@@ -1,4 +1,5 @@
 import Demo from "@/components/Demo"
+import { version } from "../../../package.json"
 
 export default function Home() {
 	return (
@@ -114,8 +115,15 @@ const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 
 			{/* Footer */}
 			<footer className="w-full max-w-2xl flex justify-between text-xs opacity-30 pt-8 border-t border-white/10">
-				<span>ragtooth</span>
-				<span>MIT License</span>
+				<span>ragtooth v{version}</span>
+				<a
+					href="https://liiift.studio"
+					target="_blank"
+					rel="noopener noreferrer"
+					className="hover:opacity-100 transition-opacity"
+				>
+					Liiift Studio
+				</a>
 			</footer>
 
 		</main>
