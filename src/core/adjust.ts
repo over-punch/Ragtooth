@@ -1,9 +1,10 @@
-// Core rag-adjustment algorithm — framework-agnostic, direct DOM mutation
+// Core saw-rag algorithm — framework-agnostic, direct DOM mutation
 import { RAG_CLASSES, type RagOptions } from './types'
 
 /** Resolved defaults applied when options are omitted */
-const DEFAULTS: Required<RagOptions> = {
-	ragDifference: 80,
+const DEFAULTS = {
+	sawDepth: 80,
+	sawPeriod: 2,
 	maxTracking: 0.7,
 }
 
@@ -21,16 +22,17 @@ const BLOCK_SELECTOR = 'p, li, h1, h2, h3, h4, h5, h6, blockquote'
 const WORD_WRAP_RE = /(^|<\/?[^>]+>|\s+)([^\s<]+)/g
 
 /**
- * Applies rag adjustment to a container element.
+ * Applies saw-rag adjustment to a container element.
  *
  * The algorithm runs five passes:
  *  1. Reset — restore the container to the original HTML snapshot
  *  2. Widow removal — replace the last space in each block with &nbsp;
  *  3. Word wrap — wrap every word in a measurement span
- *  4. Line grouping — walk word spans, accumulate widths, break into line spans
+ *  4. Line grouping — walk word spans, accumulate widths, break into line spans;
+ *     every sawPeriod-th line is shortened by sawDepth pixels
  *  5. Tracking — distribute per-line slack as letter-spacing, capped at maxTracking
  *
- * @param container   - The live DOM element to adjust (must be rendered and visible)
+ * @param container    - The live DOM element to adjust (must be rendered and visible)
  * @param originalHTML - The HTML snapshot taken before the first adjustment run
  * @param options      - Rag options (merged with defaults)
  */
@@ -39,22 +41,23 @@ export function applyRag(
 	originalHTML: string,
 	options: RagOptions = {},
 ): void {
-	const { ragDifference, maxTracking } = { ...DEFAULTS, ...options }
+	if (typeof window === 'undefined') return
+
+	// Resolve options — support deprecated ragDifference as fallback for sawDepth
+	const sawDepth = options.sawDepth ?? options.ragDifference ?? DEFAULTS.sawDepth
+	const sawPeriod = options.sawPeriod ?? DEFAULTS.sawPeriod
+	const maxTracking = options.maxTracking ?? DEFAULTS.maxTracking
 
 	// --- Pass 1: Reset ---
 	container.innerHTML = originalHTML
 
 	// --- Pass 2: Widow removal ---
-	// Replace the last whitespace in each block so the final word never wraps alone.
 	container.querySelectorAll<HTMLElement>(BLOCK_SELECTOR).forEach((block) => {
 		block.innerHTML = block.innerHTML.replace(/\s(?=[^\s]*$)/g, '\u00a0')
 	})
 
 	// --- Pass 3: Word wrap ---
-	// Collect block elements; fall back to the container if none are found.
-	const blocks = Array.from(
-		container.querySelectorAll<HTMLElement>(BLOCK_SELECTOR),
-	) as HTMLElement[]
+	const blocks = Array.from(container.querySelectorAll<HTMLElement>(BLOCK_SELECTOR))
 	const targets: HTMLElement[] = blocks.length > 0 ? blocks : [container]
 
 	targets.forEach((el) => {
@@ -66,7 +69,6 @@ export function applyRag(
 
 	// --- Pass 4: Line grouping ---
 	// Batch all offsetWidth reads before any writes to avoid layout thrashing.
-	// For each target: read all word widths first, then rebuild innerHTML once.
 	targets.forEach((element) => {
 		const elementWidth = element.offsetWidth
 		const words = Array.from(element.querySelectorAll<HTMLElement>(`.${RAG_CLASSES.word}`))
@@ -83,7 +85,9 @@ export function applyRag(
 		let lineCount = 1
 
 		wordData.forEach(({ outerHTML, width }) => {
-			const idealWidth = elementWidth - 1 - (lineCount % 2 === 0 ? ragDifference : 0)
+			// Every sawPeriod-th line is shortened by sawDepth pixels
+			const offset = lineCount % sawPeriod === 0 ? sawDepth : 0
+			const idealWidth = elementWidth - 1 - offset
 
 			if (width + lineWidth < idealWidth) {
 				html += outerHTML
@@ -116,7 +120,7 @@ export function applyRag(
 }
 
 /**
- * Strips all rag-rub injected markup, restoring the container to its original HTML.
+ * Strips all ragtooth injected markup, restoring the container to its original HTML.
  *
  * @param container    - The element that was previously adjusted
  * @param originalHTML - The snapshot passed to the original applyRag call

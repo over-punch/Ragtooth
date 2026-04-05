@@ -1,13 +1,22 @@
-// Shared types for rag-rub core and React layers
+// Shared types for ragtooth core and React layers
 
-/** Options controlling how the rag is shaped */
+/** Options controlling how the saw rag is shaped */
 export interface RagOptions {
 	/**
-	 * How many pixels shorter even-numbered lines are vs. odd lines.
-	 * Higher values create a more pronounced alternating zigzag rag.
+	 * How many pixels shorter the short lines are vs. full-width lines.
+	 * Higher values create a more pronounced sawtooth.
 	 * @default 80
 	 */
-	ragDifference?: number
+	sawDepth?: number
+
+	/**
+	 * How many lines per saw cycle.
+	 * `2` = classic alternating saw (full, short, full, short).
+	 * `3` = two full lines then one short.
+	 * `4` = three full lines then one short.
+	 * @default 2
+	 */
+	sawPeriod?: number
 
 	/**
 	 * Maximum letter-spacing in pixels that any line can receive.
@@ -15,6 +24,11 @@ export interface RagOptions {
 	 * @default 0.7
 	 */
 	maxTracking?: number
+
+	/**
+	 * @deprecated Use `sawDepth` instead.
+	 */
+	ragDifference?: number
 }
 
 /** CSS class names injected by the algorithm — exported so consumers can target/reset them */

@@ -44,24 +44,33 @@ function Control({
 }
 
 export default function App() {
-	const [ragDifference, setRagDifference] = useState(80)
+	const [sawDepth, setSawDepth] = useState(120)
+	const [sawPeriod, setSawPeriod] = useState(2)
 	const [maxTracking, setMaxTracking] = useState(0.7)
 
 	return (
 		<div className="app">
 			<header className="header">
-				<h1 className="title">rag-rub</h1>
-				<p className="subtitle">Typographic rag adjustment</p>
+				<h1 className="title">Ragtooth</h1>
+				<p className="subtitle">Deliberate saw rag for the web</p>
 			</header>
 
 			<div className="controls">
 				<Control
-					label="Rag Difference"
-					value={ragDifference}
+					label="Saw Depth"
+					value={sawDepth}
 					min={0}
 					max={400}
 					step={1}
-					onChange={setRagDifference}
+					onChange={setSawDepth}
+				/>
+				<Control
+					label="Saw Period"
+					value={sawPeriod}
+					min={2}
+					max={6}
+					step={1}
+					onChange={setSawPeriod}
 				/>
 				<Control
 					label="Max Tracking"
@@ -76,8 +85,9 @@ export default function App() {
 			<div className="text-block">
 				{LOREM.map((text, i) => (
 					<RagText
-						key={`${ragDifference}-${maxTracking}-${i}`}
-						ragDifference={ragDifference}
+						key={`${sawDepth}-${sawPeriod}-${maxTracking}-${i}`}
+						sawDepth={sawDepth}
+						sawPeriod={sawPeriod}
 						maxTracking={maxTracking}
 					>
 						{text}

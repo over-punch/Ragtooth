@@ -41,7 +41,7 @@ body {
 /* Controls */
 .controls {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: 1fr 1fr 1fr;
 	gap: 0.5rem 1.5rem;
 	margin-bottom: 3rem;
 }

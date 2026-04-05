@@ -46,7 +46,7 @@ export function useRag(options: RagOptions = {}): { ref: React.RefObject<HTMLEle
 	// Depend on the option values so a change in options triggers a re-run.
 	useLayoutEffect(() => {
 		run()
-	}, [run, options.ragDifference, options.maxTracking])
+	}, [run, options.sawDepth, options.sawPeriod, options.maxTracking, options.ragDifference])
 
 	// Attach ResizeObserver — re-run when the container's width changes.
 	// Debounce via requestAnimationFrame to avoid redundant recalculations

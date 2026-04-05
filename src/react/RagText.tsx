@@ -33,10 +33,10 @@ export interface RagTextProps extends RagOptions {
  * ```
  */
 export const RagText = forwardRef<HTMLElement, RagTextProps>(function RagText(
-	{ children, as: Tag = 'p', ragDifference, maxTracking, className, style },
+	{ children, as: Tag = 'p', sawDepth, sawPeriod, maxTracking, ragDifference, className, style },
 	forwardedRef,
 ) {
-	const { ref } = useRag({ ragDifference, maxTracking })
+	const { ref } = useRag({ sawDepth, sawPeriod, maxTracking, ragDifference })
 
 	// Merge the internal ref with any forwarded ref
 	const mergedRef = (el: HTMLElement | null) => {
