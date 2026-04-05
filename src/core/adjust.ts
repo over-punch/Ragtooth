@@ -108,7 +108,7 @@ export function applyRag(
 		wordData.forEach(({ outerHTML, width }) => {
 			// Every sawPeriod-th line is shortened by sawDepth pixels
 			const offset = lineCount % sawPeriod === 0 ? sawDepth : 0
-			const idealWidth = elementWidth - 1 - offset
+			const idealWidth = Math.max(1, elementWidth - 1 - offset)
 
 			if (width + lineWidth < idealWidth) {
 				html += outerHTML
@@ -133,9 +133,9 @@ export function applyRag(
 		const line = info.parentElement
 		if (!line) return
 
-		const charCount = line.textContent?.length ?? 1
+		const charCount = line.textContent?.length || 1
 		const difference = idealWidth - lineWidth
-		const tracking = Math.min(difference / charCount, maxTracking)
+		const tracking = Math.max(0, Math.min(difference / charCount, maxTracking))
 		line.style.letterSpacing = `${tracking}px`
 	})
 }
