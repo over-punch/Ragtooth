@@ -22,6 +22,26 @@ const BLOCK_SELECTOR = 'p, li, h1, h2, h3, h4, h5, h6, blockquote'
 const WORD_WRAP_RE = /(^|<\/?[^>]+>|\s+)([^\s<]+)/g
 
 /**
+ * Returns the innerHTML of a container with all ragtooth-injected spans removed,
+ * unwrapping their children in place. Uses DOM traversal — safe for complex markup.
+ *
+ * @param container - Element that may contain rag markup
+ */
+export function getCleanHTML(container: HTMLElement): string {
+	const clone = container.cloneNode(true) as HTMLElement
+	const ragSpans = clone.querySelectorAll(
+		`.${RAG_CLASSES.word}, .${RAG_CLASSES.line}, .${RAG_CLASSES.lineInfo}`,
+	)
+	ragSpans.forEach((el) => {
+		const parent = el.parentNode
+		if (!parent) return
+		while (el.firstChild) parent.insertBefore(el.firstChild, el)
+		parent.removeChild(el)
+	})
+	return clone.innerHTML
+}
+
+/**
  * Applies saw-rag adjustment to a container element.
  *
  * The algorithm runs five passes:
@@ -42,6 +62,7 @@ export function applyRag(
 	options: RagOptions = {},
 ): void {
 	if (typeof window === 'undefined') return
+	if (container.offsetWidth === 0) return
 
 	// Resolve options — support deprecated ragDifference as fallback for sawDepth
 	const sawDepth = options.sawDepth ?? options.ragDifference ?? DEFAULTS.sawDepth

@@ -57,7 +57,6 @@ export default function Demo() {
 
 			{/* Live text */}
 			<RagText
-				key={`${sawDepth}-${sawPeriod}-${maxTracking}`}
 				sawDepth={sawDepth}
 				sawPeriod={sawPeriod}
 				maxTracking={maxTracking}

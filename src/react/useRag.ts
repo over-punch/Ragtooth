@@ -1,6 +1,6 @@
 // React hook that attaches rag adjustment to a DOM ref with ResizeObserver support
 import { useRef, useLayoutEffect, useEffect, useCallback } from 'react'
-import { applyRag, removeRag } from '../core/adjust'
+import { applyRag, removeRag, getCleanHTML } from '../core/adjust'
 import type { RagOptions } from '../core/types'
 
 /**
@@ -8,47 +8,69 @@ import type { RagOptions } from '../core/types'
  *
  * Usage:
  * ```tsx
- * const { ref } = useRag({ ragDifference: 80, maxTracking: 0.7 })
+ * const { ref } = useRag({ sawDepth: 80, maxTracking: 0.7 })
  * <p ref={ref}>Long paragraph of text...</p>
  * ```
  *
  * The hook:
  * - Runs the adjustment after every render (useLayoutEffect) to stay in sync
- * - Re-runs whenever the container resizes (ResizeObserver, debounced via rAF)
+ * - Re-runs whenever the container's width changes (ResizeObserver, debounced via rAF)
+ * - Skips re-runs when only height changes
+ * - Auto-re-snapshots when contentKey changes (no need for key prop on content updates)
  * - Cleans up injected markup on unmount
  * - Is SSR-safe: all DOM access is gated behind environment checks
+ *
+ * @param options    - Rag options
+ * @param contentKey - Optional string that, when changed, triggers a fresh HTML snapshot.
+ *                     Pass the text content of children to avoid needing a key prop.
  */
-export function useRag(options: RagOptions = {}): { ref: React.RefObject<HTMLElement> } {
+export function useRag(
+	options: RagOptions = {},
+	contentKey?: string,
+): { ref: React.RefObject<HTMLElement> } {
 	const ref = useRef<HTMLElement>(null)
 
-	// Store original HTML snapshot — taken once on first run, before any mutation
+	// Store original HTML snapshot — taken once on first run, before any mutation.
+	// Reset to null when contentKey changes to force a fresh snapshot.
 	const originalHTMLRef = useRef<string | null>(null)
 
 	// Keep a stable ref to the latest options so the ResizeObserver callback
-	// always uses current values without needing to re-register the observer
+	// always uses current values without needing to re-register the observer.
 	const optionsRef = useRef<RagOptions>(options)
 	optionsRef.current = options
+
+	// Track last observed container width to skip ResizeObserver callbacks
+	// that are triggered by height-only changes.
+	const lastWidthRef = useRef<number>(-1)
+
+	// Track previous contentKey to detect changes during render (synchronous,
+	// before any effects fire), so the snapshot is always reset before run().
+	const prevContentKeyRef = useRef<string | undefined>(contentKey)
+	if (contentKey !== undefined && prevContentKeyRef.current !== contentKey) {
+		prevContentKeyRef.current = contentKey
+		originalHTMLRef.current = null
+	}
 
 	/** Run the full adjustment pipeline. Safe to call repeatedly. */
 	const run = useCallback(() => {
 		const el = ref.current
 		if (!el || typeof window === 'undefined') return
 
-		// Snapshot original HTML exactly once, before the first mutation
+		// Snapshot the clean HTML exactly once per content lifecycle.
+		// getCleanHTML strips any partial rag markup left by React reconciliation.
 		if (originalHTMLRef.current === null) {
-			originalHTMLRef.current = el.innerHTML
+			originalHTMLRef.current = getCleanHTML(el)
 		}
 
 		applyRag(el, originalHTMLRef.current, optionsRef.current)
-	}, []) // stable — options read via ref
+	}, []) // stable — options and snapshot read via refs
 
-	// Re-run synchronously after every render so layout is correct before paint.
-	// Depend on the option values so a change in options triggers a re-run.
+	// Re-run synchronously after every relevant render so layout is correct before paint.
 	useLayoutEffect(() => {
 		run()
-	}, [run, options.sawDepth, options.sawPeriod, options.maxTracking, options.ragDifference])
+	}, [run, options.sawDepth, options.sawPeriod, options.maxTracking, options.ragDifference, contentKey])
 
-	// Attach ResizeObserver — re-run when the container's width changes.
+	// Attach ResizeObserver — re-run only when the container's width changes.
 	// Debounce via requestAnimationFrame to avoid redundant recalculations
 	// during fast resize events.
 	useEffect(() => {
@@ -57,9 +79,14 @@ export function useRag(options: RagOptions = {}): { ref: React.RefObject<HTMLEle
 
 		let rafId: number
 
-		const observer = new ResizeObserver(() => {
-			cancelAnimationFrame(rafId)
-			rafId = requestAnimationFrame(run)
+		const observer = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const width = Math.round(entry.contentRect.width)
+				if (width === lastWidthRef.current) return
+				lastWidthRef.current = width
+				cancelAnimationFrame(rafId)
+				rafId = requestAnimationFrame(run)
+			}
 		})
 
 		observer.observe(el)
