@@ -1,25 +1,29 @@
-# Active Context — Rag-Rub
+# Active Context — Ragtooth
 
 ## Current Focus
-Project initialization. Converting a CodePen prototype into a proper standalone repo.
+Package published, site live, deploy pipeline wired up.
 
 ## What's Done
-- README written with prior art links
-- `.claude/` directory initialized (settings, commands, research)
-- `.agent/` memory files initialized
+- npm package `ragtooth@0.1.1` published to registry
+- Core algorithm: 5-pass saw-rag (reset, widow removal, word wrap, line grouping, tracking)
+- React bindings: `useRag` hook + `RagText` component
+- Vanilla JS API: `applyRag`, `removeRag`, `getCleanHTML`
+- Next.js 16 landing site with interactive demo (sliders for sawDepth/sawPeriod/maxTracking)
+- Vercel deploy pipeline: `deploy` remote → `Liiift-Studio/Ragtooth` → Vercel
+
+## Performance & Robustness Improvements (2026-04-05)
+- `react`/`react-dom` marked as optional peer deps
+- ResizeObserver skips re-runs when only height changes (width-only check)
+- `applyRag` guards against zero-width (hidden) containers
+- `getCleanHTML()` strips rag markup via DOM traversal before snapshotting
+- `RagText` auto-tracks string children — no `key` prop needed on content change
+- Demo no longer uses redundant `key` prop
 
 ## Immediate Next Steps
-1. Review the original CodePen to understand current logic
-2. Decide on tech stack (vanilla JS? React/Next.js? Vite?)
-3. Scaffold the project structure
-4. Port the CodePen logic into the new structure
-
-## Open Questions
-- sawDepth/sawPeriod API changes still need to be implemented in src/
-- Domain ragtooth.com available — docs site TBD
-- Package name on npm — `rag-rub`? `ragadjust`? `react-rag`?
-- Should there also be a demo/docs site alongside the package?
+- Bump version and publish updated package to npm (`0.1.1` → `0.1.2` or minor bump)
+- Address GitHub security vulnerabilities (9 flagged: 2 critical, 3 high, 4 moderate)
 
 ## Recent Decisions
-- **2026-04-04**: `.claude/` and `.agent/` initialized before any code — memory-first approach
-- **2026-04-04**: Package type decided — npm module, React-first (hook + component), vanilla JS core, Vite library mode build, TypeScript
+- **2026-04-05**: Renamed from rag-rub to Ragtooth
+- **2026-04-05**: First npm publish at v0.1.0
+- **2026-04-05**: Deploy remote added: `git@github-liiift:Liiift-Studio/Ragtooth.git`
