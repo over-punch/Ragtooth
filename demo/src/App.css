@@ -1,0 +1,79 @@
+*, *::before, *::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: #000;
+	color: #fff;
+	font-family: 'Merriweather Sans', sans-serif;
+	font-size: 15px;
+	line-height: 1.5;
+	padding: 2rem 1rem;
+}
+
+.app {
+	max-width: 650px;
+	margin: 0 auto;
+}
+
+/* Header */
+.header {
+	margin-bottom: 3rem;
+}
+
+.title {
+	font-size: 1.25rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.subtitle {
+	font-size: 0.8rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	opacity: 0.4;
+	margin-top: 0.25rem;
+}
+
+/* Controls */
+.controls {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.5rem 1.5rem;
+	margin-bottom: 3rem;
+}
+
+.control-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 0.4rem;
+}
+
+.control-label {
+	font-size: 0.75rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	opacity: 0.6;
+}
+
+.control-value {
+	font-size: 0.75rem;
+	font-variant-numeric: tabular-nums;
+	opacity: 0.9;
+}
+
+input[type='range'] {
+	width: 100%;
+	accent-color: #fff;
+	cursor: pointer;
+}
+
+/* Text */
+.text-block p {
+	margin-bottom: 1.5rem;
+	line-height: 1.6;
+}

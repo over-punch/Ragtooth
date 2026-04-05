@@ -1,0 +1,61 @@
+{
+	"name": "rag-rub",
+	"version": "0.1.0",
+	"description": "A typographic tool to adjust the shape of text's rag",
+	"type": "module",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "vite build",
+		"dev": "vite build --watch",
+		"typecheck": "tsc --noEmit",
+		"lint": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:ui": "vitest --ui"
+	},
+	"keywords": [
+		"typography",
+		"rag",
+		"text",
+		"react",
+		"typesetting"
+	],
+	"author": "Quinn Keaveney",
+	"license": "MIT",
+	"homepage": "https://github.com/quinn-keaveney/rag-rub#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/quinn-keaveney/rag-rub.git"
+	},
+	"bugs": {
+		"url": "https://github.com/quinn-keaveney/rag-rub/issues"
+	},
+	"sideEffects": false,
+	"peerDependencies": {
+		"react": ">=17.0.0",
+		"react-dom": ">=17.0.0"
+	},
+	"devDependencies": {
+		"@types/react": "^18.0.0",
+		"@types/react-dom": "^18.0.0",
+		"@vitejs/plugin-react": "^4.0.0",
+		"@vitest/ui": "^1.0.0",
+		"happy-dom": "^12.0.0",
+		"typescript": "^5.0.0",
+		"vite": "^5.0.0",
+		"vite-plugin-dts": "^3.9.0",
+		"vitest": "^1.0.0"
+	}
+}
