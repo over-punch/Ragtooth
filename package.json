@@ -34,13 +34,13 @@
 	],
 	"author": "Quinn Keaveney",
 	"license": "MIT",
-	"homepage": "https://github.com/quinn-keaveney/rag-rub#readme",
+	"homepage": "https://github.com/quitequinn/Rag-Rub#readme",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/quinn-keaveney/rag-rub.git"
+		"url": "https://github.com/quitequinn/Rag-Rub.git"
 	},
 	"bugs": {
-		"url": "https://github.com/quinn-keaveney/rag-rub/issues"
+		"url": "https://github.com/quitequinn/Rag-Rub/issues"
 	},
 	"sideEffects": false,
 	"peerDependencies": {
