@@ -55,6 +55,7 @@
 		"react-dom": { "optional": true }
 	},
 	"devDependencies": {
+		"next": "16.2.2",
 		"@types/react": "^18.0.0",
 		"@types/react-dom": "^18.0.0",
 		"@vitejs/plugin-react": "^4.0.0",
