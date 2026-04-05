@@ -70,6 +70,13 @@ export function useRag(
 		run()
 	}, [run, options.sawDepth, options.sawPeriod, options.maxTracking, options.ragDifference, contentKey])
 
+	// Re-run once all fonts are loaded — word widths measured before fonts arrive
+	// (common on mobile first-visit) will be wrong, so we need a corrective pass.
+	useEffect(() => {
+		if (typeof document === 'undefined' || !document.fonts) return
+		document.fonts.ready.then(run)
+	}, [run])
+
 	// Attach ResizeObserver — re-run only when the container's width changes.
 	// Debounce via requestAnimationFrame to avoid redundant recalculations
 	// during fast resize events.

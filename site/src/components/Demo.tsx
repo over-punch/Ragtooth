@@ -42,7 +42,7 @@ function Slider({
 }
 
 export default function Demo() {
-	const [sawDepth, setSawDepth] = useState(120)
+	const [sawDepth, setSawDepth] = useState(160)
 	const [sawPeriod, setSawPeriod] = useState(2)
 	const [maxTracking, setMaxTracking] = useState(0.7)
 
@@ -60,7 +60,7 @@ export default function Demo() {
 				sawDepth={sawDepth}
 				sawPeriod={sawPeriod}
 				maxTracking={maxTracking}
-				style={{ fontFamily: "Merriweather, serif", fontSize: "1.0625rem", lineHeight: "1.7" }}
+				style={{ fontFamily: "Merriweather, serif", fontSize: "1.125rem", lineHeight: "1.8" }}
 			>
 				{SAMPLE}
 			</RagText>
