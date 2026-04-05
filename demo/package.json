@@ -9,7 +9,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"rag-rub": "file:..",
+		"ragtooth": "file:..",
 		"react": "^18.0.0",
 		"react-dom": "^18.0.0"
 	},

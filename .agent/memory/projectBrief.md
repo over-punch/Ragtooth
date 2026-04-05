@@ -1,4 +1,4 @@
-# Project Brief — Rag-Rub
+# Project Brief — Ragtooth
 
 ## What it is
 A typographic tool that adjusts the shape of a text block's rag (the uneven right edge of left-aligned text).

@@ -1,7 +1,7 @@
 {
-	"name": "rag-rub",
+	"name": "ragtooth",
 	"version": "0.1.0",
-	"description": "A typographic tool to adjust the shape of text's rag",
+	"description": "Deliberate saw rag for the web — typographic tooth for your text",
 	"type": "module",
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",
@@ -28,19 +28,22 @@
 	"keywords": [
 		"typography",
 		"rag",
+		"saw-rag",
+		"ragtooth",
+		"typesetting",
 		"text",
 		"react",
-		"typesetting"
+		"letter-spacing"
 	],
 	"author": "Quinn Keaveney",
 	"license": "MIT",
-	"homepage": "https://github.com/quitequinn/Rag-Rub#readme",
+	"homepage": "https://github.com/quitequinn/Ragtooth#readme",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/quitequinn/Rag-Rub.git"
+		"url": "https://github.com/quitequinn/Ragtooth.git"
 	},
 	"bugs": {
-		"url": "https://github.com/quitequinn/Rag-Rub/issues"
+		"url": "https://github.com/quitequinn/Ragtooth/issues"
 	},
 	"sideEffects": false,
 	"peerDependencies": {

@@ -1,5 +1,8 @@
 # Tech Context — Rag-Rub
 
+## Package Name
+**ragtooth** — renamed from rag-rub on 2026-04-05. Domain ragtooth.com available.
+
 ## Decided Stack
 **npm package with React-first API** — decided 2026-04-04.
 

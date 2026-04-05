@@ -15,7 +15,8 @@ Project initialization. Converting a CodePen prototype into a proper standalone 
 4. Port the CodePen logic into the new structure
 
 ## Open Questions
-- What exactly does the CodePen algorithm do? (review before porting)
+- sawDepth/sawPeriod API changes still need to be implemented in src/
+- Domain ragtooth.com available — docs site TBD
 - Package name on npm — `rag-rub`? `ragadjust`? `react-rag`?
 - Should there also be a demo/docs site alongside the package?
 
