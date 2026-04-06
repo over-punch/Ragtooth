@@ -3,6 +3,11 @@ import "./globals.css"
 
 export const metadata: Metadata = {
 	title: "Ragtooth — Sawtooth rag for React",
+	icons: {
+		icon: "/icon.svg",
+		shortcut: "/icon.svg",
+		apple: "/icon.svg",
+	},
 	description:
 		"Ragtooth is a React library that shapes your text into a sawtooth rag — alternating long and short lines for a rhythm that reads as design, not accident. A typographic technique from editorial typesetting, now in one npm package.",
 	keywords: [
