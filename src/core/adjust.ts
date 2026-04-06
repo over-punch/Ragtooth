@@ -144,10 +144,17 @@ export function applyRag(
 		const elementWidth = element.offsetWidth
 		const words = Array.from(element.querySelectorAll<HTMLElement>(`.${RAG_CLASSES.word}`))
 
+		// Prevent hyphen-breaks during measurement: inline spans containing words like
+		// "letter-spacing" can wrap at the hyphen, causing getBoundingClientRect().width
+		// to return the container width instead of the word width. nowrap keeps each
+		// span on a single line so its measured width is accurate.
+		words.forEach(w => { w.style.whiteSpace = 'nowrap' })
+
 		// Measure a single space width in this element's font for line-start correction.
 		// Appended before other reads so all measurements share one reflow.
 		const spaceProbe = document.createElement('span')
 		spaceProbe.className = RAG_CLASSES.word
+		spaceProbe.style.whiteSpace = 'nowrap'
 		spaceProbe.textContent = ' '
 		element.appendChild(spaceProbe)
 
