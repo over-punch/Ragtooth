@@ -31,7 +31,7 @@ const WORD_WRAP_RE = /(^|<\/?[^>]+>|\s+)([^\s<]+)/g
 export function getCleanHTML(container: HTMLElement): string {
 	const clone = container.cloneNode(true) as HTMLElement
 	const ragSpans = clone.querySelectorAll(
-		`.${RAG_CLASSES.word}, .${RAG_CLASSES.line}, .${RAG_CLASSES.lineInfo}`,
+		`.${RAG_CLASSES.word}, .${RAG_CLASSES.line}, .${RAG_CLASSES.lineInfo}, .${RAG_CLASSES.break}`,
 	)
 	ragSpans.forEach((el) => {
 		const parent = el.parentNode
@@ -93,6 +93,12 @@ export function applyRag(
 	})
 
 	// --- Pass 4: Line grouping ---
+	// Each line becomes an inline-block span with white-space:nowrap so the browser
+	// treats it as one unit. A <br> between spans forces the visual line break that
+	// the algorithm predicts — without this, the browser reflows text freely across
+	// span boundaries and the sawtooth never appears.
+	const LINE_STYLE = 'display:inline-block;white-space:nowrap;vertical-align:top;'
+
 	// Batch all offsetWidth reads before any writes to avoid layout thrashing.
 	targets.forEach((element) => {
 		const elementWidth = element.offsetWidth
@@ -105,7 +111,7 @@ export function applyRag(
 		}))
 
 		// Write phase — build new HTML string
-		let html = `<span class="${RAG_CLASSES.line}">`
+		let html = `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
 		let lineWidth = 0
 		let lineCount = 1
 
@@ -117,8 +123,10 @@ export function applyRag(
 			if (width + lineWidth < idealWidth) {
 				html += outerHTML
 			} else {
+				// Close line, insert forced break, open next line
 				html += `<span class="${RAG_CLASSES.lineInfo}" style="display:none" data-ideal-width="${idealWidth}" data-line-width="${lineWidth}"></span></span>`
-				html += `<span class="${RAG_CLASSES.line}">`
+				html += `<br class="${RAG_CLASSES.break}">`
+				html += `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
 				html += outerHTML
 				lineWidth = 0
 				lineCount++

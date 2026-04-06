@@ -48,4 +48,5 @@ export const RAG_CLASSES = {
 	word: 'rag-word',
 	line: 'rag-line',
 	lineInfo: 'rag-line-info',
+	break: 'rag-break',
 } as const

@@ -468,6 +468,58 @@ describe('maxTracking unit integration', () => {
 })
 
 // ---------------------------------------------------------------------------
+// Forced line breaks (rag-break)
+// ---------------------------------------------------------------------------
+
+describe('forced line breaks', () => {
+	it('inserts <br class="rag-break"> between rag-line spans', () => {
+		const el = makeContainer('<p>Alpha beta gamma delta epsilon zeta eta theta iota kappa</p>')
+		const restore = mockOffsetWidth(el, 200)
+		const original = el.innerHTML
+		applyRag(el, original, { sawDepth: 50, sawPeriod: 2 })
+		const breaks = el.querySelectorAll(`.${RAG_CLASSES.break}`)
+		// Breaks should appear between lines (one fewer than line count)
+		const lines = el.querySelectorAll(`.${RAG_CLASSES.line}`)
+		expect(breaks.length).toBe(lines.length - 1)
+		restore()
+	})
+
+	it('rag-break elements are <br> tags', () => {
+		const el = makeContainer('<p>Alpha beta gamma delta epsilon zeta eta theta</p>')
+		const restore = mockOffsetWidth(el, 200)
+		const original = el.innerHTML
+		applyRag(el, original, { sawDepth: 50 })
+		el.querySelectorAll(`.${RAG_CLASSES.break}`).forEach((br) => {
+			expect(br.tagName.toLowerCase()).toBe('br')
+		})
+		restore()
+	})
+
+	it('rag-line spans have display:inline-block and white-space:nowrap', () => {
+		const el = makeContainer('<p>Alpha beta gamma delta epsilon zeta</p>')
+		const restore = mockOffsetWidth(el, 200)
+		const original = el.innerHTML
+		applyRag(el, original, { sawDepth: 50 })
+		el.querySelectorAll<HTMLElement>(`.${RAG_CLASSES.line}`).forEach((line) => {
+			expect(line.style.display).toBe('inline-block')
+			expect(line.style.whiteSpace).toBe('nowrap')
+		})
+		restore()
+	})
+
+	it('getCleanHTML strips rag-break elements', () => {
+		const el = makeContainer('<p>Alpha beta gamma delta epsilon zeta eta theta</p>')
+		const restore = mockOffsetWidth(el, 200)
+		const original = el.innerHTML
+		applyRag(el, original, { sawDepth: 50 })
+		const clean = getCleanHTML(el)
+		expect(clean).not.toContain(RAG_CLASSES.break)
+		expect(clean).not.toContain('<br')
+		restore()
+	})
+})
+
+// ---------------------------------------------------------------------------
 // sawPeriod
 // ---------------------------------------------------------------------------
 

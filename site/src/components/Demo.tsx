@@ -4,8 +4,11 @@
 import { useState } from "react"
 import { RagText } from "ragtooth"
 
-const SAMPLE =
-	"Typography is the art and technique of arranging type to make written language legible, readable, and appealing when displayed. The arrangement of type involves selecting typefaces, point sizes, line lengths, line spacing, and letter spacing. Type design is a closely related craft, sometimes considered part of typography."
+const PARAGRAPHS = [
+	"Typography is the art and technique of arranging type to make written language legible, readable, and appealing when displayed. The arrangement of type involves selecting typefaces, point sizes, line lengths, line spacing, and letter spacing, and adjusting the space between pairs of letters.",
+	"The term typography is also applied to the style, arrangement, and appearance of the letters, numbers, and symbols created by the process. Type design is a closely related craft, sometimes considered part of typography. Most typographers do not design typefaces, and some type designers do not consider themselves typographers.",
+	"In modern times, typography has been put into motion — giving new birth to an art form known as kinetic typography. This involves the movement of type in film and television and is commonly used in film credits and advertising.",
+]
 
 /** Labelled range slider */
 function Slider({
@@ -56,14 +59,19 @@ export default function Demo() {
 			</div>
 
 			{/* Live text */}
-			<RagText
-				sawDepth={sawDepth}
-				sawPeriod={sawPeriod}
-				maxTracking={maxTracking}
-				style={{ fontFamily: "Merriweather, serif", fontSize: "1.125rem", lineHeight: "1.8" }}
-			>
-				{SAMPLE}
-			</RagText>
+			<div className="flex flex-col gap-5">
+				{PARAGRAPHS.map((text, i) => (
+					<RagText
+						key={i}
+						sawDepth={sawDepth}
+						sawPeriod={sawPeriod}
+						maxTracking={maxTracking}
+						style={{ fontFamily: "Merriweather, serif", fontSize: "1.125rem", lineHeight: "1.8" }}
+					>
+						{text}
+					</RagText>
+				))}
+			</div>
 		</div>
 	)
 }
