@@ -63,7 +63,7 @@ input[type="range"]::-webkit-slider-thumb {
 	background: var(--foreground);
 	border: none;
 	cursor: pointer;
-	transition: background 0.15s ease;
+	transition: background 0.15s ease, width 0.15s ease, height 0.15s ease;
 }
 
 input[type="range"]:hover::-webkit-slider-thumb {
@@ -77,9 +77,28 @@ input[type="range"]::-moz-range-thumb {
 	background: var(--foreground);
 	border: none;
 	cursor: pointer;
-	transition: background 0.15s ease;
+	transition: background 0.15s ease, width 0.15s ease, height 0.15s ease;
 }
 
 input[type="range"]:hover::-moz-range-thumb {
 	background: #ffffff;
+}
+
+@media (pointer: fine) {
+	input[type="range"]::-webkit-slider-thumb {
+		width: 9px;
+		height: 9px;
+	}
+	input[type="range"]:hover::-webkit-slider-thumb {
+		width: 14px;
+		height: 14px;
+	}
+	input[type="range"]::-moz-range-thumb {
+		width: 9px;
+		height: 9px;
+	}
+	input[type="range"]:hover::-moz-range-thumb {
+		width: 14px;
+		height: 14px;
+	}
 }
