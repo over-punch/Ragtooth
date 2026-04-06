@@ -94,6 +94,14 @@ export default function Home() {
 const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 <p ref={ref}>{children}</p>`} />
 					</div>
+				<div className="flex flex-col gap-3">
+					<p className="opacity-50">Vanilla JS</p>
+					<CodeBlock code={`import { applyRag, removeRag } from 'ragtooth'
+
+const el = document.querySelector('p')
+const original = el.innerHTML
+applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
+				</div>
 					<div className="flex flex-col gap-3">
 						<p className="opacity-50">Options</p>
 						<table className="w-full text-xs">
