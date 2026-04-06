@@ -99,12 +99,22 @@ const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 								<tr className="border-t border-white/10">
 									<td className="py-2 pr-6 font-mono">sawDepth</td>
 									<td className="py-2 pr-6">80</td>
-									<td className="py-2">How much shorter the short lines are. Higher = more pronounced sawtooth. Accepts px, %, em, rem.</td>
+									<td className="py-2">How much shorter the short lines are. Higher = more pronounced sawtooth. Accepts px, %, em, rem, ch.</td>
 								</tr>
 								<tr className="border-t border-white/10">
 									<td className="py-2 pr-6 font-mono">sawPeriod</td>
 									<td className="py-2 pr-6">2</td>
 									<td className="py-2">Lines per cycle. 2 = every other line short, 3 = two full then one short.</td>
+								</tr>
+								<tr className="border-t border-white/10">
+									<td className="py-2 pr-6 font-mono">sawPhase</td>
+									<td className="py-2 pr-6">sawPeriod</td>
+									<td className="py-2">Which line within each cycle is shortened (1-indexed). Default is the last line of each cycle. Use with sawPeriod to place the short line exactly where you want it.</td>
+								</tr>
+								<tr className="border-t border-white/10">
+									<td className="py-2 pr-6 font-mono">sawAlign</td>
+									<td className="py-2 pr-6">&apos;top&apos;</td>
+									<td className="py-2">Anchor the cycle to the top or bottom of the block. <span className="font-mono">&apos;bottom&apos;</span> with sawPeriod&nbsp;3 keeps the last two lines full — no awkward short penultimate line.</td>
 								</tr>
 								<tr className="border-t border-white/10">
 									<td className="py-2 pr-6 font-mono">maxTracking</td>
