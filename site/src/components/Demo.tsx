@@ -12,14 +12,12 @@ const PARAGRAPHS: ReactNode[] = [
 		Typography traces its formal origins to Gutenberg&apos;s press of <strong>1455</strong>,
 		where <em>justified setting</em> and careful letter-spacing were discipline before
 		they were decoration. The difference between fine and ordinary typesetting has
-		always been about rhythm — how the eye moves, and where it rests.
-	</>,
-	<>
-		A ragged-right setting has a bad reputation, most of it <em>unearned</em>. The
-		trouble is never the rag itself but the shape it falls into — accidental, without
-		rhythm. Set in a typeface with strong descenders and a generous <em>x-height</em>,
-		a sawtooth rag can feel as considered as full justification. The difference is
-		simply that the decision is yours rather than the browser&apos;s.
+		always been about rhythm — how the eye moves, and where it rests. A ragged-right
+		setting has a bad reputation, most of it <em>unearned</em>. The trouble is never
+		the rag itself but the shape it falls into — accidental, without rhythm. Set in a
+		typeface with strong descenders and a generous <em>x-height</em>, a sawtooth rag
+		can feel as considered as full justification. The difference is simply that the
+		decision is yours rather than the browser&apos;s.
 	</>,
 	<>
 		These <strong>three controls</strong> — depth, period, and tracking — are enough
@@ -31,7 +29,7 @@ const PARAGRAPHS: ReactNode[] = [
 
 // OpenType features: common + discretionary ligatures, old-style numerals, kerning
 const SAMPLE_STYLE: React.CSSProperties = {
-	fontFamily: "Merriweather, serif",
+	fontFamily: "var(--font-merriweather), serif",
 	fontSize: "1.125rem",
 	lineHeight: "1.8",
 	fontFeatureSettings: '"liga" 1, "dlig" 1, "onum" 1, "kern" 1',
@@ -74,9 +72,9 @@ function Slider({
 export default function Demo() {
 	const [sawDepth, setSawDepth] = useState(160)
 	const [sawPeriod, setSawPeriod] = useState(2)
-	const [sawPhase, setSawPhase] = useState(2)
+	const [sawPhase, setSawPhase] = useState(1)
 	const [maxTracking, setMaxTracking] = useState(0.7)
-	const [sawAlign, setSawAlign] = useState<"top" | "bottom">("top")
+	const [sawAlign, setSawAlign] = useState<"top" | "bottom">("bottom")
 
 	// Keep sawPhase in range when sawPeriod changes
 	const effectiveSawPhase = Math.min(sawPhase, sawPeriod)

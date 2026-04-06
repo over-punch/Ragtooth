@@ -111,15 +111,20 @@ export function applyRag(
 			const fragment = document.createDocumentFragment()
 
 			for (let i = 0; i < tokens.length; i += 2) {
-				const space = tokens[i]       // whitespace gap (may be empty)
+				const space = tokens[i]       // whitespace gap before this word
 				const word  = tokens[i + 1]   // word (undefined at end of string)
-				if (!word) {
-					if (space) fragment.appendChild(document.createTextNode(space))
-					continue
-				}
+				if (!word) continue // trailing whitespace — absorbed into the preceding span below
+
+				// If this is the last word in the text node, include any trailing whitespace
+				// in the span rather than creating an orphan text node. Orphan text nodes at
+				// inline-element boundaries (e.g. "of " before <strong>1455</strong>) are
+				// silently dropped in Pass 4, which removes the space between words.
+				const isLastWord = tokens[i + 3] === undefined
+				const trailingSpace = isLastWord ? (tokens[i + 2] ?? '') : ''
+
 				const span = document.createElement('span')
 				span.className = RAG_CLASSES.word
-				span.appendChild(document.createTextNode(space + word))
+				span.appendChild(document.createTextNode(space + word + trailingSpace))
 				fragment.appendChild(span)
 			}
 
@@ -139,11 +144,27 @@ export function applyRag(
 		const elementWidth = element.offsetWidth
 		const words = Array.from(element.querySelectorAll<HTMLElement>(`.${RAG_CLASSES.word}`))
 
-		// Read phase — collect all widths in one pass
-		const wordData = words.map((word) => ({
-			outerHTML: word.outerHTML,
-			width: word.offsetWidth,
-		}))
+		// Read phase — collect all widths in one pass.
+		// Also build contextual HTML for each word: the word span wrapped in its
+		// ancestor inline elements (em, strong, a, etc.) up to the block element.
+		// This preserves italic, bold, and other inline styling when the HTML is
+		// reassembled in the write phase. Each word is self-contained so a line
+		// break between two words inside the same <em> simply produces two adjacent
+		// <em> elements — semantically split but visually identical.
+		const wordData = words.map((word) => {
+			let html = word.outerHTML
+			let ancestor: Element | null = word.parentElement
+			while (ancestor && ancestor !== element) {
+				// Use a shallow clone to get a properly-serialised open/close tag pair
+				// (handles attribute values with special characters correctly).
+				const shallow = ancestor.cloneNode(false) as Element
+				const shallowHTML = shallow.outerHTML
+				const split = shallowHTML.lastIndexOf('</')
+				html = shallowHTML.slice(0, split) + html + shallowHTML.slice(split)
+				ancestor = ancestor.parentElement
+			}
+			return { html, width: word.offsetWidth }
+		})
 
 		// For bottom-aligned mode, pre-count lines (using top-aligned shortening as a proxy
 		// for the same total) so we know how far each line sits from the end of the block.
@@ -169,7 +190,7 @@ export function applyRag(
 		let lineWidth = 0
 		let lineCount = 1
 
-		wordData.forEach(({ outerHTML, width }) => {
+		wordData.forEach(({ html: wordHTML, width }) => {
 			// Determine whether this line is shortened.
 			// sawPhase (1-indexed) controls which position within the period is short.
 			// top: count from the first line. bottom: count from the last line upward.
@@ -182,13 +203,13 @@ export function applyRag(
 			const idealWidth = Math.max(1, elementWidth - 1 - offset)
 
 			if (width + lineWidth < idealWidth) {
-				html += outerHTML
+				html += wordHTML
 			} else {
 				// Close line, insert forced break, open next line
 				html += `<span class="${RAG_CLASSES.lineInfo}" style="display:none" data-ideal-width="${idealWidth}" data-line-width="${lineWidth}"></span></span>`
 				html += `<br class="${RAG_CLASSES.break}">`
 				html += `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
-				html += outerHTML
+				html += wordHTML
 				lineWidth = 0
 				lineCount++
 			}
