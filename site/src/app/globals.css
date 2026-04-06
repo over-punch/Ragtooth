@@ -2,9 +2,9 @@
 @import "tailwindcss";
 
 :root {
-	--background: #130820;
+	--background: #160927;
 	--foreground: #f0ece3;
-	--accent: #b89fd8;
+	--btn-bg: #2d2240;
 	--font-sans: "Merriweather Sans", sans-serif;
 	--font-serif: "Merriweather", serif;
 }
@@ -42,16 +42,16 @@ input[type="range"]::-webkit-slider-thumb {
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
-	background: var(--accent);
+	background: var(--btn-bg);
+	border: 1.5px solid rgba(255,255,255,0.25);
 	cursor: pointer;
-	border: none;
 }
 
 input[type="range"]::-moz-range-thumb {
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
-	background: var(--accent);
+	background: var(--btn-bg);
+	border: 1.5px solid rgba(255,255,255,0.25);
 	cursor: pointer;
-	border: none;
 }

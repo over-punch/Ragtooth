@@ -28,10 +28,7 @@ function Slider({
 }) {
 	return (
 		<div className="flex flex-col gap-1">
-			<div className="flex justify-between text-xs uppercase tracking-widest opacity-50">
-				<span>{label}</span>
-				<span className="tabular-nums">{value}</span>
-			</div>
+			<span className="text-xs uppercase tracking-widest opacity-50">{label}</span>
 			<input
 				type="range"
 				min={min}
@@ -40,6 +37,7 @@ function Slider({
 				value={value}
 				onChange={(e) => onChange(Number(e.target.value))}
 			/>
+			<span className="tabular-nums text-xs opacity-40 text-right">{value}</span>
 		</div>
 	)
 }

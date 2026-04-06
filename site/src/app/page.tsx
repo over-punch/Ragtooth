@@ -36,7 +36,7 @@ export default function Home() {
 			{/* Interactive demo */}
 			<section className="w-full max-w-2xl flex flex-col gap-4">
 				<p className="text-xs uppercase tracking-widest opacity-40">Live demo — drag the sliders</p>
-				<div className="rounded-xl p-8" style={{ background: "rgba(0,0,0,0.25)" }}>
+				<div className="rounded-xl -mx-8 px-8 py-8" style={{ background: "rgba(0,0,0,0.25)" }}>
 					<Demo />
 				</div>
 			</section>
