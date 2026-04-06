@@ -1,4 +1,5 @@
 import Demo from "@/components/Demo"
+import CopyInstall from "@/components/CopyInstall"
 import { version } from "../../../package.json"
 
 export default function Home() {
@@ -19,9 +20,7 @@ export default function Home() {
 					A typographic technique from editorial and book design, now available for React.
 				</p>
 				<div className="flex items-center gap-4">
-					<code className="text-sm bg-white/10 px-3 py-1.5 rounded font-mono">
-						npm install ragtooth
-					</code>
+					<CopyInstall />
 					<a
 						href="https://github.com/quitequinn/Ragtooth"
 						target="_blank"
