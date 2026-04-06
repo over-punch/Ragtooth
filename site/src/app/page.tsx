@@ -11,13 +11,15 @@ export default function Home() {
 				<div className="flex flex-col gap-2">
 					<p className="text-xs uppercase tracking-widest opacity-40">ragtooth</p>
 					<h1
-						className="text-4xl lg:text-8xl xl:text-9xl leading-tight lg:leading-[0.88]"
+						className="text-4xl lg:text-8xl xl:text-9xl"
 						style={{
 							fontFamily: "var(--font-merriweather), serif",
 							fontVariationSettings: '"wght" 300, "opsz" 144, "wdth" 87',
+							lineHeight: "1.05em",
 						}}
 					>
-						Sawtooth rag<br />for the web.
+						A Sawtooth Rag,<br />
+						<span style={{ opacity: 0.5, fontStyle: "italic" }}>for the web.</span>
 					</h1>
 				</div>
 				<p className="text-base opacity-60 leading-relaxed max-w-lg">
