@@ -7,11 +7,11 @@ export default function Home() {
 		<main className="flex flex-col items-center px-6 py-20 gap-24">
 
 			{/* Hero */}
-			<section className="w-full max-w-2xl flex flex-col gap-6">
+			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<div className="flex flex-col gap-2">
 					<p className="text-xs uppercase tracking-widest opacity-40">ragtooth</p>
 					<h1
-						className="text-4xl leading-tight"
+						className="text-4xl lg:text-8xl xl:text-9xl leading-tight lg:leading-[0.88]"
 						style={{
 							fontFamily: "var(--font-merriweather), serif",
 							fontVariationSettings: '"wght" 300, "opsz" 144, "wdth" 87',
