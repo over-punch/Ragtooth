@@ -1,7 +1,7 @@
 {
 	"name": "ragtooth",
-	"version": "1.0.9",
-	"description": "Deliberate saw rag for the web — typographic tooth for your text",
+	"version": "1.1.0",
+	"description": "Deliberate sawtooth rag for the web — works with React, vanilla JS, or any framework",
 	"type": "module",
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",
@@ -29,10 +29,13 @@
 		"typography",
 		"rag",
 		"saw-rag",
+		"sawtooth-rag",
 		"ragtooth",
 		"typesetting",
 		"text",
 		"react",
+		"vanilla-js",
+		"framework-agnostic",
 		"letter-spacing"
 	],
 	"author": "Quinn Keaveney",

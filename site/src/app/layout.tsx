@@ -2,40 +2,40 @@ import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-	title: "Ragtooth — Sawtooth rag for React",
+	title: "Ragtooth — Sawtooth rag for the web",
 	icons: {
 		icon: "/icon.svg",
 		shortcut: "/icon.svg",
 		apple: "/icon.svg",
 	},
 	description:
-		"Ragtooth is a React library that shapes your text into a sawtooth rag — alternating long and short lines for a rhythm that reads as design, not accident. A typographic technique from editorial typesetting, now in one npm package.",
+		"Ragtooth shapes your text into a sawtooth rag — alternating long and short lines for a rhythm that reads as design, not accident. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one npm package.",
 	keywords: [
 		"ragtooth",
 		"sawtooth rag",
 		"typographic rag",
 		"rag right",
 		"text rag",
-		"typography React",
+		"typography",
 		"letter spacing",
 		"typesetting",
 		"editorial typography",
-		"React typography",
+		"vanilla javascript typography",
 		"npm typography",
 	],
 	openGraph: {
-		title: "Ragtooth — Sawtooth rag for React",
+		title: "Ragtooth — Sawtooth rag for the web",
 		description:
-			"Shape your text into a sawtooth rag. A typographic technique from editorial typesetting, now in one npm package.",
+			"Shape your text into a sawtooth rag. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one npm package.",
 		url: "https://ragtooth.liiift.studio",
 		siteName: "Ragtooth",
 		type: "website",
 	},
 	twitter: {
 		card: "summary",
-		title: "Ragtooth — Sawtooth rag for React",
+		title: "Ragtooth — Sawtooth rag for the web",
 		description:
-			"Shape your text into a sawtooth rag pattern. A typographic technique from editorial typesetting, now in one npm package.",
+			"Shape your text into a sawtooth rag. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one npm package.",
 	},
 	metadataBase: new URL("https://ragtooth.liiift.studio"),
 }
