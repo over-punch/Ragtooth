@@ -139,18 +139,28 @@ export function applyRag(
 	// span boundaries and the sawtooth never appears.
 	const LINE_STYLE = 'display:inline-block;white-space:nowrap;vertical-align:top;'
 
-	// Batch all offsetWidth reads before any writes to avoid layout thrashing.
+	// Batch all layout reads before any writes to avoid layout thrashing.
 	targets.forEach((element) => {
 		const elementWidth = element.offsetWidth
 		const words = Array.from(element.querySelectorAll<HTMLElement>(`.${RAG_CLASSES.word}`))
 
+		// Measure a single space width in this element's font for line-start correction.
+		// Appended before other reads so all measurements share one reflow.
+		const spaceProbe = document.createElement('span')
+		spaceProbe.className = RAG_CLASSES.word
+		spaceProbe.textContent = ' '
+		element.appendChild(spaceProbe)
+
 		// Read phase — collect all widths in one pass.
+		// getBoundingClientRect().width gives subpixel precision, preventing rounding
+		// errors from accumulating across many words on a line.
 		// Also build contextual HTML for each word: the word span wrapped in its
 		// ancestor inline elements (em, strong, a, etc.) up to the block element.
 		// This preserves italic, bold, and other inline styling when the HTML is
 		// reassembled in the write phase. Each word is self-contained so a line
 		// break between two words inside the same <em> simply produces two adjacent
 		// <em> elements — semantically split but visually identical.
+		const spaceWidth = spaceProbe.getBoundingClientRect().width
 		const wordData = words.map((word) => {
 			let html = word.outerHTML
 			let ancestor: Element | null = word.parentElement
@@ -163,8 +173,13 @@ export function applyRag(
 				html = shallowHTML.slice(0, split) + html + shallowHTML.slice(split)
 				ancestor = ancestor.parentElement
 			}
-			return { html, width: word.offsetWidth }
+			// hasLeadingSpace: the leading whitespace is stripped from the first word
+			// of each line (trimLineStart), so we deduct it from lineWidth at line starts.
+			const hasLeadingSpace = /^[^\S\u00a0]/.test(word.textContent ?? '')
+			return { html, width: word.getBoundingClientRect().width, hasLeadingSpace }
 		})
+
+		element.removeChild(spaceProbe)
 
 		// For bottom-aligned mode, pre-count lines so we know how far each line sits from
 		// the end of the block. Seed with a top-aligned estimate, then iterate the
@@ -172,17 +187,20 @@ export function applyRag(
 		// is typically reached in 1–2 iterations; 8 is a safe upper bound.
 		let totalLines = 1
 		if (sawAlign === 'bottom') {
-			// Seed: top-aligned estimate (never break on an empty line)
+			// Seed: top-aligned estimate (never break on an empty line).
+			// effectiveWidth deducts the leading space width at each line start because
+			// trimLineStart strips it visually — without this, lineWidth is overcounted.
 			let preWidth = 0
 			let preCount = 1
-			wordData.forEach(({ width }) => {
+			wordData.forEach(({ width, hasLeadingSpace }) => {
 				const preOffset = preCount % sawPeriod === sawPhase % sawPeriod ? sawDepth : 0
 				const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
 				if (width + preWidth >= preIdeal && preWidth > 0) {
 					preCount++
 					preWidth = 0
 				}
-				preWidth += width
+				const effectiveWidth = preWidth === 0 && hasLeadingSpace ? Math.max(0, width - spaceWidth) : width
+				preWidth += effectiveWidth
 			})
 			// Iterate bottom-aligned re-count until convergent.
 			// The loop can oscillate between two values (N and N+1) when changing which
@@ -194,7 +212,7 @@ export function applyRag(
 			for (let iter = 0; iter < 8; iter++) {
 				preWidth = 0
 				preCount = 1
-				wordData.forEach(({ width }) => {
+				wordData.forEach(({ width, hasLeadingSpace }) => {
 					const cyclePos = Math.max(1, estimated - preCount + 1)
 					const preOffset = cyclePos % sawPeriod === sawPhase % sawPeriod ? sawDepth : 0
 					const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
@@ -202,7 +220,8 @@ export function applyRag(
 						preCount++
 						preWidth = 0
 					}
-					preWidth += width
+					const effectiveWidth = preWidth === 0 && hasLeadingSpace ? Math.max(0, width - spaceWidth) : width
+					preWidth += effectiveWidth
 				})
 				if (preCount === estimated) break
 				if (preCount === prevEstimated) {
@@ -229,7 +248,7 @@ export function applyRag(
 		let lineCount = 1
 		let lineStart = true // true for the first word of each new line
 
-		wordData.forEach(({ html: wordHTML, width }) => {
+		wordData.forEach(({ html: wordHTML, width, hasLeadingSpace }) => {
 			// Determine whether this line is shortened.
 			// sawPhase (1-indexed) controls which position within the period is short.
 			// top: count from the first line. bottom: count from the last line upward.
@@ -244,17 +263,21 @@ export function applyRag(
 			if (width + lineWidth < idealWidth || lineWidth === 0) {
 				html += lineStart ? trimLineStart(wordHTML) : wordHTML
 				lineStart = false
+				// Deduct the stripped leading space at line start so lineWidth matches
+				// what the browser will actually render.
+				const effectiveWidth = lineWidth === 0 && hasLeadingSpace ? Math.max(0, width - spaceWidth) : width
+				lineWidth += effectiveWidth
 			} else {
 				// Close line, insert forced break, open next line
 				html += `<span class="${RAG_CLASSES.lineInfo}" style="display:none" data-ideal-width="${idealWidth}" data-line-width="${lineWidth}"></span></span>`
 				html += `<br class="${RAG_CLASSES.break}">`
 				html += `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
 				html += trimLineStart(wordHTML)
-				lineWidth = 0
+				// Seed the new line with effectiveWidth (leading space stripped)
+				lineWidth = hasLeadingSpace ? Math.max(0, width - spaceWidth) : width
 				lineCount++
 				lineStart = false
 			}
-			lineWidth += width
 		})
 
 		html += '</span>'

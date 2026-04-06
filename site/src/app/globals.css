@@ -92,3 +92,13 @@ input[type="range"]:hover::-moz-range-thumb {
 		transform: scale(1.5);
 	}
 }
+
+/* sugar-high syntax token colours */
+.sh__keyword   { color: #c792ea; }
+.sh__string    { color: #c3e88d; }
+.sh__comment   { color: #546e7a; font-style: italic; }
+.sh__jsxliterals { color: #c3e88d; }
+.sh__class     { color: #ffcb6b; }
+.sh__identifier { color: #f0ece3; }
+.sh__sign      { color: #89ddff; }
+.sh__property  { color: #80cbc4; }

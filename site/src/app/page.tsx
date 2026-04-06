@@ -1,5 +1,6 @@
 import Demo from "@/components/Demo"
 import CopyInstall from "@/components/CopyInstall"
+import CodeBlock from "@/components/CodeBlock"
 import { version } from "../../../package.json"
 
 export default function Home() {
@@ -80,18 +81,18 @@ export default function Home() {
 				<div className="flex flex-col gap-8 text-sm">
 					<div className="flex flex-col gap-3">
 						<p className="opacity-50">Drop-in component</p>
-						<pre className="bg-white/5 rounded p-4 overflow-x-auto text-xs leading-relaxed font-mono">{`import { RagText } from 'ragtooth'
+						<CodeBlock code={`import { RagText } from 'ragtooth'
 
 <RagText sawDepth={120} sawPeriod={2}>
   Your paragraph text here...
-</RagText>`}</pre>
+</RagText>`} />
 					</div>
 					<div className="flex flex-col gap-3">
 						<p className="opacity-50">Hook — attach to any element</p>
-						<pre className="bg-white/5 rounded p-4 overflow-x-auto text-xs leading-relaxed font-mono">{`import { useRag } from 'ragtooth'
+						<CodeBlock code={`import { useRag } from 'ragtooth'
 
 const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
-<p ref={ref}>{children}</p>`}</pre>
+<p ref={ref}>{children}</p>`} />
 					</div>
 					<div className="flex flex-col gap-3">
 						<p className="opacity-50">Options</p>
