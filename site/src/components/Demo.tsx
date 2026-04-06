@@ -27,17 +27,6 @@ const PARAGRAPHS: ReactNode[] = [
 	</>,
 ]
 
-// OpenType features: common + discretionary ligatures, old-style numerals, kerning
-const SAMPLE_STYLE: React.CSSProperties = {
-	fontFamily: "var(--font-merriweather), serif",
-	fontSize: "1.125rem",
-	fontWeight: 300,
-	lineHeight: "1.8",
-	fontFeatureSettings: '"liga" 1, "dlig" 1, "onum" 1, "kern" 1',
-	fontVariantLigatures: "common-ligatures discretionary-ligatures",
-	fontVariantNumeric: "oldstyle-nums",
-}
-
 /** Labelled range slider with value displayed below the track */
 function Slider({
 	label,
@@ -71,27 +60,43 @@ function Slider({
 }
 
 export default function Demo() {
+	// Rag controls
 	const [sawDepth, setSawDepth] = useState(160)
 	const [sawPeriod, setSawPeriod] = useState(2)
 	const [sawPhase, setSawPhase] = useState(1)
 	const [maxTracking, setMaxTracking] = useState(0.7)
 	const [sawAlign, setSawAlign] = useState<"top" | "bottom">("bottom")
 
+	// Variable font axes — wght 300–900, opsz 7–144, wdth 87–112
+	const [wght, setWght] = useState(300)
+	const [opsz, setOpsz] = useState(18)
+	const [wdth, setWdth] = useState(100)
+
 	// Keep sawPhase in range when sawPeriod changes
 	const effectiveSawPhase = Math.min(sawPhase, sawPeriod)
 
+	const sampleStyle: React.CSSProperties = {
+		fontFamily: "var(--font-merriweather), serif",
+		fontSize: "1.125rem",
+		lineHeight: "1.8",
+		fontVariationSettings: `"wght" ${wght}, "opsz" ${opsz}, "wdth" ${wdth}`,
+		fontFeatureSettings: '"liga" 1, "dlig" 1, "onum" 1, "kern" 1',
+		fontVariantLigatures: "common-ligatures discretionary-ligatures",
+		fontVariantNumeric: "oldstyle-nums",
+	}
+
 	return (
 		<div className="w-full max-w-2xl mx-auto">
-			{/* Controls */}
+			{/* Rag controls */}
 			<div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6">
-				<Slider label="Depth"    value={sawDepth}         min={0}   max={400} step={1}    onChange={setSawDepth} />
-				<Slider label="Period"   value={sawPeriod}        min={2}   max={6}   step={1}    onChange={setSawPeriod} />
-				<Slider label="Phase"    value={effectiveSawPhase} min={1}   max={sawPeriod} step={1} onChange={setSawPhase} />
-				<Slider label="Tracking" value={maxTracking}      min={0}   max={2}   step={0.01} onChange={setMaxTracking} />
+				<Slider label="Depth"    value={sawDepth}          min={0}   max={400}      step={1}    onChange={setSawDepth} />
+				<Slider label="Period"   value={sawPeriod}         min={2}   max={6}        step={1}    onChange={setSawPeriod} />
+				<Slider label="Phase"    value={effectiveSawPhase} min={1}   max={sawPeriod} step={1}   onChange={setSawPhase} />
+				<Slider label="Tracking" value={maxTracking}       min={0}   max={2}        step={0.01} onChange={setMaxTracking} />
 			</div>
 
 			{/* Align toggle */}
-			<div className="flex items-center gap-3 mb-8">
+			<div className="flex items-center gap-3 mb-6">
 				<span className="text-xs uppercase tracking-widest opacity-50">Align</span>
 				{(["top", "bottom"] as const).map((v) => (
 					<button
@@ -112,6 +117,13 @@ export default function Demo() {
 				</span>
 			</div>
 
+			{/* Font axis controls */}
+			<div className="grid grid-cols-3 gap-6 mb-8">
+				<Slider label="Weight"  value={wght} min={300} max={900} step={1}  onChange={setWght} />
+				<Slider label="Optical" value={opsz} min={7}   max={144} step={1}  onChange={setOpsz} />
+				<Slider label="Width"   value={wdth} min={87}  max={112} step={0.5} onChange={setWdth} />
+			</div>
+
 			{/* Live text */}
 			<div className="flex flex-col gap-5">
 				{PARAGRAPHS.map((para, i) => (
@@ -122,7 +134,7 @@ export default function Demo() {
 						sawPhase={effectiveSawPhase}
 						maxTracking={maxTracking}
 						sawAlign={sawAlign}
-						style={SAMPLE_STYLE}
+						style={sampleStyle}
 					>
 						{para}
 					</RagText>
