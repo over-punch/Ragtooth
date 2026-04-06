@@ -2,9 +2,9 @@ import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-	title: "Ragtooth — Deliberate sawtooth rag for React",
+	title: "Ragtooth — Sawtooth rag for React",
 	description:
-		"Ragtooth is a React library that gives your text a deliberate sawtooth rag — alternating long and short lines for a rhythm that feels designed, not accidental. A typographic technique from editorial and book design, now in one npm package.",
+		"Ragtooth is a React library that shapes your text into a sawtooth rag — alternating long and short lines for a rhythm that reads as design, not accident. A typographic technique from editorial typesetting, now in one npm package.",
 	keywords: [
 		"ragtooth",
 		"sawtooth rag",
@@ -19,18 +19,18 @@ export const metadata: Metadata = {
 		"npm typography",
 	],
 	openGraph: {
-		title: "Ragtooth — Deliberate sawtooth rag for React",
+		title: "Ragtooth — Sawtooth rag for React",
 		description:
-			"Shape your text into a deliberate sawtooth pattern. A typographic technique from editorial and book design, now in one npm package.",
+			"Shape your text into a sawtooth rag. A typographic technique from editorial typesetting, now in one npm package.",
 		url: "https://ragtooth.liiift.studio",
 		siteName: "Ragtooth",
 		type: "website",
 	},
 	twitter: {
 		card: "summary",
-		title: "Ragtooth — Deliberate sawtooth rag for React",
+		title: "Ragtooth — Sawtooth rag for React",
 		description:
-			"Shape your text into a deliberate sawtooth pattern. A typographic technique from editorial and book design, now in one npm package.",
+			"Shape your text into a sawtooth rag pattern. A typographic technique from editorial typesetting, now in one npm package.",
 	},
 	metadataBase: new URL("https://ragtooth.liiift.studio"),
 }

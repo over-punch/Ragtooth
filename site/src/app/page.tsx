@@ -11,15 +11,14 @@ export default function Home() {
 				<div className="flex flex-col gap-2">
 					<p className="text-xs uppercase tracking-widest opacity-40">ragtooth</p>
 					<h1 className="text-4xl font-light leading-tight">
-						Deliberate sawtooth rag<br />for the web.
+						Sawtooth rag<br />for the web.
 					</h1>
 				</div>
 				<p className="text-base opacity-60 leading-relaxed max-w-lg">
-					Most tools try to smooth your rag. Ragtooth does the opposite — it shapes your
-					text into a deliberate sawtooth pattern, alternating long and short lines for a
-					rhythm that feels designed, not accidental. A typographic technique borrowed from
-					editorial and book design, finally available as a React package. Your text
-					deserves better than a ragged mess.
+					Most tools fight your rag. Ragtooth works with it — shaping text into a
+					sawtooth pattern of alternating long and short lines. The kind of rhythm that
+					reads as design, not accident. A technique from editorial typesetting, now
+					in one npm package.
 				</p>
 				<div className="flex items-center gap-4">
 					<CopyInstall />
@@ -48,20 +47,18 @@ export default function Home() {
 						<p className="font-semibold opacity-100 text-base">The problem with smooth rag</p>
 						<p>
 							When text is set ragged-right, natural line endings create an
-							unpredictable right edge — notches, peninsulas, near-rivers. It looks
-							like the paragraph gave up halfway through. Most tools patch this by
-							inserting soft hyphens or non-breaking spaces, which helps a little and
-							feels like a lot of work.
+							unpredictable right edge — notches, peninsulas, near-rivers. It can look
+							accidental. Most tools patch this with soft hyphens or non-breaking
+							spaces: a lot of effort for a result that&apos;s still a mess.
 						</p>
 					</div>
 					<div className="flex flex-col gap-3">
 						<p className="font-semibold opacity-100 text-base">The case for sawtooth rag</p>
 						<p>
-							A deliberate sawtooth pattern — long line, short line, long line — gives
-							the rag a rhythm. It is intentional rather than accidental, structured
-							rather than random. The eye reads it as design. Editors and book
-							typographers have used it for decades. Now you can too, in about
-							thirty seconds.
+							A sawtooth pattern — long line, short line, long line — gives the rag a
+							rhythm. Structured, not random. The eye reads it as a choice. Book
+							typographers and editorial designers have used it for decades. Now it
+							takes thirty seconds.
 						</p>
 					</div>
 				</div>
@@ -100,7 +97,7 @@ const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 								<tr className="border-t border-white/10">
 									<td className="py-2 pr-6 font-mono">sawDepth</td>
 									<td className="py-2 pr-6">80</td>
-									<td className="py-2">How much shorter the short lines are. Accepts px, %, em, rem. Higher = more pronounced sawtooth.</td>
+									<td className="py-2">How much shorter the short lines are. Higher = more pronounced sawtooth. Accepts px, %, em, rem.</td>
 								</tr>
 								<tr className="border-t border-white/10">
 									<td className="py-2 pr-6 font-mono">sawPeriod</td>
