@@ -1,30 +1,12 @@
 // Core saw-rag algorithm — framework-agnostic, direct DOM mutation
-import { RAG_CLASSES, type RagOptions, type RagValue } from './types'
+import { RAG_CLASSES, type RagOptions } from './types'
+import { resolveValue } from './resolve'
 
 /** Resolved defaults applied when options are omitted */
 const DEFAULTS = {
 	sawDepth: 80,
 	sawPeriod: 2,
 	maxTracking: 0.7,
-}
-
-/**
- * Converts a RagValue to pixels.
- *
- * @param value         - Raw value: number (px), or string with unit suffix
- * @param containerWidth - Width of the rag container in px (used for %)
- * @param fontSize       - Computed font-size of the element in px (used for em)
- */
-function resolveValue(value: RagValue, containerWidth: number, fontSize: number): number {
-	if (typeof value === 'number') return value
-	const s = value.trim()
-	if (s.endsWith('%')) return containerWidth * parseFloat(s) / 100
-	if (s.endsWith('rem')) {
-		const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
-		return rootSize * parseFloat(s)
-	}
-	if (s.endsWith('em')) return fontSize * parseFloat(s)
-	return parseFloat(s) // px or bare number string
 }
 
 /**
