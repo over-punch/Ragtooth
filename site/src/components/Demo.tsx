@@ -78,7 +78,7 @@ export default function Demo() {
 	}
 
 	return (
-		<div className="w-full max-w-2xl">
+		<div className="w-full">
 			{/* Rag controls */}
 			<div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6">
 				<Slider label="Depth"    value={sawDepth}          min={0}   max={400}      step={1}    onChange={setSawDepth} />
