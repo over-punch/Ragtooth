@@ -10,7 +10,13 @@ export default function Home() {
 			<section className="w-full max-w-2xl flex flex-col gap-6">
 				<div className="flex flex-col gap-2">
 					<p className="text-xs uppercase tracking-widest opacity-40">ragtooth</p>
-					<h1 className="text-4xl font-light leading-tight">
+					<h1
+						className="text-4xl leading-tight"
+						style={{
+							fontFamily: "var(--font-merriweather), serif",
+							fontVariationSettings: '"wght" 300, "opsz" 144, "wdth" 87',
+						}}
+					>
 						Sawtooth rag<br />for the web.
 					</h1>
 				</div>

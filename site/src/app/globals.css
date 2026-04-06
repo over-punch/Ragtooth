@@ -60,16 +60,26 @@ input[type="range"]::-webkit-slider-thumb {
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
-	background: var(--btn-bg);
+	background: rgba(255, 255, 255, 0.3);
 	border: none;
 	cursor: pointer;
+	transition: background 0.15s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+	background: #ffffff;
 }
 
 input[type="range"]::-moz-range-thumb {
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
-	background: var(--btn-bg);
+	background: rgba(255, 255, 255, 0.3);
 	border: none;
 	cursor: pointer;
+	transition: background 0.15s ease;
+}
+
+input[type="range"]:hover::-moz-range-thumb {
+	background: #ffffff;
 }
