@@ -1,11 +1,30 @@
 // Core saw-rag algorithm — framework-agnostic, direct DOM mutation
-import { RAG_CLASSES, type RagOptions } from './types'
+import { RAG_CLASSES, type RagOptions, type RagValue } from './types'
 
 /** Resolved defaults applied when options are omitted */
 const DEFAULTS = {
 	sawDepth: 80,
 	sawPeriod: 2,
 	maxTracking: 0.7,
+}
+
+/**
+ * Converts a RagValue to pixels.
+ *
+ * @param value         - Raw value: number (px), or string with unit suffix
+ * @param containerWidth - Width of the rag container in px (used for %)
+ * @param fontSize       - Computed font-size of the element in px (used for em)
+ */
+function resolveValue(value: RagValue, containerWidth: number, fontSize: number): number {
+	if (typeof value === 'number') return value
+	const s = value.trim()
+	if (s.endsWith('%')) return containerWidth * parseFloat(s) / 100
+	if (s.endsWith('rem')) {
+		const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+		return rootSize * parseFloat(s)
+	}
+	if (s.endsWith('em')) return fontSize * parseFloat(s)
+	return parseFloat(s) // px or bare number string
 }
 
 /**
@@ -64,10 +83,13 @@ export function applyRag(
 	if (typeof window === 'undefined') return
 	if (container.offsetWidth === 0) return
 
+	const containerWidth = container.offsetWidth
+	const fontSize = parseFloat(getComputedStyle(container).fontSize) || 16
+
 	// Resolve options — support deprecated ragDifference as fallback for sawDepth
-	const sawDepth = options.sawDepth ?? options.ragDifference ?? DEFAULTS.sawDepth
+	const sawDepth = resolveValue(options.sawDepth ?? options.ragDifference ?? DEFAULTS.sawDepth, containerWidth, fontSize)
 	const sawPeriod = options.sawPeriod ?? DEFAULTS.sawPeriod
-	const maxTracking = options.maxTracking ?? DEFAULTS.maxTracking
+	const maxTracking = resolveValue(options.maxTracking ?? DEFAULTS.maxTracking, containerWidth, fontSize)
 
 	// --- Pass 1: Reset ---
 	container.innerHTML = originalHTML
