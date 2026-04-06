@@ -63,9 +63,9 @@ export function applyRag(
 	const fontSize = parseFloat(getComputedStyle(container).fontSize) || 16
 
 	// Resolve options — support deprecated ragDifference as fallback for sawDepth
-	const sawDepth = resolveValue(options.sawDepth ?? options.ragDifference ?? DEFAULTS.sawDepth, containerWidth, fontSize)
-	const sawPeriod = options.sawPeriod ?? DEFAULTS.sawPeriod
-	const maxTracking = resolveValue(options.maxTracking ?? DEFAULTS.maxTracking, containerWidth, fontSize)
+	const sawDepth = Math.max(0, resolveValue(options.sawDepth ?? options.ragDifference ?? DEFAULTS.sawDepth, containerWidth, fontSize))
+	const sawPeriod = Math.max(2, Math.round(options.sawPeriod ?? DEFAULTS.sawPeriod))
+	const maxTracking = Math.max(0, resolveValue(options.maxTracking ?? DEFAULTS.maxTracking, containerWidth, fontSize))
 
 	// --- Pass 1: Reset ---
 	container.innerHTML = originalHTML

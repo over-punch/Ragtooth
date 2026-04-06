@@ -9,13 +9,18 @@ import type { RagValue } from './types'
  * @param fontSize       - Computed font-size of the element in px (used for em)
  */
 export function resolveValue(value: RagValue, containerWidth: number, fontSize: number): number {
-	if (typeof value === 'number') return value
+	if (typeof value === 'number') return isNaN(value) ? 0 : value
 	const s = value.trim()
-	if (s.endsWith('%')) return containerWidth * parseFloat(s) / 100
-	if (s.endsWith('rem')) {
+	let result: number
+	if (s.endsWith('%')) {
+		result = containerWidth * parseFloat(s) / 100
+	} else if (s.endsWith('rem')) {
 		const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
-		return rootSize * parseFloat(s)
+		result = rootSize * parseFloat(s)
+	} else if (s.endsWith('em')) {
+		result = fontSize * parseFloat(s)
+	} else {
+		result = parseFloat(s) // px or bare number string
 	}
-	if (s.endsWith('em')) return fontSize * parseFloat(s)
-	return parseFloat(s) // px or bare number string
+	return isNaN(result) ? 0 : result
 }
