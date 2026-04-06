@@ -31,6 +31,7 @@ const PARAGRAPHS: ReactNode[] = [
 const SAMPLE_STYLE: React.CSSProperties = {
 	fontFamily: "var(--font-merriweather), serif",
 	fontSize: "1.125rem",
+	fontWeight: 300,
 	lineHeight: "1.8",
 	fontFeatureSettings: '"liga" 1, "dlig" 1, "onum" 1, "kern" 1',
 	fontVariantLigatures: "common-ligatures discretionary-ligatures",

@@ -1,18 +1,36 @@
-@import url("https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600&family=Merriweather:ital,wght@0,400;1,400&display=swap");
 @import "tailwindcss";
+
+@font-face {
+	font-family: "Merriweather";
+	src: url("/fonts/Merriweather.ttf") format("truetype");
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Merriweather";
+	src: url("/fonts/Merriweather-Italic.ttf") format("truetype");
+	font-weight: 100 900;
+	font-style: italic;
+	font-display: swap;
+}
 
 :root {
 	--background: #160927;
 	--foreground: #f0ece3;
 	--btn-bg: #2d2240;
-	--font-sans: "Merriweather Sans", sans-serif;
-	--font-serif: "Merriweather", serif;
+	--font-sans: sans-serif;
+	--font-merriweather: "Merriweather";
 }
 
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
-	--font-sans: var(--font-sans);
+}
+
+button, [role="button"] {
+	cursor: pointer;
 }
 
 * {

@@ -1,14 +1,5 @@
 import type { Metadata } from "next"
-import { Merriweather } from "next/font/google"
 import "./globals.css"
-
-const merriweather = Merriweather({
-	subsets: ["latin"],
-	weight: ["300", "400", "700"],
-	style: ["normal", "italic"],
-	display: "swap",
-	variable: "--font-merriweather",
-})
 
 export const metadata: Metadata = {
 	title: "Ragtooth — Sawtooth rag for React",
@@ -50,7 +41,7 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<html lang="en" className={`h-full antialiased ${merriweather.variable}`}>
+		<html lang="en" className="h-full antialiased">
 			<body className="min-h-full flex flex-col">{children}</body>
 		</html>
 	)
