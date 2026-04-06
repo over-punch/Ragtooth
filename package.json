@@ -1,6 +1,6 @@
 {
 	"name": "ragtooth",
-	"version": "0.1.6",
+	"version": "0.1.7",
 	"description": "Deliberate saw rag for the web — typographic tooth for your text",
 	"type": "module",
 	"main": "./dist/index.cjs",

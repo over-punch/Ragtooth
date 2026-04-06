@@ -15,12 +15,6 @@ const DEFAULTS = {
  */
 const BLOCK_SELECTOR = 'p, li, h1, h2, h3, h4, h5, h6, blockquote'
 
-/**
- * Regex that wraps every word token in a span.
- * Group 1: preceding tag or whitespace (preserved).
- * Group 2: the word itself.
- */
-const WORD_WRAP_RE = /(^|<\/?[^>]+>|\s+)([^\s<]+)/g
 
 /**
  * Returns the innerHTML of a container with all ragtooth-injected spans removed,
@@ -82,14 +76,42 @@ export function applyRag(
 	})
 
 	// --- Pass 3: Word wrap ---
+	// Uses DOM traversal rather than regex so inline elements (<em>, <strong>, etc.)
+	// are preserved correctly — each word span is inserted into the correct parent
+	// element, keeping italic and bold contexts intact.
 	const blocks = Array.from(container.querySelectorAll<HTMLElement>(BLOCK_SELECTOR))
 	const targets: HTMLElement[] = blocks.length > 0 ? blocks : [container]
 
 	targets.forEach((el) => {
-		el.innerHTML = el.innerHTML.replace(
-			WORD_WRAP_RE,
-			`<span class="${RAG_CLASSES.word}">$1$2</span>`,
-		)
+		// Collect all text nodes first to avoid live-NodeList issues during mutation.
+		const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+		const textNodes: Text[] = []
+		while (walker.nextNode()) textNodes.push(walker.currentNode as Text)
+
+		for (const textNode of textNodes) {
+			const text = textNode.textContent ?? ''
+			if (!text) continue
+
+			// Split into alternating [whitespace, word, whitespace, word, …] tokens.
+			// Odd-indexed entries are words; even-indexed are the gaps before them.
+			const tokens = text.split(/(\S+)/)
+			const fragment = document.createDocumentFragment()
+
+			for (let i = 0; i < tokens.length; i += 2) {
+				const space = tokens[i]       // whitespace gap (may be empty)
+				const word  = tokens[i + 1]   // word (undefined at end of string)
+				if (!word) {
+					if (space) fragment.appendChild(document.createTextNode(space))
+					continue
+				}
+				const span = document.createElement('span')
+				span.className = RAG_CLASSES.word
+				span.appendChild(document.createTextNode(space + word))
+				fragment.appendChild(span)
+			}
+
+			textNode.parentNode!.replaceChild(fragment, textNode)
+		}
 	})
 
 	// --- Pass 4: Line grouping ---
