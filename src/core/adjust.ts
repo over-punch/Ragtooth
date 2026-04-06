@@ -167,46 +167,48 @@ export function applyRag(
 		})
 
 		// For bottom-aligned mode, pre-count lines so we know how far each line sits from
-		// the end of the block. A top-aligned first pass gives an estimate; a second pass
-		// applies the actual bottom-aligned cycle using that estimate. This resolves the
-		// parity mismatch that occurs when the first estimate is even — without the second
-		// pass the short-line positions flip completely, producing wrong line breaks and
-		// cascading single-word lines at the end.
+		// the end of the block. Seed with a top-aligned estimate, then iterate the
+		// bottom-aligned re-count until it converges (estimated === actual). Convergence
+		// is typically reached in 1–2 iterations; 8 is a safe upper bound.
 		let totalLines = 1
 		if (sawAlign === 'bottom') {
-			// Pass A: top-aligned estimate
+			// Seed: top-aligned estimate (never break on an empty line)
 			let preWidth = 0
 			let preCount = 1
 			wordData.forEach(({ width }) => {
 				const preOffset = preCount % sawPeriod === sawPhase % sawPeriod ? sawDepth : 0
 				const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
-				if (width + preWidth >= preIdeal) {
+				if (width + preWidth >= preIdeal && preWidth > 0) {
 					preCount++
 					preWidth = 0
 				}
 				preWidth += width
 			})
-			// Pass B: bottom-aligned re-count using the estimate from Pass A
-			const estimated = preCount
-			preWidth = 0
-			preCount = 1
-			wordData.forEach(({ width }) => {
-				const cyclePos = Math.max(1, estimated - preCount + 1)
-				const preOffset = cyclePos % sawPeriod === sawPhase % sawPeriod ? sawDepth : 0
-				const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
-				if (width + preWidth >= preIdeal) {
-					preCount++
-					preWidth = 0
-				}
-				preWidth += width
-			})
+			// Iterate bottom-aligned re-count until convergent
+			let estimated = preCount
+			for (let iter = 0; iter < 8; iter++) {
+				preWidth = 0
+				preCount = 1
+				wordData.forEach(({ width }) => {
+					const cyclePos = Math.max(1, estimated - preCount + 1)
+					const preOffset = cyclePos % sawPeriod === sawPhase % sawPeriod ? sawDepth : 0
+					const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
+					if (width + preWidth >= preIdeal && preWidth > 0) {
+						preCount++
+						preWidth = 0
+					}
+					preWidth += width
+				})
+				if (preCount === estimated) break
+				estimated = preCount
+			}
 			totalLines = preCount
 		}
 
 		// Strip leading whitespace from the rag-word span content — needed for the
 		// first word of each line because display:inline-block collapses leading spaces.
 		const trimLineStart = (whtml: string) =>
-			whtml.replace(/(class="rag-word">)\s+/, '$1')
+			whtml.replace(/(class="rag-word">)[^\S\u00a0]+/, '$1')
 
 		// Write phase — build new HTML string
 		let html = `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
@@ -226,7 +228,7 @@ export function applyRag(
 			const offset = isShortLine ? sawDepth : 0
 			const idealWidth = Math.max(1, elementWidth - 1 - offset)
 
-			if (width + lineWidth < idealWidth) {
+			if (width + lineWidth < idealWidth || lineWidth === 0) {
 				html += lineStart ? trimLineStart(wordHTML) : wordHTML
 				lineStart = false
 			} else {
