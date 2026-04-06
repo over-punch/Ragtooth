@@ -67,11 +67,6 @@ export default function Demo() {
 	const [maxTracking, setMaxTracking] = useState(0.7)
 	const [sawAlign, setSawAlign] = useState<"top" | "bottom">("bottom")
 
-	// Variable font axes — wght 300–900, opsz 7–144, wdth 87–112
-	const [wght, setWght] = useState(300)
-	const [opsz, setOpsz] = useState(18)
-	const [wdth, setWdth] = useState(100)
-
 	// Keep sawPhase in range when sawPeriod changes
 	const effectiveSawPhase = Math.min(sawPhase, sawPeriod)
 
@@ -79,10 +74,7 @@ export default function Demo() {
 		fontFamily: "var(--font-merriweather), serif",
 		fontSize: "1.125rem",
 		lineHeight: "1.8",
-		fontVariationSettings: `"wght" ${wght}, "opsz" ${opsz}, "wdth" ${wdth}`,
-		fontFeatureSettings: '"liga" 1, "dlig" 1, "onum" 1, "kern" 1',
-		fontVariantLigatures: "common-ligatures discretionary-ligatures",
-		fontVariantNumeric: "oldstyle-nums",
+		fontVariationSettings: '"wght" 300, "opsz" 18, "wdth" 100',
 	}
 
 	return (
@@ -96,7 +88,7 @@ export default function Demo() {
 			</div>
 
 			{/* Align toggle */}
-			<div className="flex items-center gap-3 mb-6">
+			<div className="flex items-center gap-3 mb-8">
 				<span className="text-xs uppercase tracking-widest opacity-50">Align</span>
 				{(["top", "bottom"] as const).map((v) => (
 					<button
@@ -117,13 +109,7 @@ export default function Demo() {
 				</span>
 			</div>
 
-			{/* Font axis controls */}
-			<div className="grid grid-cols-3 gap-6 mb-8">
-				<Slider label="Weight"  value={wght} min={300} max={900} step={1}  onChange={setWght} />
-				<Slider label="Optical" value={opsz} min={7}   max={144} step={1}  onChange={setOpsz} />
-				<Slider label="Width"   value={wdth} min={87}  max={112} step={0.5} onChange={setWdth} />
-			</div>
-
+	
 			{/* Live text */}
 			<div className="flex flex-col gap-5">
 				{PARAGRAPHS.map((para, i) => (
