@@ -34,9 +34,11 @@ export default function Home() {
 			</section>
 
 			{/* Interactive demo */}
-			<section className="w-full max-w-2xl flex flex-col gap-6">
+			<section className="w-full max-w-2xl flex flex-col gap-4">
 				<p className="text-xs uppercase tracking-widest opacity-40">Live demo — drag the sliders</p>
-				<Demo />
+				<div className="rounded-xl p-8" style={{ background: "rgba(0,0,0,0.25)" }}>
+					<Demo />
+				</div>
 			</section>
 
 			{/* What is sawtooth rag */}
