@@ -143,3 +143,26 @@ describe('resolveValue — unit equivalence', () => {
 		expect(resolveValue('80px', W, FS)).toBeCloseTo(resolveValue(80, W, FS))
 	})
 })
+
+describe('resolveValue — ch unit', () => {
+	it('resolves "5ch" using the supplied chWidth', () => {
+		expect(resolveValue('5ch', W, FS, 10)).toBe(50)
+	})
+
+	it('resolves "1ch" correctly', () => {
+		expect(resolveValue('1ch', W, FS, 8)).toBe(8)
+	})
+
+	it('resolves "0ch" to 0', () => {
+		expect(resolveValue('0ch', W, FS, 12)).toBe(0)
+	})
+
+	it('returns 0 when chWidth is omitted (default)', () => {
+		expect(resolveValue('3ch', W, FS)).toBe(0)
+	})
+
+	it('"Xch" is independent of containerWidth and fontSize', () => {
+		expect(resolveValue('2ch', 100, 10, 15)).toBe(30)
+		expect(resolveValue('2ch', 999, 50, 15)).toBe(30)
+	})
+})

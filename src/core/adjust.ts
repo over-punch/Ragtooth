@@ -62,10 +62,20 @@ export function applyRag(
 	const containerWidth = container.offsetWidth
 	const fontSize = parseFloat(getComputedStyle(container).fontSize) || 16
 
+	// Measure the 'ch' unit — width of the '0' glyph in the container's current font.
+	// The probe inherits font styles by being a child of the container.
+	const chProbe = document.createElement('span')
+	chProbe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;'
+	chProbe.textContent = '0'
+	container.appendChild(chProbe)
+	const chWidth = chProbe.offsetWidth
+	container.removeChild(chProbe)
+
 	// Resolve options — support deprecated ragDifference as fallback for sawDepth
-	const sawDepth = Math.max(0, resolveValue(options.sawDepth ?? options.ragDifference ?? DEFAULTS.sawDepth, containerWidth, fontSize))
+	const sawDepth = Math.max(0, resolveValue(options.sawDepth ?? options.ragDifference ?? DEFAULTS.sawDepth, containerWidth, fontSize, chWidth))
 	const sawPeriod = Math.max(2, Math.round(options.sawPeriod ?? DEFAULTS.sawPeriod))
-	const maxTracking = Math.max(0, resolveValue(options.maxTracking ?? DEFAULTS.maxTracking, containerWidth, fontSize))
+	const maxTracking = Math.max(0, resolveValue(options.maxTracking ?? DEFAULTS.maxTracking, containerWidth, fontSize, chWidth))
+	const sawAlign = options.sawAlign ?? 'top'
 
 	// --- Pass 1: Reset ---
 	container.innerHTML = originalHTML
@@ -132,14 +142,40 @@ export function applyRag(
 			width: word.offsetWidth,
 		}))
 
+		// For bottom-aligned mode, pre-count lines (using top-aligned shortening as a proxy
+		// for the same total) so we know how far each line sits from the end of the block.
+		// Top-aligned shortening has the same frequency of short lines, giving a close estimate.
+		let totalLines = 1
+		if (sawAlign === 'bottom') {
+			let preWidth = 0
+			let preCount = 1
+			wordData.forEach(({ width }) => {
+				const preOffset = preCount % sawPeriod === 0 ? sawDepth : 0
+				const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
+				if (width + preWidth >= preIdeal) {
+					preCount++
+					preWidth = 0
+				}
+				preWidth += width
+			})
+			totalLines = preCount
+		}
+
 		// Write phase — build new HTML string
 		let html = `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
 		let lineWidth = 0
 		let lineCount = 1
 
 		wordData.forEach(({ outerHTML, width }) => {
-			// Every sawPeriod-th line is shortened by sawDepth pixels
-			const offset = lineCount % sawPeriod === 0 ? sawDepth : 0
+			// Determine whether this line is shortened.
+			// top: every sawPeriod-th line from the start is short.
+			// bottom: every sawPeriod-th line from the end is short — so the paragraph
+			//   ending stays full. Clamp posFromBottom to ≥ 1 to keep the last line full
+			//   even if the pre-count slightly underestimates the actual total.
+			const isShortLine = sawAlign === 'bottom'
+				? Math.max(1, totalLines - lineCount + 1) % sawPeriod === 0
+				: lineCount % sawPeriod === 0
+			const offset = isShortLine ? sawDepth : 0
 			const idealWidth = Math.max(1, elementWidth - 1 - offset)
 
 			if (width + lineWidth < idealWidth) {

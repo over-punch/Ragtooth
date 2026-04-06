@@ -7,8 +7,9 @@ import type { RagValue } from './types'
  * @param value          - Raw value: plain number (px), or string with unit suffix
  * @param containerWidth - Width of the rag container in px (used for %)
  * @param fontSize       - Computed font-size of the element in px (used for em)
+ * @param chWidth        - Width of the '0' glyph in px (used for ch); defaults to 0
  */
-export function resolveValue(value: RagValue, containerWidth: number, fontSize: number): number {
+export function resolveValue(value: RagValue, containerWidth: number, fontSize: number, chWidth = 0): number {
 	if (typeof value === 'number') return isNaN(value) ? 0 : value
 	const s = value.trim()
 	let result: number
@@ -19,6 +20,8 @@ export function resolveValue(value: RagValue, containerWidth: number, fontSize: 
 		result = rootSize * parseFloat(s)
 	} else if (s.endsWith('em')) {
 		result = fontSize * parseFloat(s)
+	} else if (s.endsWith('ch')) {
+		result = chWidth * parseFloat(s)
 	} else {
 		result = parseFloat(s) // px or bare number string
 	}

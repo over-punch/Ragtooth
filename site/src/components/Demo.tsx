@@ -75,14 +75,37 @@ export default function Demo() {
 	const [sawDepth, setSawDepth] = useState(160)
 	const [sawPeriod, setSawPeriod] = useState(2)
 	const [maxTracking, setMaxTracking] = useState(0.7)
+	const [sawAlign, setSawAlign] = useState<"top" | "bottom">("top")
 
 	return (
 		<div className="w-full max-w-2xl mx-auto">
 			{/* Controls */}
-			<div className="grid grid-cols-3 gap-6 mb-10">
+			<div className="grid grid-cols-3 gap-6 mb-6">
 				<Slider label="Depth"    value={sawDepth}    min={0}   max={400} step={1}    onChange={setSawDepth} />
 				<Slider label="Period"   value={sawPeriod}   min={2}   max={6}   step={1}    onChange={setSawPeriod} />
 				<Slider label="Tracking" value={maxTracking} min={0}   max={2}   step={0.01} onChange={setMaxTracking} />
+			</div>
+
+			{/* Align toggle */}
+			<div className="flex items-center gap-3 mb-8">
+				<span className="text-xs uppercase tracking-widest opacity-50">Align</span>
+				{(["top", "bottom"] as const).map((v) => (
+					<button
+						key={v}
+						onClick={() => setSawAlign(v)}
+						className="text-xs px-3 py-1 rounded-full border transition-opacity"
+						style={{
+							borderColor: "currentColor",
+							opacity: sawAlign === v ? 1 : 0.35,
+							background: sawAlign === v ? "var(--btn-bg)" : "transparent",
+						}}
+					>
+						{v}
+					</button>
+				))}
+				<span className="text-xs opacity-30 ml-1">
+					{sawAlign === "bottom" ? "— period counts from last line up" : "— period counts from first line down"}
+				</span>
 			</div>
 
 			{/* Live text */}
@@ -93,6 +116,7 @@ export default function Demo() {
 						sawDepth={sawDepth}
 						sawPeriod={sawPeriod}
 						maxTracking={maxTracking}
+						sawAlign={sawAlign}
 						style={SAMPLE_STYLE}
 					>
 						{para}

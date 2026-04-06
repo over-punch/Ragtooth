@@ -34,6 +34,24 @@ function mockOffsetWidth(_el: HTMLElement, value: number) {
 	}
 }
 
+/**
+ * Class-aware offsetWidth mock: word spans (rag-word) return wordWidth,
+ * all other elements return containerWidth. Needed for sawAlign tests where
+ * we need container ≠ word width to get meaningful multi-word line grouping.
+ */
+function mockOffsetWidthByClass(containerWidth: number, wordWidth: number) {
+	const proto = HTMLElement.prototype
+	const prior = Object.getOwnPropertyDescriptor(proto, 'offsetWidth')
+	Object.defineProperty(proto, 'offsetWidth', {
+		get: function(this: HTMLElement) {
+			return this.classList?.contains(RAG_CLASSES.word) ? wordWidth : containerWidth
+		},
+		set: () => {},
+		configurable: true,
+	})
+	return () => { if (prior) Object.defineProperty(proto, 'offsetWidth', prior) }
+}
+
 /** Extract all data-ideal-width values from lineInfo spans */
 function getIdealWidths(el: HTMLElement): number[] {
 	return Array.from(el.querySelectorAll<HTMLElement>(`.${RAG_CLASSES.lineInfo}`))
@@ -591,6 +609,118 @@ describe('multi-block containers', () => {
 		const restore = mockOffsetWidth(el, 200)
 		const original = el.innerHTML
 		expect(() => applyRag(el, original)).not.toThrow()
+		restore()
+	})
+})
+
+// ---------------------------------------------------------------------------
+// sawAlign
+// ---------------------------------------------------------------------------
+// Scenario: container=600, each word=100. Full line idealWidth=599 → 5 words.
+// Short line idealWidth (depth=200) = 399 → 3 words.
+// 18 words total → with period=3: top produces [full,full,short,full] lines,
+// bottom produces [full,short,full,full] lines — ensuring a full penultimate.
+// ---------------------------------------------------------------------------
+
+describe('sawAlign', () => {
+	// 18 words we can count precisely
+	const WORDS_18 = 'one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen'
+
+	it('defaults to top-aligned behaviour (same result as omitting sawAlign)', () => {
+		document.body.innerHTML = ''
+		const html = `<p>${WORDS_18}</p>`
+
+		const el1 = makeContainer(html)
+		const r1 = mockOffsetWidthByClass(600, 100)
+		applyRag(el1, el1.innerHTML, { sawDepth: 200, sawPeriod: 3 })
+		const widths1 = getIdealWidths(el1)
+		r1()
+
+		document.body.innerHTML = ''
+
+		const el2 = makeContainer(html)
+		const r2 = mockOffsetWidthByClass(600, 100)
+		applyRag(el2, el2.innerHTML, { sawDepth: 200, sawPeriod: 3, sawAlign: 'top' })
+		const widths2 = getIdealWidths(el2)
+		r2()
+
+		expect(widths1).toEqual(widths2)
+	})
+
+	it('top-aligned: penultimate line (last lineInfo) is short with period=3 and 18 words', () => {
+		document.body.innerHTML = ''
+		const el = makeContainer(`<p>${WORDS_18}</p>`)
+		const restore = mockOffsetWidthByClass(600, 100)
+		// depth=200 → short idealWidth = 600-1-200 = 399; full = 599
+		applyRag(el, el.innerHTML, { sawDepth: 200, sawPeriod: 3, sawAlign: 'top' })
+		const widths = getIdealWidths(el)
+		// Last lineInfo = penultimate line. With top-align + period=3 it should be SHORT (399).
+		expect(widths[widths.length - 1]).toBeCloseTo(399)
+		restore()
+	})
+
+	it('bottom-aligned: penultimate line (last lineInfo) is full with period=3 and 18 words', () => {
+		document.body.innerHTML = ''
+		const el = makeContainer(`<p>${WORDS_18}</p>`)
+		const restore = mockOffsetWidthByClass(600, 100)
+		applyRag(el, el.innerHTML, { sawDepth: 200, sawPeriod: 3, sawAlign: 'bottom' })
+		const widths = getIdealWidths(el)
+		// Last lineInfo = penultimate line. With bottom-align + period=3 it should be FULL (599).
+		expect(widths[widths.length - 1]).toBeCloseTo(599)
+		restore()
+	})
+
+	it('bottom-aligned: at least one short line still appears (the rag effect is present)', () => {
+		document.body.innerHTML = ''
+		const el = makeContainer(`<p>${WORDS_18}</p>`)
+		const restore = mockOffsetWidthByClass(600, 100)
+		applyRag(el, el.innerHTML, { sawDepth: 200, sawPeriod: 3, sawAlign: 'bottom' })
+		const widths = getIdealWidths(el)
+		const hasShort = widths.some((w) => w < 500)
+		expect(hasShort).toBe(true)
+		restore()
+	})
+
+	it('bottom-aligned: does not throw', () => {
+		document.body.innerHTML = ''
+		const el = makeContainer('<p>Hello world foo bar baz qux quux corge grault garply</p>')
+		const restore = mockOffsetWidth(el, 300)
+		expect(() => applyRag(el, el.innerHTML, { sawDepth: 80, sawPeriod: 2, sawAlign: 'bottom' })).not.toThrow()
+		restore()
+	})
+})
+
+// ---------------------------------------------------------------------------
+// ch unit integration
+// ---------------------------------------------------------------------------
+
+describe('ch unit integration (sawDepth)', () => {
+	it('"0ch" sawDepth behaves like sawDepth=0 — all lines are full width', () => {
+		document.body.innerHTML = ''
+		const html = '<p>Alpha beta gamma delta epsilon zeta eta theta iota</p>'
+
+		const el1 = makeContainer(html)
+		const r1 = mockOffsetWidth(el1, 400)
+		applyRag(el1, el1.innerHTML, { sawDepth: 0, sawPeriod: 2 })
+		const widths1 = getIdealWidths(el1)
+		r1()
+
+		document.body.innerHTML = ''
+
+		const el2 = makeContainer(html)
+		const r2 = mockOffsetWidth(el2, 400)
+		applyRag(el2, el2.innerHTML, { sawDepth: '0ch', sawPeriod: 2 })
+		const widths2 = getIdealWidths(el2)
+		r2()
+
+		expect(widths1).toEqual(widths2)
+	})
+
+	it('"Xch" sawDepth does not throw', () => {
+		document.body.innerHTML = ''
+		const el = makeContainer('<p>Alpha beta gamma delta epsilon zeta eta</p>')
+		const restore = mockOffsetWidth(el, 400)
+		expect(() => applyRag(el, el.innerHTML, { sawDepth: '5ch', sawPeriod: 2 })).not.toThrow()
 		restore()
 	})
 })

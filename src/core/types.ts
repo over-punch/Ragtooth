@@ -7,6 +7,7 @@
  * - `"80px"` → pixels (explicit)
  * - `"1.5em"` → relative to the element's computed font-size
  * - `"1rem"` → relative to the root font-size
+ * - `"5ch"` → 5× the width of the "0" glyph in the element's current font
  */
 export type RagValue = number | string
 
@@ -36,6 +37,16 @@ export interface RagOptions {
 	 * @default 0.7
 	 */
 	maxTracking?: RagValue
+
+	/**
+	 * Whether the sawtooth cycle is anchored to the top or bottom of the block.
+	 * - `'top'` (default): short lines count from the first line downward.
+	 * - `'bottom'`: short lines count from the last line upward, so the paragraph
+	 *   ending stays full-width. Use with `sawPeriod: 3` to guarantee the last two
+	 *   lines are always full, eliminating the awkward short-penultimate-line effect.
+	 * @default 'top'
+	 */
+	sawAlign?: 'top' | 'bottom'
 
 	/**
 	 * @deprecated Use `sawDepth` instead.
