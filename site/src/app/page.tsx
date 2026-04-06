@@ -19,15 +19,9 @@ export default function Home() {
 						}}
 					>
 						A Sawtooth Rag,<br />
-						<span style={{ opacity: 0.5, fontStyle: "italic" }}>for the web.</span>
+						<span style={{ opacity: 0.5, fontStyle: "italic" }}>on the web.</span>
 					</h1>
 				</div>
-				<p className="text-base opacity-60 leading-relaxed max-w-lg">
-					Most tools fight your rag. Ragtooth works with it — shaping text into a
-					sawtooth pattern of alternating long and short lines. The kind of rhythm that
-					reads as design, not accident. A technique from editorial typesetting, now
-					in one npm package.
-				</p>
 				<div className="flex items-center gap-4">
 					<CopyInstall />
 					<a
@@ -39,6 +33,12 @@ export default function Home() {
 						GitHub ↗
 					</a>
 				</div>
+				<p className="text-base opacity-60 leading-relaxed max-w-lg">
+					Most tools fight your rag. Ragtooth works with it — shaping text into a
+					sawtooth pattern of alternating long and short lines. The kind of rhythm that
+					reads as design, not accident. A technique from editorial typesetting, now
+					in one npm package.
+				</p>
 			</section>
 
 			{/* Interactive demo */}
