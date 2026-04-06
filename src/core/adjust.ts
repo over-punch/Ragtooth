@@ -166,15 +166,33 @@ export function applyRag(
 			return { html, width: word.offsetWidth }
 		})
 
-		// For bottom-aligned mode, pre-count lines (using top-aligned shortening as a proxy
-		// for the same total) so we know how far each line sits from the end of the block.
-		// Top-aligned shortening has the same frequency of short lines, giving a close estimate.
+		// For bottom-aligned mode, pre-count lines so we know how far each line sits from
+		// the end of the block. A top-aligned first pass gives an estimate; a second pass
+		// applies the actual bottom-aligned cycle using that estimate. This resolves the
+		// parity mismatch that occurs when the first estimate is even — without the second
+		// pass the short-line positions flip completely, producing wrong line breaks and
+		// cascading single-word lines at the end.
 		let totalLines = 1
 		if (sawAlign === 'bottom') {
+			// Pass A: top-aligned estimate
 			let preWidth = 0
 			let preCount = 1
 			wordData.forEach(({ width }) => {
 				const preOffset = preCount % sawPeriod === sawPhase % sawPeriod ? sawDepth : 0
+				const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
+				if (width + preWidth >= preIdeal) {
+					preCount++
+					preWidth = 0
+				}
+				preWidth += width
+			})
+			// Pass B: bottom-aligned re-count using the estimate from Pass A
+			const estimated = preCount
+			preWidth = 0
+			preCount = 1
+			wordData.forEach(({ width }) => {
+				const cyclePos = Math.max(1, estimated - preCount + 1)
+				const preOffset = cyclePos % sawPeriod === sawPhase % sawPeriod ? sawDepth : 0
 				const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
 				if (width + preWidth >= preIdeal) {
 					preCount++
