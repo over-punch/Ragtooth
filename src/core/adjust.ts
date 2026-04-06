@@ -76,6 +76,9 @@ export function applyRag(
 	const sawPeriod = Math.max(2, Math.round(options.sawPeriod ?? DEFAULTS.sawPeriod))
 	const maxTracking = Math.max(0, resolveValue(options.maxTracking ?? DEFAULTS.maxTracking, containerWidth, fontSize, chWidth))
 	const sawAlign = options.sawAlign ?? 'top'
+	// sawPhase: 1-indexed position within the cycle that is shortened.
+	// Default = sawPeriod (last line), matching the pre-sawPhase behaviour.
+	const sawPhase = Math.min(sawPeriod, Math.max(1, Math.round(options.sawPhase ?? sawPeriod)))
 
 	// --- Pass 1: Reset ---
 	container.innerHTML = originalHTML
@@ -150,7 +153,7 @@ export function applyRag(
 			let preWidth = 0
 			let preCount = 1
 			wordData.forEach(({ width }) => {
-				const preOffset = preCount % sawPeriod === 0 ? sawDepth : 0
+				const preOffset = preCount % sawPeriod === sawPhase % sawPeriod ? sawDepth : 0
 				const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
 				if (width + preWidth >= preIdeal) {
 					preCount++
@@ -168,13 +171,13 @@ export function applyRag(
 
 		wordData.forEach(({ outerHTML, width }) => {
 			// Determine whether this line is shortened.
-			// top: every sawPeriod-th line from the start is short.
-			// bottom: every sawPeriod-th line from the end is short — so the paragraph
-			//   ending stays full. Clamp posFromBottom to ≥ 1 to keep the last line full
-			//   even if the pre-count slightly underestimates the actual total.
-			const isShortLine = sawAlign === 'bottom'
-				? Math.max(1, totalLines - lineCount + 1) % sawPeriod === 0
-				: lineCount % sawPeriod === 0
+			// sawPhase (1-indexed) controls which position within the period is short.
+			// top: count from the first line. bottom: count from the last line upward.
+			// Clamp posFromBottom to ≥ 1 to keep the last line full if pre-count underestimates.
+			const cyclePos = sawAlign === 'bottom'
+				? Math.max(1, totalLines - lineCount + 1)
+				: lineCount
+			const isShortLine = cyclePos % sawPeriod === sawPhase % sawPeriod
 			const offset = isShortLine ? sawDepth : 0
 			const idealWidth = Math.max(1, elementWidth - 1 - offset)
 

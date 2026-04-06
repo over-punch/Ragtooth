@@ -614,6 +614,69 @@ describe('multi-block containers', () => {
 })
 
 // ---------------------------------------------------------------------------
+// sawPhase
+// ---------------------------------------------------------------------------
+// container=600, word=100 → full idealWidth=599 (5 words/line), short=399 (3 words/line)
+// ---------------------------------------------------------------------------
+
+describe('sawPhase', () => {
+	const WORDS_12 = 'one two three four five six seven eight nine ten eleven twelve'
+
+	it('default (sawPhase=sawPeriod) matches current behaviour — last line of each period is short', () => {
+		document.body.innerHTML = ''
+		const html = `<p>${WORDS_12}</p>`
+
+		const el1 = makeContainer(html)
+		const r1 = mockOffsetWidthByClass(600, 100)
+		applyRag(el1, el1.innerHTML, { sawDepth: 200, sawPeriod: 3 })
+		const widths1 = getIdealWidths(el1)
+		r1()
+
+		document.body.innerHTML = ''
+
+		const el2 = makeContainer(html)
+		const r2 = mockOffsetWidthByClass(600, 100)
+		applyRag(el2, el2.innerHTML, { sawDepth: 200, sawPeriod: 3, sawPhase: 3 })
+		const widths2 = getIdealWidths(el2)
+		r2()
+
+		expect(widths1).toEqual(widths2)
+	})
+
+	it('sawPhase=1 makes the FIRST line of each period short', () => {
+		// period=2, phase=1: lines 1,3,5... are short (cyclePos%2 === 1%2 === 1)
+		document.body.innerHTML = ''
+		const el = makeContainer(`<p>${WORDS_12}</p>`)
+		const restore = mockOffsetWidthByClass(600, 100)
+		applyRag(el, el.innerHTML, { sawDepth: 200, sawPeriod: 2, sawPhase: 1 })
+		const widths = getIdealWidths(el)
+		// First lineInfo is for line 1 (short) → idealWidth=399
+		expect(widths[0]).toBeCloseTo(399)
+		restore()
+	})
+
+	it('sawPhase=2 (default for period=2) makes the SECOND line short', () => {
+		document.body.innerHTML = ''
+		const el = makeContainer(`<p>${WORDS_12}</p>`)
+		const restore = mockOffsetWidthByClass(600, 100)
+		applyRag(el, el.innerHTML, { sawDepth: 200, sawPeriod: 2, sawPhase: 2 })
+		const widths = getIdealWidths(el)
+		// First lineInfo is for line 1 (full) → idealWidth=599
+		expect(widths[0]).toBeCloseTo(599)
+		restore()
+	})
+
+	it('sawPhase out of range is clamped to [1, sawPeriod]', () => {
+		document.body.innerHTML = ''
+		const el = makeContainer('<p>Alpha beta gamma delta epsilon zeta eta theta</p>')
+		const restore = mockOffsetWidth(el, 300)
+		expect(() => applyRag(el, el.innerHTML, { sawDepth: 50, sawPeriod: 2, sawPhase: 99 })).not.toThrow()
+		expect(() => applyRag(el, el.innerHTML, { sawDepth: 50, sawPeriod: 2, sawPhase: 0 })).not.toThrow()
+		restore()
+	})
+})
+
+// ---------------------------------------------------------------------------
 // sawAlign
 // ---------------------------------------------------------------------------
 // Scenario: container=600, each word=100. Full line idealWidth=599 → 5 words.

@@ -39,6 +39,17 @@ export interface RagOptions {
 	maxTracking?: RagValue
 
 	/**
+	 * Which line within each period cycle is shortened (1-indexed).
+	 * `1` = first line of each cycle is short, `sawPeriod` = last line (default).
+	 * Values outside `[1, sawPeriod]` are clamped automatically.
+	 *
+	 * Example: `sawPeriod: 3, sawPhase: 2` → every group of three lines has
+	 * the *second* line shortened, leaving the third full.
+	 * @default sawPeriod (last line of each cycle)
+	 */
+	sawPhase?: number
+
+	/**
 	 * Whether the sawtooth cycle is anchored to the top or bottom of the block.
 	 * - `'top'` (default): short lines count from the first line downward.
 	 * - `'bottom'`: short lines count from the last line upward, so the paragraph

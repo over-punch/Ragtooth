@@ -74,16 +74,21 @@ function Slider({
 export default function Demo() {
 	const [sawDepth, setSawDepth] = useState(160)
 	const [sawPeriod, setSawPeriod] = useState(2)
+	const [sawPhase, setSawPhase] = useState(2)
 	const [maxTracking, setMaxTracking] = useState(0.7)
 	const [sawAlign, setSawAlign] = useState<"top" | "bottom">("top")
+
+	// Keep sawPhase in range when sawPeriod changes
+	const effectiveSawPhase = Math.min(sawPhase, sawPeriod)
 
 	return (
 		<div className="w-full max-w-2xl mx-auto">
 			{/* Controls */}
-			<div className="grid grid-cols-3 gap-6 mb-6">
-				<Slider label="Depth"    value={sawDepth}    min={0}   max={400} step={1}    onChange={setSawDepth} />
-				<Slider label="Period"   value={sawPeriod}   min={2}   max={6}   step={1}    onChange={setSawPeriod} />
-				<Slider label="Tracking" value={maxTracking} min={0}   max={2}   step={0.01} onChange={setMaxTracking} />
+			<div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6">
+				<Slider label="Depth"    value={sawDepth}         min={0}   max={400} step={1}    onChange={setSawDepth} />
+				<Slider label="Period"   value={sawPeriod}        min={2}   max={6}   step={1}    onChange={setSawPeriod} />
+				<Slider label="Phase"    value={effectiveSawPhase} min={1}   max={sawPeriod} step={1} onChange={setSawPhase} />
+				<Slider label="Tracking" value={maxTracking}      min={0}   max={2}   step={0.01} onChange={setMaxTracking} />
 			</div>
 
 			{/* Align toggle */}
@@ -115,6 +120,7 @@ export default function Demo() {
 						key={i}
 						sawDepth={sawDepth}
 						sawPeriod={sawPeriod}
+						sawPhase={effectiveSawPhase}
 						maxTracking={maxTracking}
 						sawAlign={sawAlign}
 						style={SAMPLE_STYLE}

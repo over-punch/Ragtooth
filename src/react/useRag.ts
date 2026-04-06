@@ -68,7 +68,7 @@ export function useRag(
 	// Re-run synchronously after every relevant render so layout is correct before paint.
 	useLayoutEffect(() => {
 		run()
-	}, [run, options.sawDepth, options.sawPeriod, options.maxTracking, options.ragDifference, options.sawAlign, contentKey])
+	}, [run, options.sawDepth, options.sawPeriod, options.maxTracking, options.ragDifference, options.sawAlign, options.sawPhase, contentKey])
 
 	// Re-run once all fonts are loaded — word widths measured before fonts arrive
 	// (common on mobile first-visit) will be wrong, so we need a corrective pass.
