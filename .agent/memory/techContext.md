@@ -1,37 +1,41 @@
-# Tech Context — Rag-Rub
+# Tech Context — Ragtooth
 
-## Package Name
-**ragtooth** — renamed from rag-rub on 2026-04-05. Domain ragtooth.com available.
+## Package
+- Name: `ragtooth`
+- Version: `1.0.0` (targeting v1 — stable public API)
+- npm: public, unprefixed
 
-## Decided Stack
-**npm package with React-first API** — decided 2026-04-04.
+## Build
+- Vite (library mode) → ESM (`dist/index.js`) + CJS (`dist/index.cjs`) + types (`dist/index.d.ts`)
+- TypeScript 5, strict
+- Peer deps: `react >=17` and `react-dom >=17` (both optional)
+- No runtime dependencies
 
-## Architecture
-- **Core layer**: Framework-agnostic vanilla JS algorithm (pure functions, no DOM deps where possible)
-- **React layer**: Hooks + components wrapping the core — `useRag()` hook, `<RagText>` component
-- **Build**: Vite (library mode) to produce ESM + CJS outputs
-- **TypeScript**: Yes — for type safety and good DX in consuming projects
+## Algorithm stack
+- `src/core/adjust.ts` — 5-pass DOM mutation algorithm (reset, widow removal, word wrap, line grouping, tracking)
+- `src/core/resolve.ts` — RagValue unit converter (px, %, em, rem, ch)
+- `src/core/types.ts` — shared types: `RagOptions`, `RagValue`, `RAG_CLASSES`
+- `src/react/useRag.ts` — hook: ResizeObserver, snapshot, re-runs on width change or options change
+- `src/react/RagText.tsx` — component: forwardRef wrapper around useRag
+- `src/index.ts` — barrel export
 
-## Package API Goals
-```ts
-// Hook usage
-const { ref } = useRag(options)
-<p ref={ref}>{children}</p>
+## Landing site
+- `site/` — Next.js 16 app (App Router), Tailwind CSS v4 (JIT)
+- `site/src/app/page.tsx` — landing page with hero, demo, options table, usage examples
+- `site/src/components/Demo.tsx` — interactive sliders for all 5 rag options + 3 variable font axes
+- Font: Merriweather variable (local TTFs from `site/public/fonts/`)
+  - `Merriweather.ttf` — upright, wght 100–900, opsz 7–144, wdth 87–112
+  - `Merriweather-Italic.ttf` — italic, same axes
+  - `font-variation-settings` required to activate opsz and wdth axes (font-weight alone is not enough)
 
-// Component usage
-<RagText options={options}>Long paragraph of text...</RagText>
-```
+## Deploy pipeline
+- Two git remotes:
+  - `origin` → `git@github.com:quitequinn/Ragtooth.git` (code)
+  - `deploy` → `git@github-liiift:Liiift-Studio/Ragtooth.git` (triggers Vercel)
+- Version bump commit made as Liiift identity, pushed to `deploy` to trigger Vercel
+- npm publish: `npm publish --access public` (requires login; may need OTP)
 
-## Performance Priorities
-- Core algorithm must not cause layout thrashing (batch DOM reads before writes)
-- Use `ResizeObserver` to re-run only when container width changes
-- Debounce/throttle recalculation on resize
-- No unnecessary re-renders — memo/ref patterns over state where possible
-
-## Origin Stack (CodePen)
-- HTML / CSS / Vanilla JavaScript — algorithm to be ported from here
-
-## Known Constraints
-- Rag adjustment is inherently font/size/container-dependent → must run in the browser
-- SSR-safe: package must not crash in Node/SSR environments (guard all DOM access)
-- Soft hyphens (`&shy;`) and `&nbsp;` must survive framework rendering pipelines cleanly
+## Key constraints
+- Must be SSR-safe: all DOM access gated on `typeof window !== 'undefined'`
+- Algorithm must run after browser layout (uses `offsetWidth`) — guarded against `offsetWidth === 0`
+- ResizeObserver fires on any size change; algorithm skips if container width hasn't changed

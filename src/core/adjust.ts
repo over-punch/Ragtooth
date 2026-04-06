@@ -185,10 +185,16 @@ export function applyRag(
 			totalLines = preCount
 		}
 
+		// Strip leading whitespace from the rag-word span content — needed for the
+		// first word of each line because display:inline-block collapses leading spaces.
+		const trimLineStart = (whtml: string) =>
+			whtml.replace(/(class="rag-word">)\s+/, '$1')
+
 		// Write phase — build new HTML string
 		let html = `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
 		let lineWidth = 0
 		let lineCount = 1
+		let lineStart = true // true for the first word of each new line
 
 		wordData.forEach(({ html: wordHTML, width }) => {
 			// Determine whether this line is shortened.
@@ -203,15 +209,17 @@ export function applyRag(
 			const idealWidth = Math.max(1, elementWidth - 1 - offset)
 
 			if (width + lineWidth < idealWidth) {
-				html += wordHTML
+				html += lineStart ? trimLineStart(wordHTML) : wordHTML
+				lineStart = false
 			} else {
 				// Close line, insert forced break, open next line
 				html += `<span class="${RAG_CLASSES.lineInfo}" style="display:none" data-ideal-width="${idealWidth}" data-line-width="${lineWidth}"></span></span>`
 				html += `<br class="${RAG_CLASSES.break}">`
 				html += `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
-				html += wordHTML
+				html += trimLineStart(wordHTML)
 				lineWidth = 0
 				lineCount++
+				lineStart = false
 			}
 			lineWidth += width
 		})

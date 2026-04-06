@@ -1,28 +1,27 @@
 # Project Brief — Ragtooth
 
 ## What it is
-A typographic tool that adjusts the shape of a text block's rag (the uneven right edge of left-aligned text).
+`ragtooth` — an npm package that applies deliberate sawtooth rag typographic shaping to text. Alternates long and short lines to create a rhythmic, intentional right edge instead of an accidental ragged one.
 
-## Origin
-Started as a CodePen: https://codepen.io/QuiteQuinn/pen/pobqxWX
-Now being converted into a proper standalone project.
+## Package identity
+- npm: `ragtooth`
+- GitHub: `quitequinn/Ragtooth` (code) + `Liiift-Studio/Ragtooth` (Vercel deploy trigger)
+- Site: `ragtooth.liiift.studio`
+- Author: Quinn Keaveney / Liiift Studio
 
 ## Core Goal
-Give typographers and designers fine-grained control over the rag of a text block — smoothing it, shaping it, or otherwise optimizing it beyond what CSS alone can do.
+Give typographers and web developers a single-prop drop-in to deliberately shape paragraph rag into a sawtooth pattern — a technique from editorial and book design.
 
 ## Scope
-- Input: arbitrary text content
-- Output: the same text with soft hyphens (`&shy;`), non-breaking spaces (`&nbsp;`), or other invisible characters inserted to reshape the line endings
-- Visual feedback: real-time preview of rag shape as settings change
+- Core algorithm: framework-agnostic DOM mutation (`applyRag`, `removeRag`, `getCleanHTML`)
+- React bindings: `useRag` hook + `RagText` component
+- Landing site: Next.js 16 app with interactive demo (variable font, live sliders)
 
 ## What it is NOT
-- Not a full text editor
-- Not a hyphenation engine (though it may use soft hyphens as a tool)
-- Not a CMS or publishing platform
+- Not a line-breaking / hyphenation library
+- Not a CSS-only solution
+- Not a full typesetting system
 
-## Prior Art (reference, not copy)
-- https://github.com/nathanford/ragadjust — original jQuery plugin, primary reference
-- https://github.com/aperfect/ragadjust — fork
-- https://github.com/eulenherr/jekyll-ragadjust — Jekyll integration
-- https://github.com/adamhavel/grunt-raggedast — Grunt build-tool approach
-- https://github.com/arnoesterhuizen/wp_php_ragadjust — PHP/WordPress port
+## Prior Art
+- ragadjust (jQuery, primary inspiration) — https://github.com/nathanford/ragadjust
+- Jekyll, Grunt, and PHP ports of the same concept

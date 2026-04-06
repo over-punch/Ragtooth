@@ -1,29 +1,32 @@
 # Active Context — Ragtooth
 
 ## Current Focus
-Package published, site live, deploy pipeline wired up.
+Preparing and shipping v1.0.0 — stable public API, complete README, full agent memory.
 
-## What's Done
-- npm package `ragtooth@0.1.1` published to registry
+## What's Done (as of 2026-04-06)
+- npm package `ragtooth` published (latest stable: 0.2.6 → targeting 1.0.0)
 - Core algorithm: 5-pass saw-rag (reset, widow removal, word wrap, line grouping, tracking)
-- React bindings: `useRag` hook + `RagText` component
+- All options landed: `sawDepth`, `sawPeriod`, `sawPhase`, `sawAlign`, `maxTracking`
+- `RagValue` type: px, %, em, rem, ch units all resolved correctly
+- React bindings: `useRag` hook + `RagText` component (forwardRef, auto string-children tracking)
 - Vanilla JS API: `applyRag`, `removeRag`, `getCleanHTML`
-- Next.js 16 landing site with interactive demo (sliders for sawDepth/sawPeriod/maxTracking)
-- Vercel deploy pipeline: `deploy` remote → `Liiift-Studio/Ragtooth` → Vercel
+- Inline element preservation: `<em>`, `<strong>`, etc. survive line breaks (Pass 4 contextual HTML)
+- Orphan space fix: trailing whitespace included in last-word spans (Pass 3)
+- Leading space fix: first word of each line stripped of leading whitespace (CSS inline-block collapses it)
+- Demo site: interactive sliders for all 5 rag options + 3 Merriweather variable font axes (wght/opsz/wdth)
+- Hero h1 in Merriweather wght:300 opsz:144 wdth:87
+- Slider thumbs: light grey → white on hover
 
-## Performance & Robustness Improvements (2026-04-05)
-- `react`/`react-dom` marked as optional peer deps
-- ResizeObserver skips re-runs when only height changes (width-only check)
-- `applyRag` guards against zero-width (hidden) containers
-- `getCleanHTML()` strips rag markup via DOM traversal before snapshotting
-- `RagText` auto-tracks string children — no `key` prop needed on content change
-- Demo no longer uses redundant `key` prop
+## Deploy pipeline
+- Two remotes: `origin` (quitequinn) + `deploy` (github-liiift → Vercel)
+- Version bump committed as Liiift, pushed to `deploy` to trigger Vercel build
 
 ## Immediate Next Steps
-- Bump version and publish updated package to npm (`0.1.1` → `0.1.2` or minor bump)
-- Address GitHub security vulnerabilities (9 flagged: 2 critical, 3 high, 4 moderate)
+- Bump to 1.0.0 (tag as stable)
+- Publish to npm (user must run `npm publish --access public --otp=<code>` after `npm login`)
+- Push deploy remote to trigger Vercel site update
+- Consider: CHANGELOG, GitHub release notes
 
-## Recent Decisions
-- **2026-04-05**: Renamed from rag-rub to Ragtooth
-- **2026-04-05**: First npm publish at v0.1.0
-- **2026-04-05**: Deploy remote added: `git@github-liiift:Liiift-Studio/Ragtooth.git`
+## Known Issues
+- GitHub Dependabot flagging 9 vulnerabilities in devDependencies (not runtime deps — low priority)
+- Font-change detection not implemented (resize triggers re-run but font-load event does not)

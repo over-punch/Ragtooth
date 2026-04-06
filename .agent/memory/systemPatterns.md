@@ -1,72 +1,60 @@
-# System Patterns — Rag-Rub
+# System Patterns — Ragtooth
 
-## Status
-Architecture decided. Patterns will be fully filled in once CodePen algorithm is reviewed.
-
-## Package Layer Architecture
+## Architecture
 
 ```
-rag-rub/
-├── src/core/         — pure algorithm (no React, no DOM where avoidable)
-│   ├── analyze.ts    — measure line widths, identify problem lines
-│   └── adjust.ts     — insert &shy;/&nbsp; to reshape rag
-├── src/react/        — React bindings
-│   ├── useRag.ts     — hook: attaches core to a ref, wires ResizeObserver
-│   └── RagText.tsx   — component: thin wrapper around useRag
-└── src/index.ts      — public exports
+ragtooth/
+├── src/
+│   ├── core/
+│   │   ├── adjust.ts     — 5-pass saw-rag algorithm (framework-agnostic DOM mutation)
+│   │   ├── resolve.ts    — RagValue unit converter (px, %, em, rem, ch)
+│   │   └── types.ts      — RagOptions, RagValue, RAG_CLASSES
+│   ├── react/
+│   │   ├── useRag.ts     — hook: snapshot → applyRag on mount/resize/options change
+│   │   └── RagText.tsx   — forwardRef component wrapping useRag
+│   └── index.ts          — public exports
+└── site/                 — Next.js 16 landing site
 ```
 
-## Expected Core Flow
+## The 5-Pass Algorithm (`applyRag`)
 
+1. **Reset** — `container.innerHTML = originalHTML` (idempotent; snapshot taken once at mount)
+2. **Widow removal** — regex replaces last space in each block with `\u00a0` to prevent orphaned last words
+3. **Word wrap** — `TreeWalker` walks text nodes; each word gets a `<span class="rag-word">` measurement span. Trailing whitespace of the last word in each text node is included in that span (prevents orphan spaces at inline-element boundaries like `"of "` before `<strong>`).
+4. **Line grouping** (read then write):
+   - Read: `offsetWidth` of each word span + build contextual HTML wrapping each word in its ancestor inline elements (preserves `<em>`, `<strong>`, etc. across line breaks)
+   - Write: accumulate widths; break when `lineWidth ≥ idealWidth`. Each line becomes `display:inline-block;white-space:nowrap`. Leading whitespace stripped from first word of every line (CSS collapses it anyway).
+   - `sawAlign:'bottom'` does a pre-count pass to get total lines, then anchors short-line positions from the end
+5. **Tracking** — hidden `<span class="rag-line-info" data-ideal-width data-line-width>` sentinels store per-line measurements; Pass 5 reads them and applies `letter-spacing` capped at `maxTracking`
+
+## Key Invariants
+- `originalHTML` snapshot is taken once at mount via `getCleanHTML(container)` (strips any prior rag markup before snapshotting)
+- Algorithm is pure DOM mutation — no React state, no re-renders
+- ResizeObserver skips re-runs when only height changes (width-only check)
+- All CSS classes injected by the algorithm are in `RAG_CLASSES` constant (exported for consumer targeting/reset)
+
+## RagValue Resolution (`resolve.ts`)
+- Plain number → pixels
+- String with unit: `px` (identity), `%` (of containerWidth), `em` (× fontSize), `rem` (× rootFontSize), `ch` (× chWidth, measured via probe span)
+- Returns 0 on NaN; input is clamped `≥ 0` at call site
+
+## React Hook (`useRag`)
+- `useLayoutEffect` runs after every render (options deps + contentKey)
+- Takes `originalHTML` snapshot on first run via `getCleanHTML`
+- Resets snapshot when `contentKey` changes (handles string children changing)
+- ResizeObserver debounced via `requestAnimationFrame`
+- Returns `RefObject<HTMLElement | null>`
+
+## Inline Element Preservation Pattern (Pass 4)
+Each word's HTML is wrapped in ancestor inline elements by walking up the DOM tree:
+```typescript
+let ancestor = word.parentElement
+while (ancestor && ancestor !== element) {
+    const shallow = ancestor.cloneNode(false) as Element
+    const shallowHTML = shallow.outerHTML
+    const split = shallowHTML.lastIndexOf('</')
+    html = shallowHTML.slice(0, split) + html + shallowHTML.slice(split)
+    ancestor = ancestor.parentElement
+}
 ```
-Mount / container resize
-    ↓
-Analyze — measure rendered line widths via Range API or offsetWidth
-    ↓
-Identify bad lines — lines significantly shorter/longer than target rag shape
-    ↓
-Adjust — insert soft hyphens / non-breaking spaces into text nodes
-    ↓
-Re-render — React sees updated text, browser reflows
-    ↓
-ResizeObserver fires again if container changed → loop
-```
-
-## Key Concerns
-- **DOM reflow**: adjustments must trigger re-measurement; need to avoid layout thrashing
-- **Font dependency**: rag shape is font- and size-specific; adjustments must re-run when font changes
-- **Reversibility**: inserted characters must be easy to strip out (clean export option)
-
-## CodePen Algorithm (source of truth — reviewed 2026-04-04)
-
-### What it does
-Creates a deliberate **alternating-line zigzag rag**: odd lines run near full column width, even lines are shortened by `ragDifference` (default 80px). Slack on each line is distributed as `letter-spacing` to avoid loose gaps.
-
-### Four-pass pipeline
-1. **Reset** — restore original innerHTML snapshot (idempotency)
-2. **Widow removal** — replace last space in each `<p>` with `&nbsp;` via regex
-3. **Word wrap** — wrap every word token in `<span class="word">` to make them measurable
-4. **Line grouping** — walk word spans, accumulate `offsetWidth`, break when `idealWidth` is reached; inject hidden `<span class="line-info" data-ideal-width data-line-width>` sentinel at each line end
-5. **Tracking adjustment** — for each `.line-info`, compute `(idealWidth - lineWidth) / charCount` px of letter-spacing; clamp to `acceptableTracking` max
-
-### Key DOM APIs used
-- `element.offsetWidth` — measures rendered pixel width (forces layout reflow; must be live in DOM)
-- `element.innerHTML` getter/setter — used for reset, word-wrap injection, and line rebuild
-- `element.textContent.length` — character count for tracking formula
-- `element.style.letterSpacing` — applies computed tracking per line
-
-### Exposed options
-| Option | Default | Meaning |
-|---|---|---|
-| `ragDifference` | `80` (px) | How much shorter even lines are vs. odd lines |
-| `acceptableTracking` | `0.7` (px) | Max letter-spacing per line |
-
-### Design constraints that affect porting
-- **Must be live in DOM** — `offsetWidth` does not work on detached elements
-- **Idempotency requires original snapshot** — must preserve original text before first run
-- **innerHTML mutation** — conflicts with React's virtual DOM; need a ref-based approach
-- **Reflow cost** — reads `offsetWidth` on every word on every call; must batch reads before writes and debounce on resize
-
-## Patterns TBD
-- Component/hook API shape (informed by above)
-- Whether to use `Range` API as a more precise alternative to `offsetWidth` per word
+A line break between two words inside the same `<em>` produces two adjacent `<em>` elements — semantically split but visually identical.
