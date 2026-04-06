@@ -42,7 +42,7 @@ export default function Home() {
 			</section>
 
 			{/* Interactive demo */}
-			<section className="w-full max-w-2xl flex flex-col gap-4">
+			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-4">
 				<p className="text-xs uppercase tracking-widest opacity-40">Live demo — drag the sliders</p>
 				<div className="rounded-xl -mx-8 px-8 py-8" style={{ background: "rgba(0,0,0,0.25)" }}>
 					<Demo />
@@ -50,7 +50,7 @@ export default function Home() {
 			</section>
 
 			{/* What is sawtooth rag */}
-			<section className="w-full max-w-2xl flex flex-col gap-6">
+			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<p className="text-xs uppercase tracking-widest opacity-40">What is sawtooth rag?</p>
 				<div className="grid grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
 					<div className="flex flex-col gap-3">
@@ -75,7 +75,7 @@ export default function Home() {
 			</section>
 
 			{/* Usage */}
-			<section className="w-full max-w-2xl flex flex-col gap-6">
+			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<p className="text-xs uppercase tracking-widest opacity-40">Usage</p>
 				<div className="flex flex-col gap-8 text-sm">
 					<div className="flex flex-col gap-3">
@@ -136,7 +136,7 @@ const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 			</section>
 
 			{/* Footer */}
-			<footer className="w-full max-w-2xl flex justify-between text-xs opacity-30 pt-8 border-t border-white/10">
+			<footer className="w-full max-w-2xl lg:max-w-5xl flex justify-between text-xs opacity-30 pt-8 border-t border-white/10">
 				<span>ragtooth v{version}</span>
 				<a
 					href="https://liiift.studio"
