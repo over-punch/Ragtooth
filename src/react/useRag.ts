@@ -27,7 +27,7 @@ import type { RagOptions } from '../core/types'
 export function useRag(
 	options: RagOptions = {},
 	contentKey?: string,
-): { ref: React.RefObject<HTMLElement> } {
+): { ref: React.RefObject<HTMLElement | null> } {
 	const ref = useRef<HTMLElement>(null)
 
 	// Store original HTML snapshot — taken once on first run, before any mutation.
