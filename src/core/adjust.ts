@@ -184,8 +184,13 @@ export function applyRag(
 				}
 				preWidth += width
 			})
-			// Iterate bottom-aligned re-count until convergent
+			// Iterate bottom-aligned re-count until convergent.
+			// The loop can oscillate between two values (N and N+1) when changing which
+			// lines are short changes the total line count. Detect this and pick the
+			// smaller value: the write phase then produces the larger count, and the
+			// Math.max(1,…) clamp keeps the last line full.
 			let estimated = preCount
+			let prevEstimated = -1
 			for (let iter = 0; iter < 8; iter++) {
 				preWidth = 0
 				preCount = 1
@@ -200,9 +205,17 @@ export function applyRag(
 					preWidth += width
 				})
 				if (preCount === estimated) break
+				if (preCount === prevEstimated) {
+					// Oscillating — pick the smaller to avoid over-estimating totalLines
+					estimated = Math.min(preCount, estimated)
+					break
+				}
+				prevEstimated = estimated
 				estimated = preCount
 			}
-			totalLines = preCount
+			// Use estimated (not preCount): the write phase is seeded identically, so
+			// it will consistently produce lines based on this anchor value.
+			totalLines = estimated
 		}
 
 		// Strip leading whitespace from the rag-word span content — needed for the

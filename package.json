@@ -19,6 +19,7 @@
 	"scripts": {
 		"build": "vite build",
 		"dev": "vite build --watch",
+		"dev:site": "npm run dev & cd site && npm run dev",
 		"typecheck": "tsc --noEmit",
 		"lint": "tsc --noEmit",
 		"test": "vitest run",
