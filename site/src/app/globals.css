@@ -90,8 +90,12 @@ input[type="range"]:hover::-moz-range-thumb {
 	background: #ffffff;
 }
 
-/* Larger thumb on touch devices for easier grabbing */
+/* Larger thumb on touch devices for easier grabbing.
+   margin-block gives the 28px thumb clearance from the label and value text above/below. */
 @media (pointer: coarse) {
+	input[type="range"] {
+		margin-block: 10px;
+	}
 	input[type="range"]::-webkit-slider-thumb {
 		width: 28px;
 		height: 28px;
