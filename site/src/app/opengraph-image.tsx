@@ -1,16 +1,16 @@
 // OG image for ragtooth.liiift.studio — generated at build time via next/og
 // Satori (used by ImageResponse) supports TTF and WOFF but not WOFF2.
 import { ImageResponse } from 'next/og'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 
 export const alt = 'Ragtooth — Sawtooth rag for the web'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 export default async function Image() {
-	// Inter Light 300 as WOFF — Satori supports WOFF/TTF, not WOFF2
-	const interLight = await fetch(
-		'https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/files/inter-latin-300-normal.woff',
-	).then((res) => res.arrayBuffer())
+	// Inter Light 300 bundled locally — avoids network dependency at build time
+	const interLight = await readFile(join(process.cwd(), 'public/fonts/inter-300.woff'))
 
 	return new ImageResponse(
 		(

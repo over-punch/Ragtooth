@@ -1,7 +1,7 @@
 "use client"
 
 // Interactive sawtooth rag demo with live controls and rich typographic sample text
-import { useState, useEffect } from "react"
+import { useState, useEffect, useDeferredValue } from "react"
 import type { ReactNode } from "react"
 import { RagText } from "ragtooth"
 
@@ -52,6 +52,7 @@ function Slider({
 				step={step}
 				value={value}
 				onChange={(e) => onChange(Number(e.target.value))}
+				onTouchStart={(e) => e.stopPropagation()}
 				style={{ touchAction: 'none' }}
 			/>
 			<span className="tabular-nums text-xs opacity-40 text-right">{value}</span>
@@ -79,6 +80,14 @@ export default function Demo() {
 
 	// Keep sawPhase in range when sawPeriod changes
 	const effectiveSawPhase = Math.min(sawPhase, sawPeriod)
+
+	// Defer the rag computation so rapid slider drags don't block paint on slow devices.
+	// The slider value updates immediately; the expensive DOM rewrite follows when idle.
+	const deferredDepth = useDeferredValue(sawDepth)
+	const deferredPeriod = useDeferredValue(sawPeriod)
+	const deferredPhase = useDeferredValue(effectiveSawPhase)
+	const deferredTracking = useDeferredValue(maxTracking)
+	const deferredAlign = useDeferredValue(sawAlign)
 
 	// Cursor mode — X controls depth, Y controls tracking (inverted: up = more)
 	useEffect(() => {
@@ -142,11 +151,11 @@ export default function Demo() {
 				{PARAGRAPHS.map((para, i) => (
 					<RagText
 						key={i}
-						sawDepth={sawDepth}
-						sawPeriod={sawPeriod}
-						sawPhase={effectiveSawPhase}
-						maxTracking={maxTracking}
-						sawAlign={sawAlign}
+						sawDepth={deferredDepth}
+						sawPeriod={deferredPeriod}
+						sawPhase={deferredPhase}
+						maxTracking={deferredTracking}
+						sawAlign={deferredAlign}
 						style={sampleStyle}
 					>
 						{para}

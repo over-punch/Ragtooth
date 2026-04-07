@@ -54,6 +54,12 @@ input[type="range"] {
 	outline: none;
 }
 
+input[type="range"]:focus-visible {
+	outline: 2px solid rgba(255,255,255,0.5);
+	outline-offset: 4px;
+	border-radius: 2px;
+}
+
 input[type="range"]::-webkit-slider-thumb {
 	-webkit-appearance: none;
 	appearance: none;
@@ -82,6 +88,18 @@ input[type="range"]::-moz-range-thumb {
 
 input[type="range"]:hover::-moz-range-thumb {
 	background: #ffffff;
+}
+
+/* Larger thumb on touch devices for easier grabbing */
+@media (pointer: coarse) {
+	input[type="range"]::-webkit-slider-thumb {
+		width: 28px;
+		height: 28px;
+	}
+	input[type="range"]::-moz-range-thumb {
+		width: 28px;
+		height: 28px;
+	}
 }
 
 @media (pointer: fine) {
