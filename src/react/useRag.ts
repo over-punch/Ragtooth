@@ -62,19 +62,46 @@ export function useRag(
 			originalHTMLRef.current = getCleanHTML(el)
 		}
 
+		// Preserve scroll position across the DOM mutation.
+		// applyRag rewrites innerHTML twice (reset + line-group), changing element height.
+		// On iOS Safari, overflow-anchor:none does not apply to viewport scroll, so the
+		// browser adjusts scrollY when content above the fold changes height. We counter
+		// this with two layers of restoration:
+		//  1. Synchronous scrollTo immediately after mutations — wins on most browsers.
+		//  2. rAF fallback — catches browsers where layout-time adjustment overrides (1).
+		const scrollY = window.scrollY
+
 		applyRag(el, originalHTMLRef.current, optionsRef.current)
+
+		// Layer 1: synchronous restore (fires before next paint on most engines)
+		if (window.scrollY !== scrollY) {
+			window.scrollTo(0, scrollY)
+		}
+
+		// Layer 2: rAF restore in case the browser overrides layer 1 during layout
+		const rafId = requestAnimationFrame(() => {
+			if (window.scrollY !== scrollY) {
+				window.scrollTo(0, scrollY)
+			}
+		})
+
+		// Cancel the rAF if run() is called again before it fires (e.g. rapid updates)
+		return rafId
 	}, []) // stable — options and snapshot read via refs
 
 	// Re-run synchronously after every relevant render so layout is correct before paint.
 	useLayoutEffect(() => {
-		run()
+		const rafId = run()
+		return () => { if (rafId !== undefined) cancelAnimationFrame(rafId) }
 	}, [run, options.sawDepth, options.sawPeriod, options.maxTracking, options.ragDifference, options.sawAlign, options.sawPhase, contentKey])
 
 	// Re-run once all fonts are loaded — word widths measured before fonts arrive
 	// (common on mobile first-visit) will be wrong, so we need a corrective pass.
 	useEffect(() => {
 		if (typeof document === 'undefined' || !document.fonts) return
-		document.fonts.ready.then(run)
+		let rafId: number | undefined
+		document.fonts.ready.then(() => { rafId = run() })
+		return () => { if (rafId !== undefined) cancelAnimationFrame(rafId) }
 	}, [run])
 
 	// Attach ResizeObserver — re-run only when the container's width changes.

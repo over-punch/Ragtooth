@@ -1,7 +1,7 @@
 "use client"
 
 // Interactive sawtooth rag demo with live controls and rich typographic sample text
-import { useState, useEffect, useRef, useDeferredValue } from "react"
+import { useState, useEffect, useDeferredValue } from "react"
 import type { ReactNode } from "react"
 import { RagText } from "ragtooth"
 
@@ -174,23 +174,6 @@ export default function Demo() {
 			if (rafId !== null) cancelAnimationFrame(rafId)
 		}
 	}, [gyroMode])
-
-	// Scroll-position guard for gyro mode.
-	// applyRag() rewrites innerHTML which changes paragraph height; mobile browsers
-	// interpret that layout shift (with no active touch) as a reason to jump to y=0.
-	// We save the scroll position before each gyro-triggered deferred render and
-	// restore it after the DOM mutations have settled in the next animation frame.
-	const scrollYRef = useRef(0)
-	useEffect(() => {
-		if (!gyroMode) return
-		scrollYRef.current = window.scrollY
-		const id = requestAnimationFrame(() => {
-			if (Math.abs(window.scrollY - scrollYRef.current) > 20) {
-				window.scrollTo({ top: scrollYRef.current, behavior: 'instant' })
-			}
-		})
-		return () => cancelAnimationFrame(id)
-	}, [gyroMode, deferredDepth, deferredTracking])
 
 	// Toggle cursor mode — turns off gyro if active
 	const toggleCursor = () => {
