@@ -69,6 +69,18 @@ function CursorIcon() {
 	)
 }
 
+/** Gyroscope icon SVG — circle with rotation arrow */
+function GyroIcon() {
+	return (
+		<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden>
+			<circle cx="7" cy="7" r="5.5" />
+			<circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none" />
+			<path d="M7 1.5 A5.5 5.5 0 0 1 12.5 7" strokeWidth="1.4" />
+			<path d="M11.5 5.5 L12.5 7 L13.8 6" strokeWidth="1.2" />
+		</svg>
+	)
+}
+
 export default function Demo() {
 	// Rag controls
 	const [sawDepth, setSawDepth] = useState(160)
@@ -76,7 +88,21 @@ export default function Demo() {
 	const [sawPhase, setSawPhase] = useState(1)
 	const [maxTracking, setMaxTracking] = useState(0.7)
 	const [sawAlign, setSawAlign] = useState<"top" | "bottom">("bottom")
+
+	// Interaction modes — mutually exclusive
 	const [cursorMode, setCursorMode] = useState(false)
+	const [gyroMode, setGyroMode] = useState(false)
+
+	// Detected capabilities — resolved client-side after mount
+	const [showCursor, setShowCursor] = useState(false)
+	const [showGyro, setShowGyro] = useState(false)
+
+	useEffect(() => {
+		const isHover = window.matchMedia('(hover: hover)').matches
+		const isTouch = window.matchMedia('(hover: none)').matches
+		setShowCursor(isHover)
+		setShowGyro(isTouch && 'DeviceOrientationEvent' in window)
+	}, [])
 
 	// Keep sawPhase in range when sawPeriod changes
 	const effectiveSawPhase = Math.min(sawPhase, sawPeriod)
@@ -107,12 +133,57 @@ export default function Demo() {
 		}
 	}, [cursorMode])
 
+	// Gyro mode — left/right tilt (gamma) controls depth, front/back tilt (beta) controls tracking
+	useEffect(() => {
+		if (!gyroMode) return
+		const handleOrientation = (e: DeviceOrientationEvent) => {
+			if (e.gamma !== null) {
+				// gamma: -90 (tilt left) to 90 (tilt right) → depth 0–400
+				setSawDepth(Math.round(((e.gamma + 90) / 180) * 400))
+			}
+			if (e.beta !== null) {
+				// beta when holding portrait: ~90 upright, decreases when tilted back toward you
+				// Clamp to [15, 90] (avoids flat-on-table extremes) then invert: tilt back = more tracking
+				const clamped = Math.max(15, Math.min(90, e.beta))
+				setMaxTracking(parseFloat(((90 - clamped) / 75 * 2).toFixed(2)))
+			}
+		}
+		window.addEventListener('deviceorientation', handleOrientation)
+		return () => window.removeEventListener('deviceorientation', handleOrientation)
+	}, [gyroMode])
+
+	// Toggle cursor mode — turns off gyro if active
+	const toggleCursor = () => {
+		setGyroMode(false)
+		setCursorMode(v => !v)
+	}
+
+	// Toggle gyro mode — requests iOS permission if needed, turns off cursor if active
+	const toggleGyro = async () => {
+		if (gyroMode) {
+			setGyroMode(false)
+			return
+		}
+		setCursorMode(false)
+		const DOE = DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+			requestPermission?: () => Promise<PermissionState>
+		}
+		if (typeof DOE.requestPermission === 'function') {
+			const permission = await DOE.requestPermission()
+			if (permission === 'granted') setGyroMode(true)
+		} else {
+			setGyroMode(true)
+		}
+	}
+
 	const sampleStyle: React.CSSProperties = {
 		fontFamily: "var(--font-merriweather), serif",
 		fontSize: "1.125rem",
 		lineHeight: "1.8",
 		fontVariationSettings: '"wght" 300, "opsz" 18, "wdth" 100',
 	}
+
+	const activeMode = cursorMode || gyroMode
 
 	return (
 		<div className="w-full">
@@ -124,8 +195,8 @@ export default function Demo() {
 				<Slider label="Tracking" value={maxTracking}       min={0}   max={2}        step={0.01} onChange={setMaxTracking} />
 			</div>
 
-			{/* Align toggle */}
-			<div className="flex items-center gap-3 mb-8">
+			{/* Align toggle + cursor/gyro mode toggle */}
+			<div className="flex flex-wrap items-center gap-3 mb-8">
 				<span className="text-xs uppercase tracking-widest opacity-50">Align</span>
 				{(["top", "bottom"] as const).map((v) => (
 					<button
@@ -141,9 +212,43 @@ export default function Demo() {
 						{v}
 					</button>
 				))}
-				<span className="text-xs opacity-30 ml-1">
+				<span className="text-xs opacity-30">
 					{sawAlign === "bottom" ? "— period counts from last line up" : "— period counts from first line down"}
 				</span>
+
+				{/* Cursor mode — desktop/hover-capable devices only */}
+				{showCursor && (
+					<button
+						onClick={toggleCursor}
+						title="Move your cursor to control depth (X) and tracking (Y)"
+						className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border transition-all ml-auto"
+						style={{
+							borderColor: "currentColor",
+							opacity: cursorMode ? 1 : 0.35,
+							background: cursorMode ? "var(--btn-bg)" : "transparent",
+						}}
+					>
+						<CursorIcon />
+						<span>{cursorMode ? 'Esc to exit' : '?'}</span>
+					</button>
+				)}
+
+				{/* Gyro mode — touch devices with DeviceOrientationEvent */}
+				{showGyro && (
+					<button
+						onClick={toggleGyro}
+						title="Tilt your device to control depth (left/right) and tracking (front/back)"
+						className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border transition-all ml-auto"
+						style={{
+							borderColor: "currentColor",
+							opacity: gyroMode ? 1 : 0.35,
+							background: gyroMode ? "var(--btn-bg)" : "transparent",
+						}}
+					>
+						<GyroIcon />
+						<span>{gyroMode ? 'Tilt active' : 'Tilt'}</span>
+					</button>
+				)}
 			</div>
 
 			{/* Live text */}
@@ -163,24 +268,18 @@ export default function Demo() {
 				))}
 			</div>
 
-			{/* Cursor tool + caption — button only shown on hover-capable devices */}
+			{/* Caption */}
 			<div className="flex items-center gap-3 mt-6">
-				<button
-					onClick={() => setCursorMode(v => !v)}
-					title="Move your cursor to control depth (X) and tracking (Y)"
-					className="hidden [@media(hover:hover)]:flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border transition-all"
-					style={{
-						borderColor: "currentColor",
-						opacity: cursorMode ? 1 : 0.35,
-						background: cursorMode ? "var(--btn-bg)" : "transparent",
-					}}
-				>
-					<CursorIcon />
-					<span>?</span>
-				</button>
-				<p className="text-xs opacity-30 italic">
-					Yes, we used small-caps, bold, italic, and a number in the same paragraph. We wanted to make sure the tool doesn&apos;t break.
-				</p>
+				{activeMode && (
+					<p className="text-xs opacity-30 italic">
+						{cursorMode ? 'Move cursor to adjust depth and tracking. Press Esc to exit.' : 'Tilt left/right for depth, front/back for tracking.'}
+					</p>
+				)}
+				{!activeMode && (
+					<p className="text-xs opacity-30 italic">
+						Yes, we used small-caps, bold, italic, and a number in the same paragraph. We wanted to make sure the tool doesn&apos;t break.
+					</p>
+				)}
 			</div>
 		</div>
 	)
