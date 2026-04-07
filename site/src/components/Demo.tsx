@@ -52,6 +52,7 @@ function Slider({
 				step={step}
 				value={value}
 				onChange={(e) => onChange(Number(e.target.value))}
+				style={{ touchAction: 'none' }}
 			/>
 			<span className="tabular-nums text-xs opacity-40 text-right">{value}</span>
 		</div>
