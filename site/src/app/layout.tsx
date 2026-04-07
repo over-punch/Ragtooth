@@ -17,25 +17,30 @@ export const metadata: Metadata = {
 		"rag right",
 		"text rag",
 		"typography",
+		"TypeScript",
+		"TypeScript npm package",
+		"react typography",
+		"react typescript",
 		"letter spacing",
 		"typesetting",
 		"editorial typography",
 		"vanilla javascript typography",
 		"npm typography",
+		"zero dependencies",
 	],
 	openGraph: {
 		title: "Ragtooth — Sawtooth rag for the web",
 		description:
-			"Shape your text into a sawtooth rag. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one npm package.",
+			"Shape your text into a sawtooth rag. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one fully-typed npm package.",
 		url: "https://ragtooth.liiift.studio",
 		siteName: "Ragtooth",
 		type: "website",
 	},
 	twitter: {
-		card: "summary",
+		card: "summary_large_image",
 		title: "Ragtooth — Sawtooth rag for the web",
 		description:
-			"Shape your text into a sawtooth rag. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one npm package.",
+			"Shape your text into a sawtooth rag. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one fully-typed npm package.",
 	},
 	metadataBase: new URL("https://ragtooth.liiift.studio"),
 }
