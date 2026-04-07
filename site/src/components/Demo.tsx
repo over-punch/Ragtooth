@@ -1,7 +1,7 @@
 "use client"
 
 // Interactive sawtooth rag demo with live controls and rich typographic sample text
-import { useState, useEffect, useDeferredValue } from "react"
+import { useState, useEffect, useRef, useDeferredValue } from "react"
 import type { ReactNode } from "react"
 import { RagText } from "ragtooth"
 
@@ -93,6 +93,11 @@ export default function Demo() {
 	const [cursorMode, setCursorMode] = useState(false)
 	const [gyroMode, setGyroMode] = useState(false)
 
+	// Gyro-driven values — kept separate from slider state so slider value props
+	// never change during gyro mode (which would cause mobile to scroll to the input)
+	const [gyroDepth, setGyroDepth] = useState(160)
+	const [gyroTracking, setGyroTracking] = useState(0.7)
+
 	// Detected capabilities — resolved client-side after mount
 	const [showCursor, setShowCursor] = useState(false)
 	const [showGyro, setShowGyro] = useState(false)
@@ -107,12 +112,16 @@ export default function Demo() {
 	// Keep sawPhase in range when sawPeriod changes
 	const effectiveSawPhase = Math.min(sawPhase, sawPeriod)
 
+	// Effective values: gyro-driven when gyroMode is active, slider-driven otherwise
+	const effectiveDepth = gyroMode ? gyroDepth : sawDepth
+	const effectiveTracking = gyroMode ? gyroTracking : maxTracking
+
 	// Defer the rag computation so rapid slider drags don't block paint on slow devices.
 	// The slider value updates immediately; the expensive DOM rewrite follows when idle.
-	const deferredDepth = useDeferredValue(sawDepth)
+	const deferredDepth = useDeferredValue(effectiveDepth)
 	const deferredPeriod = useDeferredValue(sawPeriod)
 	const deferredPhase = useDeferredValue(effectiveSawPhase)
-	const deferredTracking = useDeferredValue(maxTracking)
+	const deferredTracking = useDeferredValue(effectiveTracking)
 	const deferredAlign = useDeferredValue(sawAlign)
 
 	// Cursor mode — X controls depth, Y controls tracking (inverted: up = more)
@@ -133,24 +142,52 @@ export default function Demo() {
 		}
 	}, [cursorMode])
 
-	// Gyro mode — left/right tilt (gamma) controls depth, front/back tilt (beta) controls tracking
+	// Gyro mode — left/right tilt (gamma) controls depth, front/back tilt (beta) controls tracking.
+	// Updates gyroDepth/gyroTracking (not slider state) so slider value props stay frozen,
+	// preventing mobile browsers from scrolling to the input on each orientation update.
+	// rAF throttle limits re-renders to one per frame.
 	useEffect(() => {
 		if (!gyroMode) return
+		let rafId: number | null = null
 		const handleOrientation = (e: DeviceOrientationEvent) => {
-			if (e.gamma !== null) {
-				// gamma: -90 (tilt left) to 90 (tilt right) → depth 0–400
-				setSawDepth(Math.round(((e.gamma + 90) / 180) * 400))
-			}
-			if (e.beta !== null) {
-				// beta when holding portrait: ~90 upright, decreases when tilted back toward you
-				// Clamp to [15, 90] (avoids flat-on-table extremes) then invert: tilt back = more tracking
-				const clamped = Math.max(15, Math.min(90, e.beta))
-				setMaxTracking(parseFloat(((90 - clamped) / 75 * 2).toFixed(2)))
-			}
+			if (rafId !== null) return
+			rafId = requestAnimationFrame(() => {
+				rafId = null
+				if (e.gamma !== null) {
+					// gamma: -90 (tilt left) to 90 (tilt right) → depth 0–400
+					setGyroDepth(Math.round(((e.gamma + 90) / 180) * 400))
+				}
+				if (e.beta !== null) {
+					// beta when holding portrait: ~90 upright, decreases when tilted back toward you
+					// Clamp to [15, 90] (avoids flat-on-table extremes) then invert: tilt back = more tracking
+					const clamped = Math.max(15, Math.min(90, e.beta))
+					setGyroTracking(parseFloat(((90 - clamped) / 75 * 2).toFixed(2)))
+				}
+			})
 		}
 		window.addEventListener('deviceorientation', handleOrientation)
-		return () => window.removeEventListener('deviceorientation', handleOrientation)
+		return () => {
+			window.removeEventListener('deviceorientation', handleOrientation)
+			if (rafId !== null) cancelAnimationFrame(rafId)
+		}
 	}, [gyroMode])
+
+	// Scroll-position guard for gyro mode.
+	// applyRag() rewrites innerHTML which changes paragraph height; mobile browsers
+	// interpret that layout shift (with no active touch) as a reason to jump to y=0.
+	// We save the scroll position before each gyro-triggered deferred render and
+	// restore it after the DOM mutations have settled in the next animation frame.
+	const scrollYRef = useRef(0)
+	useEffect(() => {
+		if (!gyroMode) return
+		scrollYRef.current = window.scrollY
+		const id = requestAnimationFrame(() => {
+			if (Math.abs(window.scrollY - scrollYRef.current) > 20) {
+				window.scrollTo({ top: scrollYRef.current, behavior: 'instant' })
+			}
+		})
+		return () => cancelAnimationFrame(id)
+	}, [gyroMode, deferredDepth, deferredTracking])
 
 	// Toggle cursor mode — turns off gyro if active
 	const toggleCursor = () => {

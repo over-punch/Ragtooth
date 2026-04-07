@@ -41,6 +41,9 @@ body {
 	background: var(--background);
 	color: var(--foreground);
 	font-family: var(--font-sans);
+	/* Prevent browser scroll-anchor algorithm from snapping to 0 when
+	   rag DOM mutations change paragraph heights during gyro/cursor mode */
+	overflow-anchor: none;
 }
 
 input[type="range"] {
