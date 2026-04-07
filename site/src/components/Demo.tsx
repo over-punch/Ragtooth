@@ -88,6 +88,7 @@ export default function Demo() {
 	const [sawPhase, setSawPhase] = useState(1)
 	const [maxTracking, setMaxTracking] = useState(0.7)
 	const [sawAlign, setSawAlign] = useState<"top" | "bottom">("bottom")
+	const [resize, setResize] = useState(true)
 
 	// Interaction modes — mutually exclusive
 	const [cursorMode, setCursorMode] = useState(false)
@@ -123,6 +124,7 @@ export default function Demo() {
 	const deferredPhase = useDeferredValue(effectiveSawPhase)
 	const deferredTracking = useDeferredValue(effectiveTracking)
 	const deferredAlign = useDeferredValue(sawAlign)
+	const deferredResize = useDeferredValue(resize)
 
 	// Cursor mode — X controls depth, Y controls tracking (inverted: up = more)
 	useEffect(() => {
@@ -232,7 +234,7 @@ export default function Demo() {
 				<Slider label="Tracking" value={maxTracking}       min={0}   max={2}        step={0.01} onChange={setMaxTracking} />
 			</div>
 
-			{/* Align toggle + cursor/gyro mode toggle */}
+			{/* Align toggle + resize toggle + cursor/gyro mode toggle */}
 			<div className="flex flex-wrap items-center gap-3 mb-8">
 				<span className="text-xs uppercase tracking-widest opacity-50">Align</span>
 				{(["top", "bottom"] as const).map((v) => (
@@ -252,6 +254,22 @@ export default function Demo() {
 				<span className="text-xs opacity-30">
 					{sawAlign === "bottom" ? "— period counts from last line up" : "— period counts from first line down"}
 				</span>
+
+				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Resize</span>
+				{([true, false] as const).map((v) => (
+					<button
+						key={String(v)}
+						onClick={() => setResize(v)}
+						className="text-xs px-3 py-1 rounded-full border transition-opacity"
+						style={{
+							borderColor: "currentColor",
+							opacity: resize === v ? 1 : 0.35,
+							background: resize === v ? "var(--btn-bg)" : "transparent",
+						}}
+					>
+						{v ? "auto" : "off"}
+					</button>
+				))}
 
 				{/* Cursor mode — desktop/hover-capable devices only */}
 				{showCursor && (
@@ -298,6 +316,7 @@ export default function Demo() {
 						sawPhase={deferredPhase}
 						maxTracking={deferredTracking}
 						sawAlign={deferredAlign}
+						resize={deferredResize}
 						style={sampleStyle}
 					>
 						{para}

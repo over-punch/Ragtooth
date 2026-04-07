@@ -60,6 +60,17 @@ export interface RagOptions {
 	sawAlign?: 'top' | 'bottom'
 
 	/**
+	 * Whether to re-run the adjustment when the container's width changes.
+	 * When `true` (default), a ResizeObserver watches the element and re-runs the
+	 * algorithm on any width change — covering window resize, orientation change, and
+	 * any other layout shift that affects the container.
+	 * Set to `false` to opt out of automatic resize tracking (useful for static
+	 * contexts where the container width never changes).
+	 * @default true
+	 */
+	resize?: boolean
+
+	/**
 	 * @deprecated Use `sawDepth` instead.
 	 */
 	ragDifference?: number

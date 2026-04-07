@@ -80,9 +80,20 @@ export function useRag(
 	// Attach ResizeObserver — re-run only when the container's width changes.
 	// Debounce via requestAnimationFrame to avoid redundant recalculations
 	// during fast resize events.
+	// When resize is false, skip the observer entirely (static contexts).
+	const resize = options.resize ?? true
 	useEffect(() => {
 		const el = ref.current
 		if (!el || typeof window === 'undefined' || typeof ResizeObserver === 'undefined') return
+
+		// Cleanup-only path when resize is disabled: still removes markup on unmount.
+		if (!resize) {
+			return () => {
+				if (el && originalHTMLRef.current !== null) {
+					removeRag(el, originalHTMLRef.current)
+				}
+			}
+		}
 
 		let rafId: number
 
@@ -106,7 +117,7 @@ export function useRag(
 				removeRag(el, originalHTMLRef.current)
 			}
 		}
-	}, [run])
+	}, [run, resize])
 
 	return { ref }
 }
