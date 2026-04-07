@@ -14,42 +14,62 @@ function makeContainer(html: string): HTMLElement {
 }
 
 /**
- * Globally mocks offsetWidth on HTMLElement.prototype so every element
- * (including spans created dynamically by applyRag) returns `value`.
+ * Globally mocks offsetWidth on HTMLElement.prototype and getBoundingClientRect
+ * on Element.prototype so every element returns `value`.
+ * applyRag uses getBoundingClientRect().width for subpixel word measurement,
+ * so both must be mocked together to get meaningful line-grouping in tests.
  * Includes a no-op setter so happy-dom's constructor (`this.offsetWidth = 0`)
- * doesn't throw. Returns a cleanup function that restores the original descriptor.
+ * doesn't throw. Returns a cleanup function that restores both originals.
  */
 function mockOffsetWidth(_el: HTMLElement, value: number) {
 	const proto = HTMLElement.prototype
 	const prior = Object.getOwnPropertyDescriptor(proto, 'offsetWidth')
 	Object.defineProperty(proto, 'offsetWidth', {
-		get: () => value,
+		get: function(this: HTMLElement) {
+			if (this.classList?.contains(RAG_CLASSES.spaceProbe)) return 0
+			return value
+		},
 		set: () => { /* no-op — allows happy-dom constructor to run */ },
 		configurable: true,
 	})
+	const origBCR = Element.prototype.getBoundingClientRect
+	Element.prototype.getBoundingClientRect = function(this: Element) {
+		if ((this as HTMLElement).classList?.contains(RAG_CLASSES.spaceProbe)) return { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect
+		return { width: value, height: 0, top: 0, left: 0, right: value, bottom: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect
+	}
 	return () => {
-		if (prior) {
-			Object.defineProperty(proto, 'offsetWidth', prior)
-		}
+		if (prior) Object.defineProperty(proto, 'offsetWidth', prior)
+		Element.prototype.getBoundingClientRect = origBCR
 	}
 }
 
 /**
- * Class-aware offsetWidth mock: word spans (rag-word) return wordWidth,
- * all other elements return containerWidth. Needed for sawAlign tests where
- * we need container ≠ word width to get meaningful multi-word line grouping.
+ * Class-aware mock: word spans (rag-word) return wordWidth, all other elements
+ * return containerWidth. Mocks both offsetWidth and getBoundingClientRect so the
+ * subpixel measurement path in applyRag works correctly in tests.
  */
 function mockOffsetWidthByClass(containerWidth: number, wordWidth: number) {
 	const proto = HTMLElement.prototype
 	const prior = Object.getOwnPropertyDescriptor(proto, 'offsetWidth')
 	Object.defineProperty(proto, 'offsetWidth', {
 		get: function(this: HTMLElement) {
+			if (this.classList?.contains(RAG_CLASSES.spaceProbe)) return 0
 			return this.classList?.contains(RAG_CLASSES.word) ? wordWidth : containerWidth
 		},
 		set: () => {},
 		configurable: true,
 	})
-	return () => { if (prior) Object.defineProperty(proto, 'offsetWidth', prior) }
+	const origBCR = Element.prototype.getBoundingClientRect
+	Element.prototype.getBoundingClientRect = function(this: Element) {
+		const el = this as HTMLElement
+		if (el.classList?.contains(RAG_CLASSES.spaceProbe)) return { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect
+		const w = el.classList?.contains(RAG_CLASSES.word) ? wordWidth : containerWidth
+		return { width: w, height: 0, top: 0, left: 0, right: w, bottom: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect
+	}
+	return () => {
+		if (prior) Object.defineProperty(proto, 'offsetWidth', prior)
+		Element.prototype.getBoundingClientRect = origBCR
+	}
 }
 
 /** Extract all data-ideal-width values from lineInfo spans */
@@ -784,6 +804,102 @@ describe('ch unit integration (sawDepth)', () => {
 		const el = makeContainer('<p>Alpha beta gamma delta epsilon zeta eta</p>')
 		const restore = mockOffsetWidth(el, 400)
 		expect(() => applyRag(el, el.innerHTML, { sawDepth: '5ch', sawPeriod: 2 })).not.toThrow()
+		restore()
+	})
+})
+
+// ---------------------------------------------------------------------------
+// Inline element preservation
+// ---------------------------------------------------------------------------
+
+describe('inline element preservation', () => {
+	it('preserves <em> context on words inside inline elements', () => {
+		const el = makeContainer('<p>Hello <em>italic world</em> bar baz qux quux corge</p>')
+		const restore = mockOffsetWidthByClass(400, 100)
+		const original = el.innerHTML
+		applyRag(el, original, { sawDepth: 100, sawPeriod: 2 })
+		// em elements should still appear in the output after line grouping
+		expect(el.innerHTML).toContain('<em>')
+		restore()
+	})
+
+	it('preserves <strong> context on words inside inline elements', () => {
+		const el = makeContainer('<p>Hello <strong>bold world</strong> bar baz qux quux</p>')
+		const restore = mockOffsetWidthByClass(400, 100)
+		const original = el.innerHTML
+		applyRag(el, original, { sawDepth: 100, sawPeriod: 2 })
+		expect(el.innerHTML).toContain('<strong>')
+		restore()
+	})
+
+	it('getCleanHTML removes all rag markup after inline-element pass', () => {
+		const el = makeContainer('<p>Hello <em>italic world</em> plain text here</p>')
+		const restore = mockOffsetWidthByClass(400, 100)
+		const original = el.innerHTML
+		applyRag(el, original, { sawDepth: 100 })
+		const clean = getCleanHTML(el)
+		expect(clean).not.toContain(RAG_CLASSES.word)
+		expect(clean).not.toContain(RAG_CLASSES.line)
+		expect(clean).toContain('<em>')
+		restore()
+	})
+})
+
+// ---------------------------------------------------------------------------
+// sawDepth edge cases
+// ---------------------------------------------------------------------------
+
+describe('sawDepth edge cases', () => {
+	it('sawDepth=0 produces full-width idealWidths for all lines', () => {
+		document.body.innerHTML = ''
+		const el = makeContainer('<p>Alpha beta gamma delta epsilon zeta eta theta iota kappa</p>')
+		const restore = mockOffsetWidth(el, 400)
+		const original = el.innerHTML
+		applyRag(el, original, { sawDepth: 0, sawPeriod: 2 })
+		const widths = getIdealWidths(el)
+		// All lines full: idealWidth = elementWidth - 1 = 399
+		widths.forEach((w) => expect(w).toBeCloseTo(399))
+		restore()
+	})
+
+	it('sawDepth larger than containerWidth clamps idealWidth to 1 — no throw', () => {
+		document.body.innerHTML = ''
+		const el = makeContainer('<p>Alpha beta gamma delta epsilon zeta eta theta</p>')
+		const restore = mockOffsetWidth(el, 200)
+		expect(() => applyRag(el, el.innerHTML, { sawDepth: 9999 })).not.toThrow()
+		getIdealWidths(el).forEach((w) => expect(w).toBeGreaterThanOrEqual(1))
+		restore()
+	})
+})
+
+// ---------------------------------------------------------------------------
+// getCleanHTML on pristine input
+// ---------------------------------------------------------------------------
+
+describe('getCleanHTML on pristine input', () => {
+	it('returns the original HTML unchanged when no rag markup is present', () => {
+		const el = makeContainer('<p>Hello <em>world</em> foo bar</p>')
+		const clean = getCleanHTML(el)
+		expect(clean).toBe('<p>Hello <em>world</em> foo bar</p>')
+	})
+
+	it('is a no-op on plain text nodes', () => {
+		const el = makeContainer('Just plain text')
+		expect(getCleanHTML(el)).toBe('Just plain text')
+	})
+})
+
+// ---------------------------------------------------------------------------
+// Container fallback (no block children)
+// ---------------------------------------------------------------------------
+
+describe('container fallback', () => {
+	it('creates word spans directly on the container when no block elements exist', () => {
+		const el = makeContainer('Just some plain text without block elements')
+		const restore = mockOffsetWidth(el, 300)
+		const original = el.innerHTML
+		applyRag(el, original)
+		expect(el.querySelectorAll(`.${RAG_CLASSES.word}`).length).toBeGreaterThan(0)
 		restore()
 	})
 })

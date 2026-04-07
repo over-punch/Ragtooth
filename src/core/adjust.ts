@@ -92,14 +92,28 @@ export function applyRag(
 	// Uses DOM traversal rather than regex so inline elements (<em>, <strong>, etc.)
 	// are preserved correctly — each word span is inserted into the correct parent
 	// element, keeping italic and bold contexts intact.
+	// Word spans are collected here (per block element) and passed to Pass 4 directly,
+	// avoiding a querySelectorAll that some test environments fail to resolve inside
+	// inline elements like <em> and <strong>.
 	const blocks = Array.from(container.querySelectorAll<HTMLElement>(BLOCK_SELECTOR))
 	const targets: HTMLElement[] = blocks.length > 0 ? blocks : [container]
 
+	const wordsByTarget = new Map<HTMLElement, HTMLElement[]>()
+
 	targets.forEach((el) => {
+		const elementWords: HTMLElement[] = []
+
 		// Collect all text nodes first to avoid live-NodeList issues during mutation.
-		const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+		// Uses recursive childNodes traversal instead of TreeWalker for reliable descent
+		// into inline elements (<em>, <strong>, etc.) across all DOM implementations.
 		const textNodes: Text[] = []
-		while (walker.nextNode()) textNodes.push(walker.currentNode as Text)
+		;(function collectTextNodes(node: Node) {
+			if (node.nodeType === Node.TEXT_NODE) {
+				textNodes.push(node as Text)
+			} else {
+				node.childNodes.forEach(collectTextNodes)
+			}
+		})(el)
 
 		for (const textNode of textNodes) {
 			const text = textNode.textContent ?? ''
@@ -126,10 +140,13 @@ export function applyRag(
 				span.className = RAG_CLASSES.word
 				span.appendChild(document.createTextNode(space + word + trailingSpace))
 				fragment.appendChild(span)
+				elementWords.push(span)
 			}
 
 			textNode.parentNode!.replaceChild(fragment, textNode)
 		}
+
+		wordsByTarget.set(el, elementWords)
 	})
 
 	// --- Pass 4: Line grouping ---
@@ -142,7 +159,7 @@ export function applyRag(
 	// Batch all layout reads before any writes to avoid layout thrashing.
 	targets.forEach((element) => {
 		const elementWidth = element.offsetWidth
-		const words = Array.from(element.querySelectorAll<HTMLElement>(`.${RAG_CLASSES.word}`))
+		const words = wordsByTarget.get(element) ?? []
 
 		// Prevent hyphen-breaks during measurement: inline spans containing words like
 		// "letter-spacing" can wrap at the hyphen, causing getBoundingClientRect().width
@@ -153,7 +170,7 @@ export function applyRag(
 		// Measure a single space width in this element's font for line-start correction.
 		// Appended before other reads so all measurements share one reflow.
 		const spaceProbe = document.createElement('span')
-		spaceProbe.className = RAG_CLASSES.word
+		spaceProbe.className = RAG_CLASSES.spaceProbe
 		spaceProbe.style.whiteSpace = 'nowrap'
 		spaceProbe.textContent = ' '
 		element.appendChild(spaceProbe)

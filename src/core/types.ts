@@ -71,4 +71,6 @@ export const RAG_CLASSES = {
 	line: 'rag-line',
 	lineInfo: 'rag-line-info',
 	break: 'rag-break',
+	/** Internal class for the space-width measurement probe — not injected into page markup */
+	spaceProbe: 'rag-space-probe',
 } as const

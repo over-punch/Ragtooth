@@ -14,6 +14,8 @@ export default function CopyInstall() {
 		navigator.clipboard.writeText(CMD).then(() => {
 			setCopied(true)
 			setTimeout(() => setCopied(false), 2000)
+		}).catch(() => {
+			// Clipboard write failed (no HTTPS, permission denied, etc.) — no-op
 		})
 	}
 
