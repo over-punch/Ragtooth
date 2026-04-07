@@ -34,11 +34,20 @@ export default function Home() {
 						GitHub ↗
 					</a>
 				</div>
+				<div className="flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-30 tracking-wide">
+					<span>TypeScript</span>
+					<span>·</span>
+					<span>Zero dependencies</span>
+					<span>·</span>
+					<span>React + Vanilla JS</span>
+					<span>·</span>
+					<span>~2.7kb gzipped</span>
+				</div>
 				<p className="text-base opacity-60 leading-relaxed max-w-lg">
 					Most tools fight your rag. Ragtooth works with it — shaping text into a
 					sawtooth pattern of alternating long and short lines. The kind of rhythm that
 					reads as design, not accident. A technique from editorial typesetting, now
-					in one npm package.
+					in one fully-typed npm package.
 				</p>
 			</section>
 
@@ -77,7 +86,10 @@ export default function Home() {
 
 			{/* Usage */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
-				<p className="text-xs uppercase tracking-widest opacity-40">Usage</p>
+				<div className="flex items-baseline gap-4">
+					<p className="text-xs uppercase tracking-widest opacity-40">Usage</p>
+					<p className="text-xs opacity-25 tracking-wide">TypeScript + React · Vanilla JS</p>
+				</div>
 				<div className="flex flex-col gap-8 text-sm">
 					<div className="flex flex-col gap-3">
 						<p className="opacity-50">Drop-in component</p>
