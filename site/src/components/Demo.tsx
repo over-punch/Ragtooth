@@ -51,11 +51,12 @@ function Slider({
 				max={max}
 				step={step}
 				value={value}
+				aria-label={label}
 				onChange={(e) => onChange(Number(e.target.value))}
 				onTouchStart={(e) => e.stopPropagation()}
 				style={{ touchAction: 'none' }}
 			/>
-			<span className="tabular-nums text-xs opacity-40 text-right">{value}</span>
+			<span className="tabular-nums text-xs opacity-50 text-right">{value}</span>
 		</div>
 	)
 }
@@ -244,14 +245,14 @@ export default function Demo() {
 						className="text-xs px-3 py-1 rounded-full border transition-opacity"
 						style={{
 							borderColor: "currentColor",
-							opacity: sawAlign === v ? 1 : 0.35,
+							opacity: sawAlign === v ? 1 : 0.5,
 							background: sawAlign === v ? "var(--btn-bg)" : "transparent",
 						}}
 					>
 						{v}
 					</button>
 				))}
-				<span className="text-xs opacity-30">
+				<span className="text-xs opacity-50">
 					{sawAlign === "bottom" ? "— period counts from last line up" : "— period counts from first line down"}
 				</span>
 
@@ -263,7 +264,7 @@ export default function Demo() {
 						className="text-xs px-3 py-1 rounded-full border transition-opacity"
 						style={{
 							borderColor: "currentColor",
-							opacity: resize === v ? 1 : 0.35,
+							opacity: resize === v ? 1 : 0.5,
 							background: resize === v ? "var(--btn-bg)" : "transparent",
 						}}
 					>
@@ -279,7 +280,7 @@ export default function Demo() {
 						className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border transition-all ml-auto"
 						style={{
 							borderColor: "currentColor",
-							opacity: cursorMode ? 1 : 0.35,
+							opacity: cursorMode ? 1 : 0.5,
 							background: cursorMode ? "var(--btn-bg)" : "transparent",
 						}}
 					>
@@ -296,7 +297,7 @@ export default function Demo() {
 						className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border transition-all ml-auto"
 						style={{
 							borderColor: "currentColor",
-							opacity: gyroMode ? 1 : 0.35,
+							opacity: gyroMode ? 1 : 0.5,
 							background: gyroMode ? "var(--btn-bg)" : "transparent",
 						}}
 					>
@@ -327,12 +328,12 @@ export default function Demo() {
 			{/* Caption */}
 			<div className="flex items-center gap-3 mt-6">
 				{activeMode && (
-					<p className="text-xs opacity-30 italic">
+					<p className="text-xs opacity-50 italic">
 						{cursorMode ? 'Move cursor to adjust depth and tracking. Press Esc to exit.' : 'Tilt left/right for depth, front/back for tracking.'}
 					</p>
 				)}
 				{!activeMode && (
-					<p className="text-xs opacity-30 italic">
+					<p className="text-xs opacity-50 italic">
 						Yes, we used small-caps, bold, italic, and a number in the same paragraph. We wanted to make sure the tool doesn&apos;t break.
 					</p>
 				)}

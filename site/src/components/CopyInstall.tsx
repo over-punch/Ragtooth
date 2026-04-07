@@ -35,7 +35,7 @@ export default function CopyInstall() {
 				href={NPM_URL}
 				target="_blank"
 				rel="noopener noreferrer"
-				className="text-sm opacity-40 hover:opacity-100 transition-opacity"
+				className="text-sm opacity-50 hover:opacity-100 transition-opacity"
 			>
 				npm ↗
 			</a>

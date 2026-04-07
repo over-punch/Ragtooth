@@ -10,7 +10,7 @@ export default function Home() {
 			{/* Hero */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<div className="flex flex-col gap-2">
-					<p className="text-xs uppercase tracking-widest opacity-40">ragtooth</p>
+					<p className="text-xs uppercase tracking-widest opacity-50">ragtooth</p>
 					<h1
 						className="text-4xl lg:text-8xl xl:text-9xl"
 						style={{
@@ -29,12 +29,12 @@ export default function Home() {
 						href="https://github.com/quitequinn/Ragtooth"
 						target="_blank"
 						rel="noopener noreferrer"
-						className="text-sm opacity-40 hover:opacity-100 transition-opacity"
+						className="text-sm opacity-50 hover:opacity-100 transition-opacity"
 					>
 						GitHub ↗
 					</a>
 				</div>
-				<div className="flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-30 tracking-wide">
+				<div className="flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-50 tracking-wide">
 					<span>TypeScript</span>
 					<span>·</span>
 					<span>Zero dependencies</span>
@@ -53,7 +53,7 @@ export default function Home() {
 
 			{/* Interactive demo */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-4">
-				<p className="text-xs uppercase tracking-widest opacity-40">Live demo — drag the sliders</p>
+				<p className="text-xs uppercase tracking-widest opacity-50">Live demo — drag the sliders</p>
 				<div className="rounded-xl -mx-8 px-8 py-8" style={{ background: "rgba(0,0,0,0.25)" }}>
 					<Demo />
 				</div>
@@ -61,7 +61,7 @@ export default function Home() {
 
 			{/* What is sawtooth rag */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
-				<p className="text-xs uppercase tracking-widest opacity-40">What is sawtooth rag?</p>
+				<p className="text-xs uppercase tracking-widest opacity-50">What is sawtooth rag?</p>
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
 					<div className="flex flex-col gap-3">
 						<p className="font-semibold opacity-100 text-base">The problem with smooth rag</p>
@@ -87,8 +87,8 @@ export default function Home() {
 			{/* Usage */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<div className="flex items-baseline gap-4">
-					<p className="text-xs uppercase tracking-widest opacity-40">Usage</p>
-					<p className="text-xs opacity-25 tracking-wide">TypeScript + React · Vanilla JS</p>
+					<p className="text-xs uppercase tracking-widest opacity-50">Usage</p>
+					<p className="text-xs opacity-50 tracking-wide">TypeScript + React · Vanilla JS</p>
 				</div>
 				<div className="flex flex-col gap-8 text-sm">
 					<div className="flex flex-col gap-3">
@@ -118,7 +118,7 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
 						<p className="opacity-50">Options</p>
 						<table className="w-full text-xs">
 							<thead>
-								<tr className="opacity-40 text-left">
+								<tr className="opacity-50 text-left">
 									<th className="pb-2 pr-6 font-normal">Option</th>
 									<th className="pb-2 pr-6 font-normal">Default</th>
 									<th className="pb-2 font-normal">Description</th>
@@ -157,7 +157,7 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
 			</section>
 
 			{/* Footer */}
-			<footer className="w-full max-w-2xl lg:max-w-5xl flex justify-between text-xs opacity-30 pt-8 border-t border-white/10">
+			<footer className="w-full max-w-2xl lg:max-w-5xl flex justify-between text-xs opacity-50 pt-8 border-t border-white/10">
 				<span>ragtooth v{version}</span>
 				<a
 					href="https://liiift.studio"

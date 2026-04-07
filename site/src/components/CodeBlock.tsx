@@ -20,13 +20,13 @@ function tokenize(code: string): ReactNode[] {
 	while ((match = TOKEN.exec(code)) !== null) {
 		// Plain gap (whitespace, numbers, operators not in punct set)
 		if (match.index > last) {
-			nodes.push(<span key={key++} style={{ opacity: 0.45 }}>{code.slice(last, match.index)}</span>)
+			nodes.push(<span key={key++} style={{ opacity: 0.6 }}>{code.slice(last, match.index)}</span>)
 		}
 
 		const [full, comment, str, word, punct] = match
 
 		if (comment) {
-			nodes.push(<span key={key++} style={{ opacity: 0.3 }}>{comment}</span>)
+			nodes.push(<span key={key++} style={{ opacity: 0.6 }}>{comment}</span>)
 		} else if (str) {
 			nodes.push(<em key={key++} style={{ fontStyle: 'italic', opacity: 0.6 }}>{str}</em>)
 		} else if (word) {
@@ -36,14 +36,14 @@ function tokenize(code: string): ReactNode[] {
 				nodes.push(<span key={key++}>{word}</span>)
 			}
 		} else if (punct) {
-			nodes.push(<span key={key++} style={{ opacity: 0.35 }}>{punct}</span>)
+			nodes.push(<span key={key++} style={{ opacity: 0.6 }}>{punct}</span>)
 		}
 
 		last = match.index + full.length
 	}
 
 	if (last < code.length) {
-		nodes.push(<span key={key++} style={{ opacity: 0.45 }}>{code.slice(last)}</span>)
+		nodes.push(<span key={key++} style={{ opacity: 0.6 }}>{code.slice(last)}</span>)
 	}
 
 	return nodes
