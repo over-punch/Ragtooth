@@ -1,6 +1,7 @@
 import Demo from "@/components/Demo"
 import CopyInstall from "@/components/CopyInstall"
 import CodeBlock from "@/components/CodeBlock"
+import ToolDirectory from "@/components/ToolDirectory"
 import { version } from "../../../package.json"
 
 export default function Home() {
@@ -157,16 +158,19 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
 			</section>
 
 			{/* Footer */}
-			<footer className="w-full max-w-2xl lg:max-w-5xl flex justify-between text-xs opacity-50 pt-8 border-t border-white/10">
-				<span>ragtooth v{version}</span>
-				<a
-					href="https://liiift.studio"
-					target="_blank"
-					rel="noopener noreferrer"
-					className="hover:opacity-100 transition-opacity"
-				>
-					Liiift Studio
-				</a>
+			<footer className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6 pt-8 border-t border-white/10 text-xs">
+				<ToolDirectory current="ragtooth" />
+				<div className="flex justify-between opacity-50">
+					<span>ragtooth v{version}</span>
+					<a
+						href="https://liiift.studio"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="hover:opacity-100 transition-opacity"
+					>
+						Liiift Studio
+					</a>
+				</div>
 			</footer>
 
 		</main>
