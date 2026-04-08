@@ -17,7 +17,7 @@
 }
 
 :root {
-	--background: #160927;
+	--background: #160927; /* hue 280° */
 	--foreground: #f0ece3;
 	--btn-bg: #2d2240;
 	--font-sans: sans-serif;
