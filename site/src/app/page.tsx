@@ -151,6 +151,11 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
 									<td className="py-2 pr-6">0.7</td>
 									<td className="py-2">Max letter-spacing (px, em, rem). Keeps lines from being stretched into oblivion.</td>
 								</tr>
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
+									<td className="py-2 pr-6 font-mono">resize</td>
+									<td className="py-2 pr-6">true</td>
+									<td className="py-2">Re-runs the algorithm on container resize via ResizeObserver. Set false for static layouts.</td>
+								</tr>
 							</tbody>
 						</table>
 					</div>
