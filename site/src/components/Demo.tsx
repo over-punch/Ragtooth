@@ -61,6 +61,32 @@ function Slider({
 	)
 }
 
+/** Before/after toggle — left half = without effect, right half filled = with effect */
+function BeforeAfterToggle({ active, onClick }: { active: boolean; onClick: () => void }) {
+	return (
+		<button
+			onClick={onClick}
+			aria-label="Toggle before/after comparison"
+			title={active ? 'Hide comparison' : 'Compare without effect'}
+			style={{
+				position: 'absolute', bottom: 0, right: 0,
+				width: 32, height: 32, borderRadius: '50%',
+				border: '1px solid currentColor',
+				opacity: active ? 0.8 : 0.25,
+				background: 'transparent',
+				display: 'flex', alignItems: 'center', justifyContent: 'center',
+				cursor: 'pointer', transition: 'opacity 0.15s ease',
+			}}
+		>
+			<svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+				<rect x="0.5" y="0.5" width="13" height="9" rx="1" stroke="currentColor" strokeWidth="1"/>
+				<line x1="7" y1="0.5" x2="7" y2="9.5" stroke="currentColor" strokeWidth="1"/>
+				<rect x="8" y="1.5" width="5" height="7" fill="currentColor"/>
+			</svg>
+		</button>
+	)
+}
+
 /** Cursor icon SVG */
 function CursorIcon() {
 	return (
@@ -90,6 +116,9 @@ export default function Demo() {
 	const [maxTracking, setMaxTracking] = useState(0.7)
 	const [sawAlign, setSawAlign] = useState<"top" | "bottom">("bottom")
 	const [resize, setResize] = useState(true)
+
+	// Before/after comparison toggle
+	const [beforeAfter, setBeforeAfter] = useState(false)
 
 	// Interaction modes — mutually exclusive
 	const [cursorMode, setCursorMode] = useState(false)
@@ -209,7 +238,7 @@ export default function Demo() {
 	const activeMode = cursorMode || gyroMode
 
 	return (
-		<div className="w-full">
+		<div className="w-full" style={{ overflow: 'hidden' }}>
 			{/* Rag controls */}
 			<div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6">
 				<Slider label="Depth"    value={sawDepth}          min={0}   max={400}      step={1}    onChange={setSawDepth} />
@@ -291,21 +320,33 @@ export default function Demo() {
 			</div>
 
 			{/* Live text */}
-			<div className="flex flex-col gap-5">
-				{PARAGRAPHS.map((para, i) => (
-					<RagText
-						key={i}
-						sawDepth={deferredDepth}
-						sawPeriod={deferredPeriod}
-						sawPhase={deferredPhase}
-						maxTracking={deferredTracking}
-						sawAlign={deferredAlign}
-						resize={deferredResize}
-						style={sampleStyle}
-					>
-						{para}
-					</RagText>
-				))}
+			<div className="relative pb-8">
+				<div className="flex flex-col gap-5">
+					{PARAGRAPHS.map((para, i) => (
+						<RagText
+							key={i}
+							sawDepth={deferredDepth}
+							sawPeriod={deferredPeriod}
+							sawPhase={deferredPhase}
+							maxTracking={deferredTracking}
+							sawAlign={deferredAlign}
+							resize={deferredResize}
+							style={sampleStyle}
+						>
+							{para}
+						</RagText>
+					))}
+				</div>
+				{beforeAfter && (
+					<div aria-hidden style={{ position: 'absolute', top: 0, left: 0, width: '100%', pointerEvents: 'none', opacity: 0.25 }}>
+						<div className="flex flex-col gap-5">
+							{PARAGRAPHS.map((para, i) => (
+								<p key={i} style={sampleStyle}>{para}</p>
+							))}
+						</div>
+					</div>
+				)}
+				<BeforeAfterToggle active={beforeAfter} onClick={() => setBeforeAfter(v => !v)} />
 			</div>
 
 			{/* Caption */}
