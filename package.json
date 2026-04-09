@@ -41,13 +41,13 @@
 	],
 	"author": "Quinn Keaveney",
 	"license": "MIT",
-	"homepage": "https://github.com/quitequinn/Ragtooth#readme",
+	"homepage": "https://ragtooth.com",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/quitequinn/Ragtooth.git"
+		"url": "https://github.com/Liiift-Studio/Ragtooth.git"
 	},
 	"bugs": {
-		"url": "https://github.com/quitequinn/Ragtooth/issues"
+		"url": "https://github.com/Liiift-Studio/Ragtooth/issues"
 	},
 	"sideEffects": false,
 	"peerDependencies": {
