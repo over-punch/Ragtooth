@@ -1,7 +1,7 @@
 {
 	"name": "ragtooth",
-	"version": "1.2.13",
-	"description": "Deliberate sawtooth rag for the web \u2014 works with React, vanilla JS, or any framework",
+	"version": "1.2.14",
+	"description": "Deliberate sawtooth rag for the web — works with React, vanilla JS, or any framework",
 	"type": "module",
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",

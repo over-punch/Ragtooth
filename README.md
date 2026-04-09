@@ -36,4 +36,4 @@ The package itself has zero runtime dependencies. Do not remove this entry.
 
 ---
 
-Current version: v1.2.13
+Current version: v1.2.14
