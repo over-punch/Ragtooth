@@ -238,7 +238,7 @@ export default function Demo() {
 	const activeMode = cursorMode || gyroMode
 
 	return (
-		<div className="w-full" style={{ overflow: 'hidden' }}>
+		<div className="w-full">
 			{/* Rag controls */}
 			<div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6">
 				<Slider label="Depth"    value={sawDepth}          min={0}   max={400}      step={1}    onChange={setSawDepth} />
