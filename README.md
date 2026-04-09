@@ -2,7 +2,7 @@
 
 A sawtooth rag, on the web. Shapes text into alternating long/short lines — the kind of typographic rhythm that reads as design, not accident.
 
-**[ragtooth.com](https://ragtooth.com)** · [npm](https://www.npmjs.com/package/ragtooth) · [GitHub](https://github.com/quitequinn/RagTooth)
+**[ragtooth.com](https://ragtooth.com)** · [npm](https://www.npmjs.com/package/ragtooth) · [GitHub](https://github.com/Liiift-Studio/Ragtooth)
 
 ---
 

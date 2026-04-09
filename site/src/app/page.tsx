@@ -27,7 +27,7 @@ export default function Home() {
 				<div className="flex items-center gap-4">
 					<CopyInstall />
 					<a
-						href="https://github.com/quitequinn/Ragtooth"
+						href="https://github.com/Liiift-Studio/Ragtooth"
 						target="_blank"
 						rel="noopener noreferrer"
 						className="text-sm opacity-50 hover:opacity-100 transition-opacity"

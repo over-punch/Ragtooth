@@ -6,7 +6,7 @@ export { RagText } from './react/RagText'
 export type { RagTextProps } from './react/RagText'
 
 // Core (framework-agnostic)
-export { applyRag, removeRag } from './core/adjust'
+export { applyRag, removeRag, getCleanHTML } from './core/adjust'
 
 // Types
 export type { RagOptions } from './core/types'
