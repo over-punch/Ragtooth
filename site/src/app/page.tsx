@@ -173,7 +173,7 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
 						rel="noopener noreferrer"
 						className="hover:opacity-100 transition-opacity"
 					>
-						Liiift Studio
+						<img src="/logo-white.png" alt="Liiift Studio" style={{ height: 18, display: 'block' }} />
 					</a>
 				</div>
 			</footer>
