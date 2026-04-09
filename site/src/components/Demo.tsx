@@ -20,7 +20,7 @@ const PARAGRAPHS: ReactNode[] = [
 	</>,
 	<>
 		These <strong>three controls</strong> — depth, period, and tracking — are enough
-		for nearly any paragraph. Start with depth around <strong>15–20%</strong>{' '}of your
+		for nearly any paragraph. Start with depth around <strong>15–20%</strong> of your
 		line length, keep the period at&nbsp;2 for the classic sawtooth, and hold tracking
 		just above zero. The fine-tuning is yours to find.
 	</>,

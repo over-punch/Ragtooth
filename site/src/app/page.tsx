@@ -63,7 +63,7 @@ export default function Home() {
 			{/* What is sawtooth rag */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<p className="text-xs uppercase tracking-widest opacity-50">What is sawtooth rag?</p>
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
+				<div className="prose-grid grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
 					<div className="flex flex-col gap-3">
 						<p className="font-semibold opacity-100 text-base">The problem with smooth rag</p>
 						<p>
