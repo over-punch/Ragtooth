@@ -321,7 +321,7 @@ export default function Demo() {
 
 			{/* Live text */}
 			<div className="relative pb-8">
-				<div className="flex flex-col gap-5">
+				<div className="flex flex-col gap-8">
 					{PARAGRAPHS.map((para, i) => (
 						<RagText
 							key={i}
@@ -339,7 +339,7 @@ export default function Demo() {
 				</div>
 				{beforeAfter && (
 					<div aria-hidden style={{ position: 'absolute', top: 0, left: 0, width: '100%', pointerEvents: 'none', opacity: 0.25 }}>
-						<div className="flex flex-col gap-5">
+						<div className="flex flex-col gap-8">
 							{PARAGRAPHS.map((para, i) => (
 								<p key={i} style={sampleStyle}>{para}</p>
 							))}
@@ -350,14 +350,14 @@ export default function Demo() {
 			</div>
 
 			{/* Caption */}
-			<div className="flex items-center gap-3 mt-6">
+			<div className="flex items-center gap-3 mt-8">
 				{activeMode && (
-					<p className="text-xs opacity-50 italic">
+					<p className="text-xs opacity-50 italic" style={{ lineHeight: "1.8" }}>
 						{cursorMode ? 'Move cursor to adjust depth and tracking. Press Esc to exit.' : 'Tilt left/right for depth, front/back for tracking.'}
 					</p>
 				)}
 				{!activeMode && (
-					<p className="text-xs opacity-50 italic">
+					<p className="text-xs opacity-50 italic" style={{ lineHeight: "1.8" }}>
 						Yes, we used small-caps, bold, italic, and a number in the same paragraph. We wanted to make sure the tool doesn&apos;t break.
 					</p>
 				)}
