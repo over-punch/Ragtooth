@@ -165,8 +165,8 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
 			{/* Footer */}
 			<footer className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6 pt-8 border-t border-white/10 text-xs">
 				<ToolDirectory current="ragtooth" />
-				<div className="flex justify-between opacity-50">
-					<span>ragtooth v{version}</span>
+				<hr className="border-white/10" />
+				<div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 opacity-50">
 					<a
 						href="https://liiift.studio"
 						target="_blank"
@@ -175,6 +175,7 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
 					>
 						<img src="/logo-white.png" alt="Liiift Studio" style={{ height: 18, display: 'block' }} />
 					</a>
+					<span className="sm:col-start-4">ragtooth v{version}</span>
 				</div>
 			</footer>
 
