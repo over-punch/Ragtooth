@@ -297,7 +297,7 @@ export default function Demo() {
 						}}
 					>
 						<CursorIcon />
-						<span>{cursorMode ? 'Esc to exit' : '?'}</span>
+						<span>{cursorMode ? 'Esc to exit' : 'Cursor'}</span>
 					</button>
 				)}
 
