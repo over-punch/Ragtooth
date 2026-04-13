@@ -358,7 +358,7 @@ export default function Demo() {
 				)}
 				{!activeMode && (
 					<p className="text-xs opacity-50 italic" style={{ lineHeight: "1.8" }}>
-						Yes, we used small-caps, bold, italic, and a number in the same paragraph. We wanted to make sure the tool doesn&apos;t break.
+						Yes, we used small-caps, bold, italic, and a number in the same paragraph. We wanted to make sure the tool doesn&apos;t break. On e-readers and e-ink displays, a deliberate sawtooth rag also prevents the harsh reflow artefacts that appear when text redraws line by line on a slow-refresh screen.
 					</p>
 				)}
 			</div>
