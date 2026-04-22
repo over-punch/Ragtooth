@@ -28,18 +28,27 @@
 	},
 	"keywords": [
 		"typography",
+		"web-typography",
+		"frontend",
+		"liiift-studio",
 		"rag",
 		"saw-rag",
 		"sawtooth-rag",
 		"ragtooth",
+		"typographic-rhythm",
+		"paragraph",
+		"text-composition",
 		"typesetting",
 		"text",
 		"react",
 		"vanilla-js",
 		"framework-agnostic",
-		"letter-spacing"
+		"letter-spacing",
+		"zero-dependencies",
+		"typescript",
+		"css"
 	],
-	"author": "Quinn Keaveney",
+	"author": "Quinn Keaveney <quinn@liiift.studio>",
 	"license": "MIT",
 	"homepage": "https://ragtooth.com",
 	"repository": {
@@ -50,6 +59,9 @@
 		"url": "https://github.com/Liiift-Studio/Ragtooth/issues"
 	},
 	"sideEffects": false,
+	"publishConfig": {
+		"access": "public"
+	},
 	"peerDependencies": {
 		"react": ">=17.0.0",
 		"react-dom": ">=17.0.0"
