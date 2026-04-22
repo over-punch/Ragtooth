@@ -1,5 +1,7 @@
 # Ragtooth
 
+[![npm](https://img.shields.io/npm/v/ragtooth.svg)](https://www.npmjs.com/package/ragtooth) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![part of liiift type-tools](https://img.shields.io/badge/liiift-type--tools-blueviolet)](https://github.com/Liiift-Studio/type-tools)
+
 A sawtooth rag, on the web. Shapes text into alternating long/short lines — the kind of typographic rhythm that reads as design, not accident.
 
 **[ragtooth.com](https://ragtooth.com)** · [npm](https://www.npmjs.com/package/ragtooth) · [GitHub](https://github.com/Liiift-Studio/Ragtooth)
