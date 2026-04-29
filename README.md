@@ -1,10 +1,10 @@
 # Ragtooth
 
-[![npm](https://img.shields.io/npm/v/ragtooth.svg)](https://www.npmjs.com/package/ragtooth) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![part of liiift type-tools](https://img.shields.io/badge/liiift-type--tools-blueviolet)](https://github.com/Liiift-Studio/type-tools)
+[![npm](https://img.shields.io/npm/v/%40liiift-studio%2Fragtooth.svg)](https://www.npmjs.com/package/@liiift-studio/ragtooth) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![part of liiift type-tools](https://img.shields.io/badge/liiift-type--tools-blueviolet)](https://github.com/Liiift-Studio/type-tools)
 
 A sawtooth rag, on the web. Shapes text into alternating long/short lines — the kind of typographic rhythm that reads as design, not accident.
 
-**[ragtooth.com](https://ragtooth.com)** · [npm](https://www.npmjs.com/package/ragtooth) · [GitHub](https://github.com/Liiift-Studio/Ragtooth)
+**[ragtooth.com](https://ragtooth.com)** · [npm](https://www.npmjs.com/package/@liiift-studio/ragtooth) · [GitHub](https://github.com/Liiift-Studio/Ragtooth)
 
 TypeScript · Zero dependencies · React + Vanilla JS
 
@@ -13,7 +13,7 @@ TypeScript · Zero dependencies · React + Vanilla JS
 ## Install
 
 ```bash
-npm install ragtooth
+npm install @liiift-studio/ragtooth
 ```
 
 ## React
@@ -21,7 +21,7 @@ npm install ragtooth
 ### Component
 
 ```tsx
-import { RagText } from 'ragtooth'
+import { RagText } from '@liiift-studio/ragtooth'
 
 <RagText sawDepth={120} sawPeriod={2}>
   Your paragraph text here...
@@ -31,7 +31,7 @@ import { RagText } from 'ragtooth'
 ### Hook
 
 ```tsx
-import { useRag } from 'ragtooth'
+import { useRag } from '@liiift-studio/ragtooth'
 
 const ref = useRag({ sawDepth: 120, sawPeriod: 2 })
 
@@ -43,7 +43,7 @@ const ref = useRag({ sawDepth: 120, sawPeriod: 2 })
 ## Vanilla JS
 
 ```ts
-import { applyRag, removeRag } from 'ragtooth'
+import { applyRag, removeRag } from '@liiift-studio/ragtooth'
 
 const el = document.querySelector('p')
 const originalHTML = el.innerHTML
@@ -125,8 +125,8 @@ applyRag(el, el.innerHTML, { sawPeriod: 3, sawPhase: 2 })
 ## TypeScript
 
 ```ts
-import { applyRag, removeRag, getCleanHTML } from 'ragtooth'
-import type { RagOptions, RagValue } from 'ragtooth'
+import { applyRag, removeRag, getCleanHTML } from '@liiift-studio/ragtooth'
+import type { RagOptions, RagValue } from '@liiift-studio/ragtooth'
 
 const options: RagOptions = {
   sawDepth: '15%',
@@ -159,7 +159,7 @@ const options: RagOptions = {
 
 ```tsx
 "use client"
-import { RagText } from 'ragtooth'
+import { RagText } from '@liiift-studio/ragtooth'
 ```
 
 ---
