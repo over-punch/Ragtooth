@@ -3,7 +3,7 @@
 // Interactive sawtooth rag demo with live controls and rich typographic sample text
 import { useState, useEffect, useDeferredValue } from "react"
 import type { ReactNode } from "react"
-import { RagText } from "ragtooth"
+import { RagText } from "@liiift-studio/ragtooth"
 
 // Rich sample text — italic for terms, bold small-caps opener, numbers, mixed rhythms.
 const PARAGRAPHS: ReactNode[] = [

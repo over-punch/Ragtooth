@@ -89,7 +89,7 @@ export default function Home() {
 				<div className="flex flex-col gap-8 text-sm">
 					<div className="flex flex-col gap-3">
 						<p className="opacity-50">Drop-in component</p>
-						<CodeBlock code={`import { RagText } from 'ragtooth'
+						<CodeBlock code={`import { RagText } from '@liiift-studio/ragtooth'
 
 <RagText sawDepth={120} sawPeriod={2}>
   Your paragraph text here...
@@ -97,14 +97,14 @@ export default function Home() {
 					</div>
 					<div className="flex flex-col gap-3">
 						<p className="opacity-50">Hook — attach to any element</p>
-						<CodeBlock code={`import { useRag } from 'ragtooth'
+						<CodeBlock code={`import { useRag } from '@liiift-studio/ragtooth'
 
 const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 <p ref={ref}>{children}</p>`} />
 					</div>
 				<div className="flex flex-col gap-3">
 					<p className="opacity-50">Vanilla JS</p>
-					<CodeBlock code={`import { applyRag, removeRag } from 'ragtooth'
+					<CodeBlock code={`import { applyRag, removeRag } from '@liiift-studio/ragtooth'
 
 const el = document.querySelector('p')
 const original = el.innerHTML

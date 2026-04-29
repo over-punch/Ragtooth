@@ -1,5 +1,5 @@
 {
-	"name": "ragtooth",
+	"name": "@liiift-studio/ragtooth",
 	"version": "1.2.24",
 	"description": "Deliberate sawtooth rag for the web — works with React, vanilla JS, or any framework",
 	"type": "module",
