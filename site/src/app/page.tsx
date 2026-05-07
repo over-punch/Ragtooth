@@ -65,7 +65,7 @@ export default function Home() {
 							When text is set ragged-right, natural line endings create an
 							unpredictable right edge — notches, peninsulas, near-rivers. It can look
 							accidental. Most tools patch this with soft hyphens or non-breaking
-							spaces: a lot of effort for a result that&apos;s still a mess.
+							spaces: a lot of effort for a result that&rsquo;s still a mess.
 						</p>
 					</div>
 					<div className="flex flex-col gap-3">

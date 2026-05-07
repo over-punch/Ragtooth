@@ -8,7 +8,7 @@ import { RagText } from "@liiift-studio/ragtooth"
 // Rich sample text — italic for terms, bold small-caps opener, numbers, mixed rhythms.
 const PARAGRAPHS: ReactNode[] = [
 	<>
-		<span style={{ fontFeatureSettings: "'smcp', 'c2sc'", fontVariantCaps: "all-small-caps", fontVariationSettings: '"wght" 700, "opsz" 18, "wdth" 100' }}>Typography traces its formal origins to Gutenberg&apos;s press of 1455</span>,
+		<span style={{ fontFeatureSettings: "'smcp', 'c2sc'", fontVariantCaps: "all-small-caps", fontVariationSettings: '"wght" 700, "opsz" 18, "wdth" 100' }}>Typography traces its formal origins to Gutenberg&rsquo;s press of 1455</span>,
 		where <em>justified setting</em> and careful letter-spacing were discipline before
 		they were decoration. The difference between fine and ordinary typesetting has
 		always been about rhythm — how the eye moves, and where it rests. A ragged-right
@@ -16,7 +16,7 @@ const PARAGRAPHS: ReactNode[] = [
 		the rag itself but the shape it falls into — accidental, without rhythm. Set in a
 		typeface with strong descenders and a generous <em>x-height</em>, a sawtooth rag
 		can feel as considered as full justification. The difference is
-		simply that the decision is yours rather than the browser&apos;s.
+		simply that the decision is yours rather than the browser&rsquo;s.
 	</>,
 	<>
 		These <strong>three controls</strong> — depth, period, and tracking — are enough
@@ -358,7 +358,7 @@ export default function Demo() {
 				)}
 				{!activeMode && (
 					<p className="text-xs opacity-50 italic" style={{ lineHeight: "1.8" }}>
-						Yes, we used small-caps, bold, italic, and a number in the same paragraph. We wanted to make sure the tool doesn&apos;t break. On e-readers and e-ink displays, a deliberate sawtooth rag also prevents the harsh reflow artefacts that appear when text redraws line by line on a slow-refresh screen.
+						Yes, we used small-caps, bold, italic, and a number in the same paragraph. We wanted to make sure the tool doesn&rsquo;t break. On e-readers and e-ink displays, a deliberate sawtooth rag also prevents the harsh reflow artefacts that appear when text redraws line by line on a slow-refresh screen.
 					</p>
 				)}
 			</div>
