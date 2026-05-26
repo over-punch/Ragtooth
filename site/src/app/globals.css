@@ -4,5 +4,6 @@
 
 :root {
 	--background: hsl(158, 55%, 9%);
+	--foreground: hsl(158, 15%, 92%);
 	--btn-bg: hsl(158, 33%, 17%);
 }
