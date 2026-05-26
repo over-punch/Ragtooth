@@ -100,7 +100,7 @@ export function useRag(
 	useEffect(() => {
 		if (typeof document === 'undefined' || !document.fonts) return
 		let rafId: number | undefined
-		document.fonts.ready.then(() => { rafId = run() })
+		document.fonts.ready?.then(() => { rafId = run() })
 		return () => { if (rafId !== undefined) cancelAnimationFrame(rafId) }
 	}, [run])
 
