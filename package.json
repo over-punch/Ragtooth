@@ -22,9 +22,11 @@
 		"dev:site": "npm run dev & cd site && npm run dev",
 		"typecheck": "tsc --noEmit",
 		"lint": "tsc --noEmit",
-		"test": "vitest run",
+		"test": "vitest",
+		"test:run": "vitest run",
 		"test:watch": "vitest",
-		"test:ui": "vitest --ui"
+		"test:ui": "vitest --ui",
+		"prepublishOnly": "npm run test:run && npm run build"
 	},
 	"keywords": [
 		"typography",
