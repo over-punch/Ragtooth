@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 		apple: "/icon.svg",
 	},
 	description:
-		"Ragtooth shapes your text into a sawtooth rag — alternating long and short lines for a rhythm that reads as design, not accident. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one npm package.",
+		"Sawtooth rag for the web. Shapes text into alternating long and short lines — a rhythm that reads as design, not accident. React, vanilla JS, any framework.",
 	keywords: [
 		"ragtooth",
 		"sawtooth rag",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 		title: "Ragtooth — Sawtooth rag for the web",
 		description:
 			"Shape your text into a sawtooth rag. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one fully-typed npm package.",
-		url: "https://ragtooth.liiift.studio",
+		url: "https://ragtooth.com",
 		siteName: "Ragtooth",
 		type: "website",
 	},
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 		description:
 			"Shape your text into a sawtooth rag. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one fully-typed npm package.",
 	},
-	metadataBase: new URL("https://ragtooth.liiift.studio"),
+	metadataBase: new URL("https://ragtooth.com"),
 }
 
 export default function RootLayout({
