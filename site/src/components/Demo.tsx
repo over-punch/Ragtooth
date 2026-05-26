@@ -29,6 +29,7 @@ const PARAGRAPHS: ReactNode[] = [
 /** Labelled range slider with value displayed below the track */
 function Slider({
 	label,
+	title,
 	value,
 	min,
 	max,
@@ -36,6 +37,7 @@ function Slider({
 	onChange,
 }: {
 	label: string
+	title?: string
 	value: number
 	min: number
 	max: number
@@ -52,6 +54,7 @@ function Slider({
 				step={step}
 				value={value}
 				aria-label={label}
+				title={title}
 				onChange={(e) => onChange(Number(e.target.value))}
 				onTouchStart={(e) => e.stopPropagation()}
 				style={{ touchAction: 'none' }}
@@ -241,10 +244,10 @@ export default function Demo() {
 		<div className="w-full">
 			{/* Rag controls */}
 			<div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6">
-				<Slider label="Depth"    value={sawDepth}          min={0}   max={400}      step={1}    onChange={setSawDepth} />
-				<Slider label="Period"   value={sawPeriod}         min={2}   max={6}        step={1}    onChange={setSawPeriod} />
-				<Slider label="Phase"    value={effectiveSawPhase} min={1}   max={sawPeriod} step={1}   onChange={setSawPhase} />
-				<Slider label="Tracking" value={maxTracking}       min={0}   max={2}        step={0.01} onChange={setMaxTracking} />
+				<Slider label="Depth"    title="How far lines deviate from the maximum line width — higher values create a more pronounced sawtooth shape"    value={sawDepth}          min={0}   max={400}      step={1}    onChange={setSawDepth} />
+				<Slider label="Period"   title="How many lines complete one full rag cycle — 2 gives a classic alternating long/short sawtooth"         value={sawPeriod}         min={2}   max={6}        step={1}    onChange={setSawPeriod} />
+				<Slider label="Phase"    title="Which step in the cycle the first line lands on — shift this to avoid awkward breaks at the paragraph opening"    value={effectiveSawPhase} min={1}   max={sawPeriod} step={1}   onChange={setSawPhase} />
+				<Slider label="Tracking" title="How much letter-spacing ragtooth may add to nudge a line shorter — keep this low to avoid noticeable spacing changes" value={maxTracking}       min={0}   max={2}        step={0.01} onChange={setMaxTracking} />
 			</div>
 
 			{/* Align toggle + resize toggle + cursor/gyro mode toggle */}
@@ -254,6 +257,7 @@ export default function Demo() {
 					<button
 						key={v}
 						onClick={() => setSawAlign(v)}
+						title={v === "top" ? "Count the rag cycle from the first line downward — the sawtooth starts at the paragraph opening" : "Count the rag cycle from the last line upward — the sawtooth resolves cleanly at the paragraph end"}
 						className="text-xs px-3 py-1 rounded-full border transition-opacity"
 						style={{
 							borderColor: "currentColor",
@@ -273,6 +277,7 @@ export default function Demo() {
 					<button
 						key={String(v)}
 						onClick={() => setResize(v)}
+						title={v ? "Recalculate line breaks whenever the container width changes — keeps the rag accurate after window resize" : "Fix line breaks at their current width and skip resize recalculation — useful for performance testing"}
 						className="text-xs px-3 py-1 rounded-full border transition-opacity"
 						style={{
 							borderColor: "currentColor",
