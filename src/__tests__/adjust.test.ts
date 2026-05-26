@@ -903,3 +903,48 @@ describe('container fallback', () => {
 		restore()
 	})
 })
+
+// ---------------------------------------------------------------------------
+// Intl.Segmenter word splitting
+// ---------------------------------------------------------------------------
+
+describe('Intl.Segmenter word splitting', () => {
+	it('produces word spans using Intl.Segmenter when available', () => {
+		// Verify the Segmenter path runs without error and wraps words
+		const el = makeContainer('<p>Hello world foo bar</p>')
+		const restore = mockOffsetWidth(el, 300)
+		const original = el.innerHTML
+		applyRag(el, original)
+		const wordSpans = el.querySelectorAll(`.${RAG_CLASSES.word}`)
+		expect(wordSpans.length).toBeGreaterThan(0)
+		restore()
+	})
+
+	it('falls back gracefully when Intl.Segmenter is not available', () => {
+		// Temporarily remove Intl.Segmenter to exercise the fallback path
+		const OrigSegmenter = (Intl as Record<string, unknown>).Segmenter
+		delete (Intl as Record<string, unknown>).Segmenter
+
+		const el = makeContainer('<p>Hello world foo bar baz</p>')
+		const restore = mockOffsetWidth(el, 300)
+		const original = el.innerHTML
+		expect(() => applyRag(el, original)).not.toThrow()
+		const wordSpans = el.querySelectorAll(`.${RAG_CLASSES.word}`)
+		expect(wordSpans.length).toBeGreaterThan(0)
+		restore()
+
+		// Restore
+		;(Intl as Record<string, unknown>).Segmenter = OrigSegmenter
+	})
+
+	it('idempotency holds with Intl.Segmenter — same result on repeated calls', () => {
+		const el = makeContainer('<p>Hello world foo bar baz qux</p>')
+		const restore = mockOffsetWidth(el, 300)
+		const original = el.innerHTML
+		applyRag(el, original)
+		const firstRun = el.innerHTML
+		applyRag(el, original)
+		expect(el.innerHTML).toBe(firstRun)
+		restore()
+	})
+})

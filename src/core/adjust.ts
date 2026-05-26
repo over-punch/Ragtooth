@@ -119,28 +119,73 @@ export function applyRag(
 			const text = textNode.textContent ?? ''
 			if (!text) continue
 
-			// Split into alternating [whitespace, word, whitespace, word, …] tokens.
-			// Odd-indexed entries are words; even-indexed are the gaps before them.
-			const tokens = text.split(/(\S+)/)
 			const fragment = document.createDocumentFragment()
 
-			for (let i = 0; i < tokens.length; i += 2) {
-				const space = tokens[i]       // whitespace gap before this word
-				const word  = tokens[i + 1]   // word (undefined at end of string)
-				if (!word) continue // trailing whitespace — absorbed into the preceding span below
+			// Use Intl.Segmenter when available for language-aware word detection.
+			// This handles CJK, Arabic, Thai, and other scripts that do not use spaces
+			// as word boundaries — gracefully falling back to a regex split for
+			// environments that do not support Intl.Segmenter.
+			if (typeof Intl !== 'undefined' && typeof (Intl as Record<string, unknown>).Segmenter === 'function') {
+				const segmenter = new (Intl as { Segmenter: new (locale: string | undefined, opts: { granularity: string }) => { segment: (text: string) => Iterable<{ segment: string; isWordLike: boolean }> } }).Segmenter(undefined, { granularity: 'word' })
+				const segments = Array.from(segmenter.segment(text))
 
-				// If this is the last word in the text node, include any trailing whitespace
-				// in the span rather than creating an orphan text node. Orphan text nodes at
-				// inline-element boundaries (e.g. "of " before <strong>1455</strong>) are
-				// silently dropped in Pass 4, which removes the space between words.
-				const isLastWord = tokens[i + 3] === undefined
-				const trailingSpace = isLastWord ? (tokens[i + 2] ?? '') : ''
+				// Accumulate each word-like segment together with any surrounding
+				// non-word segments (whitespace, punctuation) into a single span,
+				// mirroring the one-span-per-word structure produced by the regex path.
+				// Leading non-word content is attached as a prefix to the next word;
+				// trailing non-word content after the last word is attached to the last span.
+				let pending = '' // non-word text waiting to be prepended to the next word
+				let lastSpan: HTMLSpanElement | null = null
 
-				const span = document.createElement('span')
-				span.className = RAG_CLASSES.word
-				span.appendChild(document.createTextNode(space + word + trailingSpace))
-				fragment.appendChild(span)
-				elementWords.push(span)
+				for (const seg of segments) {
+					if (seg.isWordLike) {
+						const span = document.createElement('span')
+						span.className = RAG_CLASSES.word
+						span.appendChild(document.createTextNode(pending + seg.segment))
+						pending = ''
+						fragment.appendChild(span)
+						elementWords.push(span)
+						lastSpan = span
+					} else {
+						// Non-word segment (space, punctuation, etc.)
+						// Attach trailing non-word content to the previous span so it is
+						// included in BCR measurements and not left as an orphan text node
+						// at inline-element boundaries.
+						if (lastSpan) {
+							lastSpan.appendChild(document.createTextNode(seg.segment))
+						} else {
+							pending += seg.segment
+						}
+					}
+				}
+
+				// Any leading non-word text with no preceding word becomes a bare text node.
+				if (pending) {
+					fragment.appendChild(document.createTextNode(pending))
+				}
+			} else {
+				// Fallback: split into alternating [whitespace, word, whitespace, word, …] tokens.
+				// Odd-indexed entries are words; even-indexed are the gaps before them.
+				const tokens = text.split(/(\S+)/)
+
+				for (let i = 0; i < tokens.length; i += 2) {
+					const space = tokens[i]       // whitespace gap before this word
+					const word  = tokens[i + 1]   // word (undefined at end of string)
+					if (!word) continue // trailing whitespace — absorbed into the preceding span below
+
+					// If this is the last word in the text node, include any trailing whitespace
+					// in the span rather than creating an orphan text node. Orphan text nodes at
+					// inline-element boundaries (e.g. "of " before <strong>1455</strong>) are
+					// silently dropped in Pass 4, which removes the space between words.
+					const isLastWord = tokens[i + 3] === undefined
+					const trailingSpace = isLastWord ? (tokens[i + 2] ?? '') : ''
+
+					const span = document.createElement('span')
+					span.className = RAG_CLASSES.word
+					span.appendChild(document.createTextNode(space + word + trailingSpace))
+					fragment.appendChild(span)
+					elementWords.push(span)
+				}
 			}
 
 			textNode.parentNode!.replaceChild(fragment, textNode)

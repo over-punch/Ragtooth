@@ -37,6 +37,8 @@ export default function Home() {
 					<span>·</span>
 					<span>React + Vanilla JS</span>
 					<span>·</span>
+					<span>CJK · Arabic · Thai</span>
+					<span>·</span>
 					<span>~2.7kb gzipped</span>
 				</div>
 				<p className="text-base opacity-60 leading-relaxed max-w-lg">
@@ -154,6 +156,9 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
 							</tbody>
 						</table>
 					</div>
+						<p className="text-xs opacity-50 leading-relaxed">
+							Word boundaries are detected using <span className="font-mono">Intl.Segmenter</span> when available — correctly splitting CJK (Chinese, Japanese, Korean), Arabic, Thai, and other scripts that don&rsquo;t use spaces as word delimiters. Falls back to a whitespace regex in environments without Segmenter support.
+						</p>
 				</div>
 			</section>
 
