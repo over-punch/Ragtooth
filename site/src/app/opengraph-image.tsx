@@ -1,4 +1,4 @@
-// OG image for ragtooth.liiift.studio — generated at build time via next/og
+// OG image for ragtooth.com — generated at build time via next/og
 // Satori (used by ImageResponse) supports TTF and WOFF but not WOFF2.
 import { ImageResponse } from 'next/og'
 import { readFile } from 'node:fs/promises'
@@ -66,7 +66,7 @@ export default async function Image() {
 						<span>~2.7kb gzipped</span>
 					</div>
 					<div style={{ fontSize: 13, color: 'rgba(255,255,255,0.18)', letterSpacing: '0.04em' }}>
-						ragtooth.liiift.studio
+						ragtooth.com
 					</div>
 				</div>
 			</div>

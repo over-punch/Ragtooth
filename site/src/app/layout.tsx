@@ -46,6 +46,7 @@ export const metadata: Metadata = {
 			"Shape your text into a sawtooth rag. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one fully-typed npm package.",
 	},
 	metadataBase: new URL("https://ragtooth.com"),
+	alternates: { canonical: "https://ragtooth.com" },
 }
 
 export default function RootLayout({
