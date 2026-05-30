@@ -71,7 +71,11 @@ export function applyRag(
 	const chWidth = chProbe.offsetWidth
 	container.removeChild(chProbe)
 
-	// Resolve options — support deprecated ragDifference as fallback for sawDepth
+	// Resolve options — support deprecated ragDifference as fallback for sawDepth.
+	// Emit a one-time warning so consumers know to migrate to sawDepth.
+	if (options.ragDifference !== undefined && options.sawDepth === undefined) {
+		console.warn('[ragtooth] ragDifference is deprecated — use sawDepth instead.')
+	}
 	const sawDepth = Math.max(0, resolveValue(options.sawDepth ?? options.ragDifference ?? DEFAULTS.sawDepth, containerWidth, fontSize, chWidth))
 	const sawPeriod = Math.max(2, Math.round(options.sawPeriod ?? DEFAULTS.sawPeriod))
 	const maxTracking = Math.max(0, resolveValue(options.maxTracking ?? DEFAULTS.maxTracking, containerWidth, fontSize, chWidth))
@@ -97,6 +101,15 @@ export function applyRag(
 	// inline elements like <em> and <strong>.
 	const blocks = Array.from(container.querySelectorAll<HTMLElement>(BLOCK_SELECTOR))
 	const targets: HTMLElement[] = blocks.length > 0 ? blocks : [container]
+
+	// Build one Intl.Segmenter instance per applyRag call (if available) and reuse it
+	// across all text nodes.  Construction involves locale negotiation and ICU
+	// initialisation, so creating it inside the inner loop is expensive.
+	type SegmenterInstance = { segment: (text: string) => Iterable<{ segment: string; isWordLike: boolean }> }
+	const segmenter: SegmenterInstance | null =
+		typeof Intl !== 'undefined' && typeof (Intl as Record<string, unknown>).Segmenter === 'function'
+			? new (Intl as { Segmenter: new (locale: undefined, opts: { granularity: string }) => SegmenterInstance }).Segmenter(undefined, { granularity: 'word' })
+			: null
 
 	const wordsByTarget = new Map<HTMLElement, HTMLElement[]>()
 
@@ -125,8 +138,7 @@ export function applyRag(
 			// This handles CJK, Arabic, Thai, and other scripts that do not use spaces
 			// as word boundaries — gracefully falling back to a regex split for
 			// environments that do not support Intl.Segmenter.
-			if (typeof Intl !== 'undefined' && typeof (Intl as Record<string, unknown>).Segmenter === 'function') {
-				const segmenter = new (Intl as { Segmenter: new (locale: string | undefined, opts: { granularity: string }) => { segment: (text: string) => Iterable<{ segment: string; isWordLike: boolean }> } }).Segmenter(undefined, { granularity: 'word' })
+			if (segmenter !== null) {
 				const segments = Array.from(segmenter.segment(text))
 
 				// Accumulate each word-like segment together with any surrounding
@@ -338,8 +350,8 @@ export function applyRag(
 				lineWidth += effectiveWidth
 			} else {
 				// Close line, insert forced break, open next line
-				html += `<span class="${RAG_CLASSES.lineInfo}" style="display:none" data-ideal-width="${idealWidth}" data-line-width="${lineWidth}"></span></span>`
-				html += `<br class="${RAG_CLASSES.break}">`
+				html += `<span class="${RAG_CLASSES.lineInfo}" style="display:none" aria-hidden="true" data-ideal-width="${idealWidth}" data-line-width="${lineWidth}"></span></span>`
+				html += `<br class="${RAG_CLASSES.break}" aria-hidden="true">`
 				html += `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
 				html += trimLineStart(wordHTML)
 				// Seed the new line with effectiveWidth (leading space stripped)

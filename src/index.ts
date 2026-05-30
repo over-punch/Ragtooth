@@ -1,4 +1,4 @@
-// Public API for rag-rub
+// Public API for @liiift-studio/ragtooth
 
 // React bindings
 export { useRag } from './react/useRag'

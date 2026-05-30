@@ -6,5 +6,7 @@ describe('RAG_CLASSES', () => {
 		expect(RAG_CLASSES.word).toBe('rag-word')
 		expect(RAG_CLASSES.line).toBe('rag-line')
 		expect(RAG_CLASSES.lineInfo).toBe('rag-line-info')
+		expect(RAG_CLASSES.break).toBe('rag-break')
+		expect(RAG_CLASSES.spaceProbe).toBe('rag-space-probe')
 	})
 })

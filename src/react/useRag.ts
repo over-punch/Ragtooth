@@ -43,6 +43,11 @@ export function useRag(
 	// that are triggered by height-only changes.
 	const lastWidthRef = useRef<number>(-1)
 
+	// Holds the inner scroll-restore rAF spawned by the most recent run() call
+	// triggered from the ResizeObserver path.  Kept separate so it can be
+	// cancelled on disconnect before it fires.
+	const innerRafRef = useRef<number | undefined>(undefined)
+
 	// Track previous contentKey to detect changes during render (synchronous,
 	// before any effects fire), so the snapshot is always reset before run().
 	const prevContentKeyRef = useRef<string | undefined>(contentKey)
@@ -73,14 +78,16 @@ export function useRag(
 
 		applyRag(el, originalHTMLRef.current, optionsRef.current)
 
-		// Layer 1: synchronous restore (fires before next paint on most engines)
-		if (window.scrollY !== scrollY) {
+		// Layer 1: synchronous restore (fires before next paint on most engines).
+		// Use a 2px tolerance: iOS Safari can return sub-integer scrollY values
+		// after a DOM mutation, which would trigger a spurious scrollTo on every call.
+		if (Math.abs(window.scrollY - scrollY) > 2) {
 			window.scrollTo(0, scrollY)
 		}
 
 		// Layer 2: rAF restore in case the browser overrides layer 1 during layout
 		const rafId = requestAnimationFrame(() => {
-			if (window.scrollY !== scrollY) {
+			if (Math.abs(window.scrollY - scrollY) > 2) {
 				window.scrollTo(0, scrollY)
 			}
 		})
@@ -127,10 +134,16 @@ export function useRag(
 		const observer = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const width = Math.round(entry.contentRect.width)
-				if (width === lastWidthRef.current) return
+				if (width === lastWidthRef.current) continue
 				lastWidthRef.current = width
 				cancelAnimationFrame(rafId)
-				rafId = requestAnimationFrame(run)
+				// Cancel any pending inner scroll-restore rAF from the previous run()
+				if (innerRafRef.current !== undefined) {
+					cancelAnimationFrame(innerRafRef.current)
+				}
+				rafId = requestAnimationFrame(() => {
+					innerRafRef.current = run()
+				})
 			}
 		})
 
@@ -138,6 +151,9 @@ export function useRag(
 
 		return () => {
 			cancelAnimationFrame(rafId)
+			if (innerRafRef.current !== undefined) {
+				cancelAnimationFrame(innerRafRef.current)
+			}
 			observer.disconnect()
 			// Restore original markup on unmount
 			if (el && originalHTMLRef.current !== null) {

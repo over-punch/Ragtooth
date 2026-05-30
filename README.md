@@ -33,12 +33,12 @@ import { RagText } from '@liiift-studio/ragtooth'
 ```tsx
 import { useRag } from '@liiift-studio/ragtooth'
 
-const ref = useRag({ sawDepth: 120, sawPeriod: 2 })
+const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 
 <p ref={ref}>Your paragraph text here...</p>
 ```
 
-`useRag` returns a ref to attach to any block element. Re-runs on resize automatically.
+`useRag` returns `{ ref }` — destructure it and attach `ref` to any block element. Re-runs on resize automatically.
 
 ## Vanilla JS
 
@@ -58,9 +58,12 @@ removeRag(el, originalHTML)
 Wait for fonts before measuring:
 
 ```ts
+const originalHTML = el.innerHTML
 await document.fonts.ready
-applyRag(el, el.innerHTML, { sawDepth: 120 })
+applyRag(el, originalHTML, { sawDepth: 120 })
 ```
+
+Capture `originalHTML` before any mutation so the `fonts.ready` call receives clean HTML, not the previously-instrumented markup.
 
 ---
 
@@ -145,7 +148,7 @@ const options: RagOptions = {
 | `applyRag(el, originalHTML, options?)` | Applies the sawtooth rag to `el`. |
 | `removeRag(el, originalHTML)` | Restores `el` to its original HTML. |
 | `getCleanHTML(el)` | Returns the element's current HTML with all injected spans removed. |
-| `useRag(options?)` | React hook — returns a ref. Attaches, measures, and re-runs on resize. |
+| `useRag(options?)` | React hook — returns `{ ref }`. Attach `ref` to any block element. Measures and re-runs on resize. |
 | `RagText` | React component wrapper around `useRag`. |
 | `RagOptions` | TypeScript interface for all options. |
 | `RagValue` | Type for size options (`number \| string`). |

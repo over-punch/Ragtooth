@@ -3,13 +3,11 @@ import React, { forwardRef } from 'react'
 import { useRag } from './useRag'
 import type { RagOptions } from '../core/types'
 
-export interface RagTextProps extends RagOptions {
+export interface RagTextProps extends RagOptions, React.HTMLAttributes<HTMLElement> {
 	/** Text content to adjust. String children are tracked automatically — no key prop needed on content change. */
 	children: React.ReactNode
 	/** HTML element to render. @default "p" */
 	as?: React.ElementType
-	className?: string
-	style?: React.CSSProperties
 }
 
 /**
@@ -31,7 +29,7 @@ export interface RagTextProps extends RagOptions {
  * For non-string children (JSX nodes), pass a key prop if content changes dynamically.
  */
 export const RagText = forwardRef<HTMLElement, RagTextProps>(function RagText(
-	{ children, as: Tag = 'p', sawDepth, sawPeriod, sawPhase, maxTracking, ragDifference, sawAlign, resize, className, style },
+	{ children, as: Tag = 'p', sawDepth, sawPeriod, sawPhase, maxTracking, ragDifference, sawAlign, resize, ...htmlProps },
 	forwardedRef,
 ) {
 	// Derive a stable content key from string children so the hook can
@@ -40,7 +38,8 @@ export const RagText = forwardRef<HTMLElement, RagTextProps>(function RagText(
 
 	const { ref } = useRag({ sawDepth, sawPeriod, sawPhase, maxTracking, ragDifference, sawAlign, resize }, contentKey)
 
-	// Merge the internal ref with any forwarded ref
+	// Merge the internal ref with any forwarded ref using a callback ref so the
+	// hook's internal ref (which may be readonly in React 19) is assigned safely.
 	const mergedRef = (el: HTMLElement | null) => {
 		;(ref as React.MutableRefObject<HTMLElement | null>).current = el
 		if (typeof forwardedRef === 'function') {
@@ -50,8 +49,10 @@ export const RagText = forwardRef<HTMLElement, RagTextProps>(function RagText(
 		}
 	}
 
+	// Spread remaining HTML attributes (aria-*, role, id, data-*, className, style, etc.)
+	// so consumers can attach accessibility and test attributes without a wrapper element.
 	return (
-		<Tag ref={mergedRef} className={className} style={style}>
+		<Tag ref={mergedRef} {...htmlProps}>
 			{children}
 		</Tag>
 	)

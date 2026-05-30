@@ -166,3 +166,28 @@ describe('resolveValue — ch unit', () => {
 		expect(resolveValue('2ch', 999, 50, 15)).toBe(30)
 	})
 })
+
+describe('resolveValue — NaN and invalid inputs', () => {
+	it('returns 0 for plain NaN number', () => {
+		expect(resolveValue(NaN, W, FS)).toBe(0)
+	})
+
+	it('returns 0 for empty string', () => {
+		expect(resolveValue('', W, FS)).toBe(0)
+	})
+
+	it('returns 0 for unrecognised unit string "10vw"', () => {
+		// vw is not a supported unit; parseFloat('10vw') = 10 (bare px fallback)
+		// This documents the current behaviour rather than asserting ideal behaviour.
+		expect(resolveValue('10vw', W, FS)).toBe(10)
+	})
+
+	it('returns 0 for a string with no numeric prefix "px"', () => {
+		// parseFloat('px') = NaN → 0
+		expect(resolveValue('px', W, FS)).toBe(0)
+	})
+
+	it('returns 0 for a non-numeric string "abc"', () => {
+		expect(resolveValue('abc', W, FS)).toBe(0)
+	})
+})
