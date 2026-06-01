@@ -44,6 +44,7 @@ export const metadata: Metadata = {
 		title: "Ragtooth — Sawtooth rag for the web",
 		description:
 			"Shape your text into a sawtooth rag. Works with React, vanilla JS, or any framework. A typographic technique from editorial typesetting, now in one fully-typed npm package.",
+		images: ["https://ragtooth.com/opengraph-image"],
 	},
 	metadataBase: new URL("https://ragtooth.com"),
 	alternates: { canonical: "https://ragtooth.com" },

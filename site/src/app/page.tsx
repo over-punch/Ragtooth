@@ -26,6 +26,7 @@ export default function Home() {
 						href="https://github.com/Liiift-Studio/Ragtooth"
 						target="_blank"
 						rel="noopener noreferrer"
+						aria-label="Ragtooth on GitHub (opens in new tab)"
 						className="text-sm opacity-50 hover:opacity-100 transition-opacity"
 					>
 						GitHub ↗
@@ -33,13 +34,13 @@ export default function Home() {
 				</div>
 				<div className="flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-50 tracking-wide">
 					<span>TypeScript</span>
-					<span>·</span>
+					<span aria-hidden="true">·</span>
 					<span>Zero dependencies</span>
-					<span>·</span>
+					<span aria-hidden="true">·</span>
 					<span>React + Vanilla JS</span>
-					<span>·</span>
+					<span aria-hidden="true">·</span>
 					<span>CJK · Arabic · Thai</span>
-					<span>·</span>
+					<span aria-hidden="true">·</span>
 					<span>~2.7kb gzipped</span>
 				</div>
 				<p className="text-base opacity-60 leading-relaxed max-w-lg">
@@ -52,7 +53,7 @@ export default function Home() {
 
 			{/* Interactive demo */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-4">
-				<p className="text-xs uppercase tracking-widest opacity-50">Live demo — drag the sliders</p>
+				<h2 className="text-xs uppercase tracking-widest opacity-50">Live demo — drag the sliders</h2>
 				<div className="rounded-xl -mx-8 px-8 py-8" style={{ background: "rgba(0,0,0,0.25)", overflow: 'hidden' }}>
 					<Demo />
 				</div>
@@ -60,7 +61,7 @@ export default function Home() {
 
 			{/* What is sawtooth rag */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
-				<p className="text-xs uppercase tracking-widest opacity-50">What is sawtooth rag?</p>
+				<h2 className="text-xs uppercase tracking-widest opacity-50">What is sawtooth rag?</h2>
 				<div className="prose-grid grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
 					<div className="flex flex-col gap-3">
 						<p className="font-semibold opacity-100 text-base">The problem with smooth rag</p>
@@ -86,7 +87,7 @@ export default function Home() {
 			{/* Usage */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<div className="flex items-baseline gap-4">
-					<p className="text-xs uppercase tracking-widest opacity-50">Usage</p>
+					<h2 className="text-xs uppercase tracking-widest opacity-50">Usage</h2>
 					<p className="text-xs opacity-50 tracking-wide">TypeScript + React · Vanilla JS</p>
 				</div>
 				<div className="flex flex-col gap-8 text-sm">
@@ -107,15 +108,20 @@ const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 					</div>
 				<div className="flex flex-col gap-3">
 					<p className="opacity-50">Vanilla JS</p>
-					<CodeBlock code={`import { applyRag, removeRag } from '@liiift-studio/ragtooth'
+					<CodeBlock code={`import { applyRag, removeRag, getCleanHTML } from '@liiift-studio/ragtooth'
 
 const el = document.querySelector('p')
-const original = el.innerHTML
-applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
+// getCleanHTML strips any previously-injected spans before storing original HTML
+const original = getCleanHTML(el)
+applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })
+
+// To remove the effect and restore original markup:
+removeRag(el, original)`} />
 				</div>
 					<div className="flex flex-col gap-3">
 						<p className="opacity-50">Options</p>
 						<table className="w-full text-xs">
+							<caption className="sr-only">Ragtooth options</caption>
 							<thead>
 								<tr className="opacity-50 text-left">
 									<th className="pb-2 pr-6 font-normal">Option</th>
@@ -127,17 +133,17 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">sawDepth</td>
 									<td className="py-2 pr-6">80</td>
-									<td className="py-2">How much shorter the short lines are. Higher = more pronounced sawtooth. Accepts px, %, em, rem, ch.</td>
+									<td className="py-2">How much shorter the short lines are, in px. Higher = more pronounced sawtooth. Also accepts %, em, rem, ch as a string.</td>
 								</tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">sawPeriod</td>
 									<td className="py-2 pr-6">2</td>
-									<td className="py-2">Lines per cycle. 2 = every other line short, 3 = two full then one short.</td>
+									<td className="py-2">Number of lines per cycle. With period 2 the pattern is long–short–long–short. With period 3 it is long–long–short. The short line&apos;s position within the cycle is controlled by sawPhase.</td>
 								</tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">sawPhase</td>
 									<td className="py-2 pr-6">sawPeriod</td>
-									<td className="py-2">Which line within each cycle is shortened (1-indexed). Default is the last line of each cycle. Use with sawPeriod to place the short line exactly where you want it.</td>
+									<td className="py-2">Which line within each cycle is shortened (1-indexed). Defaults to the last line of each cycle. Use with sawPeriod to place the short line exactly where you want it.</td>
 								</tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">sawAlign</td>
@@ -147,12 +153,17 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })`} />
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">maxTracking</td>
 									<td className="py-2 pr-6">0.7</td>
-									<td className="py-2">Max letter-spacing (px, em, rem). Keeps lines from being stretched into oblivion.</td>
+									<td className="py-2">Max letter-spacing in px (also accepts em, rem). Keeps lines from being stretched into oblivion.</td>
 								</tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">resize</td>
 									<td className="py-2 pr-6">true</td>
 									<td className="py-2">Re-runs the algorithm on container resize via ResizeObserver. Set false for static layouts.</td>
+								</tr>
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors opacity-40">
+									<td className="py-2 pr-6 font-mono">ragDifference</td>
+									<td className="py-2 pr-6">—</td>
+									<td className="py-2">Deprecated alias for sawDepth. Will be removed in a future major version.</td>
 								</tr>
 							</tbody>
 						</table>
