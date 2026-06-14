@@ -14,10 +14,10 @@ export default function Home() {
 			{/* Hero */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<div className="flex flex-col gap-2">
-					<p className="text-xs uppercase tracking-widest opacity-50">ragtooth</p>
+					<p className="text-xs uppercase tracking-[0.18em] font-medium text-muted">ragtooth</p>
 					<h1 className="text-4xl lg:text-8xl xl:text-9xl" style={{ fontFamily: "var(--font-merriweather), serif", fontVariationSettings: '"wght" 300, "opsz" 144', lineHeight: "1.05em" }}>
 						<MagnetChar as="span" minWeight={300} maxWeight={800} spreadRadius={220} fixedAxes={{ opsz: 144 }}>A Sawtooth Rag,</MagnetChar><br />
-						<MagnetChar as="span" minWeight={300} maxWeight={800} spreadRadius={220} fixedAxes={{ opsz: 144 }} style={{ opacity: 0.5, fontStyle: "italic" }}>on the web.</MagnetChar>
+						<MagnetChar as="span" minWeight={300} maxWeight={800} spreadRadius={220} fixedAxes={{ opsz: 144 }} style={{ color: "var(--foreground-subtle)", fontStyle: "italic" }}>on the web.</MagnetChar>
 					</h1>
 				</div>
 				<div className="flex items-center gap-4">
@@ -27,12 +27,12 @@ export default function Home() {
 						target="_blank"
 						rel="noopener noreferrer"
 						aria-label="Ragtooth on GitHub (opens in new tab)"
-						className="text-sm opacity-50 hover:opacity-100 transition-opacity"
+						className="text-sm text-muted hover:text-foreground transition-colors"
 					>
 						GitHub ↗
 					</a>
 				</div>
-				<div className="flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-50 tracking-wide">
+				<div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted tracking-wide">
 					<span>TypeScript</span>
 					<span aria-hidden="true">·</span>
 					<span>Zero dependencies</span>
@@ -43,7 +43,7 @@ export default function Home() {
 					<span aria-hidden="true">·</span>
 					<span>~2.7kb gzipped</span>
 				</div>
-				<p className="text-base opacity-60 leading-relaxed max-w-lg">
+				<p className="text-base text-muted leading-relaxed max-w-lg">
 					Most tools fight your rag. Ragtooth works with it — shaping text into a
 					sawtooth pattern of alternating long and short lines. The kind of rhythm that
 					reads as design, not accident. A technique from editorial typesetting, now
@@ -53,7 +53,7 @@ export default function Home() {
 
 			{/* Interactive demo */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-4">
-				<h2 className="text-xs uppercase tracking-widest opacity-50">Live demo — drag the sliders</h2>
+				<h2 className="text-xs uppercase tracking-[0.18em] font-medium text-muted">Live demo — drag the sliders</h2>
 				<div className="rounded-xl -mx-8 px-8 py-8" style={{ background: "rgba(0,0,0,0.25)", overflow: 'hidden' }}>
 					<Demo />
 				</div>
@@ -61,10 +61,10 @@ export default function Home() {
 
 			{/* What is sawtooth rag */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
-				<h2 className="text-xs uppercase tracking-widest opacity-50">What is sawtooth rag?</h2>
-				<div className="prose-grid grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
+				<h2 className="text-xs uppercase tracking-[0.18em] font-medium text-muted">What is sawtooth rag?</h2>
+				<div className="prose-grid grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed text-muted">
 					<div className="flex flex-col gap-3">
-						<p className="font-semibold opacity-100 text-base">The problem with smooth rag</p>
+						<p className="font-semibold text-foreground text-base">The problem with smooth rag</p>
 						<p>
 							When text is set ragged-right, natural line endings create an
 							unpredictable right edge — notches, peninsulas, near-rivers. It can look
@@ -73,7 +73,7 @@ export default function Home() {
 						</p>
 					</div>
 					<div className="flex flex-col gap-3">
-						<p className="font-semibold opacity-100 text-base">The case for sawtooth rag</p>
+						<p className="font-semibold text-foreground text-base">The case for sawtooth rag</p>
 						<p>
 							A sawtooth pattern — long line, short line, long line — gives the rag a
 							rhythm. Structured, not random. The eye reads it as a choice. Book
@@ -87,12 +87,12 @@ export default function Home() {
 			{/* Usage */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<div className="flex items-baseline gap-4">
-					<h2 className="text-xs uppercase tracking-widest opacity-50">Usage</h2>
-					<p className="text-xs opacity-50 tracking-wide">TypeScript + React · Vanilla JS</p>
+					<h2 className="text-xs uppercase tracking-[0.18em] font-medium text-muted">Usage</h2>
+					<p className="text-xs text-muted tracking-wide">TypeScript + React · Vanilla JS</p>
 				</div>
 				<div className="flex flex-col gap-8 text-sm">
 					<div className="flex flex-col gap-3">
-						<p className="opacity-50">Drop-in component</p>
+						<p className="text-muted">Drop-in component</p>
 						<CodeBlock code={`import { RagText } from '@liiift-studio/ragtooth'
 
 <RagText sawDepth={120} sawPeriod={2}>
@@ -100,14 +100,14 @@ export default function Home() {
 </RagText>`} />
 					</div>
 					<div className="flex flex-col gap-3">
-						<p className="opacity-50">Hook — attach to any element</p>
+						<p className="text-muted">Hook — attach to any element</p>
 						<CodeBlock code={`import { useRag } from '@liiift-studio/ragtooth'
 
 const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 <p ref={ref}>{children}</p>`} />
 					</div>
 				<div className="flex flex-col gap-3">
-					<p className="opacity-50">Vanilla JS</p>
+					<p className="text-muted">Vanilla JS</p>
 					<CodeBlock code={`import { applyRag, removeRag, getCleanHTML } from '@liiift-studio/ragtooth'
 
 const el = document.querySelector('p')
@@ -119,17 +119,17 @@ applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })
 removeRag(el, original)`} />
 				</div>
 					<div className="flex flex-col gap-3">
-						<p className="opacity-50">Options</p>
+						<p className="text-muted">Options</p>
 						<table className="w-full text-xs">
 							<caption className="sr-only">Ragtooth options</caption>
 							<thead>
-								<tr className="opacity-50 text-left">
+								<tr className="text-subtle text-left">
 									<th className="pb-2 pr-6 font-normal">Option</th>
 									<th className="pb-2 pr-6 font-normal">Default</th>
 									<th className="pb-2 font-normal">Description</th>
 								</tr>
 							</thead>
-							<tbody className="opacity-70">
+							<tbody className="text-muted">
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">sawDepth</td>
 									<td className="py-2 pr-6">80</td>
@@ -160,7 +160,7 @@ removeRag(el, original)`} />
 									<td className="py-2 pr-6">true</td>
 									<td className="py-2">Re-runs the algorithm on container resize via ResizeObserver. Set false for static layouts.</td>
 								</tr>
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors opacity-40">
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors text-faint">
 									<td className="py-2 pr-6 font-mono">ragDifference</td>
 									<td className="py-2 pr-6">—</td>
 									<td className="py-2">Deprecated alias for sawDepth. Will be removed in a future major version.</td>
@@ -168,7 +168,7 @@ removeRag(el, original)`} />
 							</tbody>
 						</table>
 					</div>
-						<p className="text-xs opacity-50 leading-relaxed">
+						<p className="text-xs text-muted leading-relaxed">
 							Word boundaries are detected using <span className="font-mono">Intl.Segmenter</span> when available — correctly splitting CJK (Chinese, Japanese, Korean), Arabic, Thai, and other scripts that don&rsquo;t use spaces as word delimiters. Falls back to a whitespace regex in environments without Segmenter support.
 						</p>
 				</div>
