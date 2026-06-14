@@ -27,7 +27,7 @@ export default async function Image() {
 				}}
 			>
 				{/* Label */}
-				<span style={{ fontSize: 13, letterSpacing: '0.18em', color: '#89968e', textTransform: 'uppercase' }}>
+				<span style={{ fontSize: 13, letterSpacing: '0.18em', color: '#abbdb1', textTransform: 'uppercase' }}>
 					ragtooth
 				</span>
 
@@ -49,14 +49,14 @@ export default async function Image() {
 					<div style={{ fontSize: 76, color: '#d8eee0', lineHeight: 1.06, fontWeight: 300 }}>
 						A Sawtooth Rag,
 					</div>
-					<div style={{ fontSize: 76, color: '#89968e', lineHeight: 1.06, fontWeight: 300 }}>
+					<div style={{ fontSize: 76, color: '#abbdb1', lineHeight: 1.06, fontWeight: 300 }}>
 						on the web.
 					</div>
 				</div>
 
 				{/* Footer */}
 				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-					<div style={{ fontSize: 14, color: '#89968e', letterSpacing: '0.04em', display: 'flex', gap: 20 }}>
+					<div style={{ fontSize: 14, color: '#abbdb1', letterSpacing: '0.04em', display: 'flex', gap: 20 }}>
 						<span>TypeScript</span>
 						<span style={{ opacity: 0.4 }}>·</span>
 						<span>Zero dependencies</span>
@@ -65,7 +65,7 @@ export default async function Image() {
 						<span style={{ opacity: 0.4 }}>·</span>
 						<span>~2.7kb gzipped</span>
 					</div>
-					<div style={{ fontSize: 13, color: '#6a756e', letterSpacing: '0.04em' }}>
+					<div style={{ fontSize: 13, color: '#89968e', letterSpacing: '0.04em' }}>
 						ragtooth.com
 					</div>
 				</div>
