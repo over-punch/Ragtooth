@@ -43,7 +43,7 @@ export default function Home() {
 					<span aria-hidden="true">·</span>
 					<span>~2.7kb gzipped</span>
 				</div>
-				<p className="text-base text-muted leading-relaxed max-w-lg">
+				<p className="text-base leading-relaxed max-w-lg">
 					Most tools fight your rag. Ragtooth works with it — shaping text into a
 					sawtooth pattern of alternating long and short lines. The kind of rhythm that
 					reads as design, not accident. A technique from editorial typesetting, now
@@ -62,7 +62,7 @@ export default function Home() {
 			{/* What is sawtooth rag */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<h2 className="text-xs uppercase tracking-[0.18em] font-medium text-muted">What is sawtooth rag?</h2>
-				<div className="prose-grid grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed text-muted">
+				<div className="prose-grid grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed">
 					<div className="flex flex-col gap-3">
 						<p className="font-semibold text-foreground text-base">The problem with smooth rag</p>
 						<p>
