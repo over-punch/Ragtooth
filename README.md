@@ -4,9 +4,13 @@
 
 A sawtooth rag, on the web. Shapes text into alternating long/short lines — the kind of typographic rhythm that reads as design, not accident.
 
+The *rag* is the uneven right edge of unjustified text. Left to the browser it falls where it falls. Ragtooth measures each natural line and reshapes that edge into a deliberate, repeating zig-zag — short line, full line, short line — so the paragraph looks composed instead of accidental.
+
+![Before and after: the same paragraph with a natural ragged right edge on the left, and ragtooth's deliberate alternating long/short sawtooth on the right.](https://raw.githubusercontent.com/Liiift-Studio/Ragtooth/main/assets/hero.png?v=1)
+
 **[ragtooth.com](https://ragtooth.com)** · [npm](https://www.npmjs.com/package/@liiift-studio/ragtooth) · [GitHub](https://github.com/Liiift-Studio/Ragtooth)
 
-TypeScript · Zero dependencies · React + Vanilla JS
+TypeScript · Zero dependencies · ~3.3 kB min+gzip · React + Vanilla JS
 
 ---
 
@@ -27,6 +31,21 @@ import { RagText } from '@liiift-studio/ragtooth'
   Your paragraph text here...
 </RagText>
 ```
+
+`RagText` renders a `<p>` by default and forwards every standard HTML attribute, so `className`, `style`, `id`, `aria-*`, and `data-*` pass straight through — no wrapper element needed:
+
+```tsx
+<RagText as="h2" className="lede" sawDepth={40}>
+  A heading with a shaped rag
+</RagText>
+```
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `as` | `ElementType` | `"p"` | The element to render. |
+| `children` | `ReactNode` | — | The text to shape. String children are re-measured automatically when they change — no `key` prop required. For JSX children that change, pass a `key`. |
+| *(all `RagOptions`)* | — | — | `sawDepth`, `sawPeriod`, `sawPhase`, `sawAlign`, `maxTracking`, `resize` — see [Options](#options). |
+| *(any HTML attribute)* | — | — | `className`, `style`, `id`, `aria-*`, `data-*`, etc. are forwarded to the rendered element. |
 
 ### Hook
 
@@ -76,9 +95,33 @@ Ragtooth measures each line's natural width by wrapping every word in a span, re
 
 The algorithm never changes how text flows. It reads the browser's natural line breaks, then constrains them. `ResizeObserver` re-runs on any container width change.
 
+Calling `applyRag` again is safe — it resets to the supplied `originalHTML` before re-measuring, so repeated calls (e.g. on resize) never compound.
+
+---
+
+## Accessibility
+
+Ragtooth shapes the *visual* edge of a paragraph; the reading order, words, and text content are unchanged. A few things worth knowing because the effect works by mutating the DOM:
+
+- **Word wrapping.** Each word is wrapped in an inline `<span>` to measure it. Inline spans don't introduce new word boundaries, so screen readers still announce the paragraph as continuous text.
+- **Letter-spacing.** Short lines are filled with `letter-spacing` up to `maxTracking`. Keep `maxTracking` modest (the `0.7` default is conservative) so spacing stays within comfortable reading limits — this respects [WCAG 1.4.12 Text Spacing](https://www.w3.org/WAI/WCAG21/Understand/text-spacing.html), which expects text to remain readable when users override spacing.
+- **Reset for export.** `getCleanHTML(el)` returns the markup with every injected span removed — use it before serialising, copying, or persisting content so you store clean HTML, not instrumented markup.
+- **Best on body copy.** Like all rag shaping, it reads best on left-aligned, unjustified prose. It is decorative: if `letter-spacing` is set very high it can hurt legibility, so tune `sawDepth`/`maxTracking` to taste.
+
+---
+
+## Compatibility
+
+- **Browsers** — any evergreen browser. Relies on [`ResizeObserver`](https://caniuse.com/resizeobserver) and [`document.fonts.ready`](https://caniuse.com/mdn-api_fontfaceset_ready), both supported in Chrome/Edge 64+, Firefox 69+, and Safari 11.1+.
+- **SSR** — the core guards on `typeof window` and no-ops on the server; the React entry points need a browser (see [Next.js](#nextjs)).
+- **React** — optional peer dependency, `react`/`react-dom` `>=17`. The vanilla API has no peer deps at all.
+- **Size** — ~3.3 kB min+gzip, zero runtime dependencies.
+
 ---
 
 ## Options
+
+**Recommended starting point:** `sawDepth: 120, sawPeriod: 2` for body copy at a comfortable measure (~60–75 characters), then tune `sawDepth` up for a more dramatic zig-zag or down for a subtler one. Leave the rest at their defaults to begin with.
 
 | Option | Type | Default | Description |
 |---|---|---|---|
@@ -164,6 +207,29 @@ const options: RagOptions = {
 "use client"
 import { RagText } from '@liiift-studio/ragtooth'
 ```
+
+---
+
+## Development
+
+```bash
+git clone https://github.com/Liiift-Studio/Ragtooth.git
+cd Ragtooth
+npm install
+
+npm run build      # bundle to dist/ (Vite, ESM + CJS + .d.ts)
+npm test           # run the unit tests (Vitest, happy-dom)
+npm run typecheck  # tsc --noEmit
+npm run capture    # regenerate the README hero image (assets/hero.png)
+```
+
+The source is organised the same way as the rest of the [type-tools](https://github.com/Liiift-Studio/type-tools) suite:
+
+- `src/core/` — the framework-agnostic algorithm (`adjust.ts`), options resolver (`resolve.ts`), and shared types. No React imports.
+- `src/react/` — the `useRag` hook and `RagText` component.
+- `src/__tests__/` — Vitest unit tests for the core, resolver, types, and React layers.
+
+Issues and PRs are welcome at [github.com/Liiift-Studio/Ragtooth](https://github.com/Liiift-Studio/Ragtooth/issues).
 
 ---
 

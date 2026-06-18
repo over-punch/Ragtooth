@@ -1,0 +1,96 @@
+<!doctype html>
+<!-- README visual harness for ragtooth — rendered headless by scripts/capture.mjs. Not shipped in the npm package. -->
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>ragtooth capture</title>
+		<style>
+			/* Tool theme — mirrors site/src/app/globals.css */
+			@font-face {
+				font-family: "Merriweather";
+				src: url("/site/public/fonts/Merriweather.woff2") format("woff2");
+				font-weight: 400;
+				font-display: block;
+			}
+			:root {
+				--background: oklch(0.12 0.04 158);
+				--foreground: oklch(0.97 0.008 158);
+				--foreground-subtle: oklch(0.66 0.02 158);
+			}
+			html,
+			body {
+				margin: 0;
+				background: transparent;
+			}
+			body {
+				font-family: "Merriweather", Georgia, serif;
+				-webkit-font-smoothing: antialiased;
+			}
+			.scene {
+				display: flex;
+				gap: 40px;
+				padding: 48px;
+				width: 1120px;
+				box-sizing: border-box;
+				background: var(--background);
+				border-radius: 20px;
+			}
+			.panel {
+				flex: 1;
+				min-width: 0;
+			}
+			.label {
+				font-family: "Merriweather", Georgia, serif;
+				font-size: 13px;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--foreground-subtle);
+				margin: 0 0 18px;
+			}
+			.panel p {
+				font-size: 21px;
+				line-height: 1.5;
+				color: var(--foreground);
+				margin: 0;
+			}
+			/* Faint guide rule at the right edge so the rag shape reads clearly */
+			.panel {
+				border-right: 1px dashed color-mix(in oklch, var(--foreground-subtle) 45%, transparent);
+				padding-right: 22px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="scene" id="hero">
+			<div class="panel">
+				<p class="label">Natural rag</p>
+				<p id="before"></p>
+			</div>
+			<div class="panel">
+				<p class="label">ragtooth</p>
+				<p id="after"></p>
+			</div>
+		</div>
+
+		<script type="module">
+			import { applyRag } from "/_core.mjs"
+
+			const COPY =
+				"Typography is the craft of endowing human language with a durable visual form. " +
+				"A ragged right edge should feel composed, not careless. ragtooth shapes the rag " +
+				"into a deliberate sawtooth so the paragraph reads as design rather than accident."
+
+			const before = document.getElementById("before")
+			const after = document.getElementById("after")
+			before.textContent = COPY
+			after.textContent = COPY
+
+			window.__ready = (async () => {
+				await document.fonts.ready
+				// Apply a pronounced sawtooth so the shape is unmistakable in a still image.
+				applyRag(after, after.innerHTML, { sawDepth: 120, sawPeriod: 2, maxTracking: 0.7 })
+				return true
+			})()
+		</script>
+	</body>
+</html>
