@@ -195,7 +195,10 @@ describe('widow removal', () => {
 		const restore = mockOffsetWidth(el, 100)
 		const original = el.innerHTML
 		applyRag(el, original)
-		const text = el.querySelector('p')?.innerHTML ?? ''
+		// happy-dom 20 serializes the nbsp character as the &nbsp; entity in innerHTML,
+		// so assert against the live DOM textContent (which holds the real \u00a0 char)
+		// rather than the serialized markup.
+		const text = el.querySelector('p')?.textContent ?? ''
 		expect(text).toContain('\u00a0')
 		restore()
 	})
@@ -215,7 +218,8 @@ describe('widow removal', () => {
 		const original = el.innerHTML
 		applyRag(el, original)
 		const paras = el.querySelectorAll('p')
-		paras.forEach((p) => expect(p.innerHTML).toContain('\u00a0'))
+		// Assert against textContent \u2014 happy-dom 20 serializes nbsp as &nbsp; in innerHTML.
+		paras.forEach((p) => expect(p.textContent).toContain('\u00a0'))
 		restore()
 	})
 })
