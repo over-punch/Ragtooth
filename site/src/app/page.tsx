@@ -130,37 +130,37 @@ removeRag(el, original)`} />
 								</tr>
 							</thead>
 							<tbody className="text-muted">
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
+								<tr className="border-t border-foreground/10 hover:bg-foreground/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">sawDepth</td>
 									<td className="py-2 pr-6">80</td>
 									<td className="py-2">How much shorter the short lines are, in px. Higher = more pronounced sawtooth. Also accepts %, em, rem, ch as a string.</td>
 								</tr>
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
+								<tr className="border-t border-foreground/10 hover:bg-foreground/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">sawPeriod</td>
 									<td className="py-2 pr-6">2</td>
 									<td className="py-2">Number of lines per cycle. With period 2 the pattern is long–short–long–short. With period 3 it is long–long–short. The short line&apos;s position within the cycle is controlled by sawPhase.</td>
 								</tr>
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
+								<tr className="border-t border-foreground/10 hover:bg-foreground/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">sawPhase</td>
 									<td className="py-2 pr-6">sawPeriod</td>
 									<td className="py-2">Which line within each cycle is shortened (1-indexed). Defaults to the last line of each cycle. Use with sawPeriod to place the short line exactly where you want it.</td>
 								</tr>
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
+								<tr className="border-t border-foreground/10 hover:bg-foreground/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">sawAlign</td>
 									<td className="py-2 pr-6">&apos;top&apos;</td>
 									<td className="py-2">Anchor the cycle to the top or bottom of the block. <span className="font-mono">&apos;bottom&apos;</span> with sawPeriod&nbsp;3 keeps the last two lines full — no awkward short penultimate line.</td>
 								</tr>
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
+								<tr className="border-t border-foreground/10 hover:bg-foreground/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">maxTracking</td>
 									<td className="py-2 pr-6">0.7</td>
 									<td className="py-2">Max letter-spacing in px (also accepts em, rem). Keeps lines from being stretched into oblivion.</td>
 								</tr>
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors">
+								<tr className="border-t border-foreground/10 hover:bg-foreground/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">resize</td>
 									<td className="py-2 pr-6">true</td>
 									<td className="py-2">Re-runs the algorithm on container resize via ResizeObserver. Set false for static layouts.</td>
 								</tr>
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors text-faint">
+								<tr className="border-t border-foreground/10 hover:bg-foreground/5 transition-colors text-faint">
 									<td className="py-2 pr-6 font-mono">ragDifference</td>
 									<td className="py-2 pr-6">—</td>
 									<td className="py-2">Deprecated alias for sawDepth. Will be removed in a future major version.</td>
