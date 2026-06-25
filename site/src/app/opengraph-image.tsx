@@ -16,7 +16,7 @@ export default async function Image() {
 		(
 			<div
 				style={{
-					background: '#000902',
+					background: '#560356',
 					width: '100%',
 					height: '100%',
 					display: 'flex',
@@ -27,7 +27,7 @@ export default async function Image() {
 				}}
 			>
 				{/* Label */}
-				<span style={{ fontSize: 13, letterSpacing: '0.18em', color: '#abbdb1', textTransform: 'uppercase' }}>
+				<span style={{ fontSize: 13, letterSpacing: '0.18em', color: '#c7b8c6', textTransform: 'uppercase' }}>
 					ragtooth
 				</span>
 
@@ -40,23 +40,23 @@ export default async function Image() {
 								style={{
 									width: `${scale * 600}px`,
 									height: 3,
-									background: i % 2 === 0 ? '#abbdb1' : '#29302b',
+									background: i % 2 === 0 ? '#c7b8c6' : '#80777f',
 									borderRadius: 2,
 								}}
 							/>
 						))}
 					</div>
-					<div style={{ fontSize: 76, color: '#d8eee0', lineHeight: 1.06, fontWeight: 300 }}>
+					<div style={{ fontSize: 76, color: '#f8f3f8', lineHeight: 1.06, fontWeight: 300 }}>
 						A Sawtooth Rag,
 					</div>
-					<div style={{ fontSize: 76, color: '#abbdb1', lineHeight: 1.06, fontWeight: 300 }}>
+					<div style={{ fontSize: 76, color: '#c7b8c6', lineHeight: 1.06, fontWeight: 300 }}>
 						on the web.
 					</div>
 				</div>
 
 				{/* Footer */}
 				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-					<div style={{ fontSize: 14, color: '#abbdb1', letterSpacing: '0.04em', display: 'flex', gap: 20 }}>
+					<div style={{ fontSize: 14, color: '#c7b8c6', letterSpacing: '0.04em', display: 'flex', gap: 20 }}>
 						<span>TypeScript</span>
 						<span style={{ opacity: 0.4 }}>·</span>
 						<span>Zero dependencies</span>
@@ -65,7 +65,7 @@ export default async function Image() {
 						<span style={{ opacity: 0.4 }}>·</span>
 						<span>~2.7kb gzipped</span>
 					</div>
-					<div style={{ fontSize: 13, color: '#89968e', letterSpacing: '0.04em' }}>
+					<div style={{ fontSize: 13, color: '#9f949f', letterSpacing: '0.04em' }}>
 						ragtooth.com
 					</div>
 				</div>
