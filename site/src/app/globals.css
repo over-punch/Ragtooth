@@ -3,10 +3,10 @@
 @import "./base.css";
 
 :root {
-	--background: oklch(0.12 0.0400 158);
-	--foreground: oklch(0.97 0.008 158);
-	--foreground-muted: oklch(0.78 0.025 158);
-	--foreground-subtle: oklch(0.66 0.020 158);
-	--foreground-faint: oklch(0.55 0.016 158);
-	--btn-bg: oklch(0.19 0.0240 158);
+	--background: oklch(0.320 0.1437 328);
+	--foreground: oklch(0.970 0.0080 328);
+	--foreground-muted: oklch(0.800 0.0250 328);
+	--foreground-subtle: oklch(0.680 0.0200 328);
+	--foreground-faint: oklch(0.580 0.0160 328);
+	--btn-bg: oklch(0.420 0.1076 328);
 }
