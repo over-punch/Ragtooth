@@ -1,0 +1,83 @@
+<!doctype html>
+<!-- ragtooth/webflow/harness.html — local proof page for the Webflow embed bundle.
+     Serve this directory (or open the file) after running `npm run build:webflow`, which
+     emits ../dist/ragtooth.webflow.min.js. No build step is needed to view it. -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>ragtooth — Webflow embed harness</title>
+	<!-- ragtooth shapes the rag with letter-spacing, so any font works. A serif with a
+	     clear rag reads best; EB Garamond is loaded here just for looks. -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+	<style>
+		body {
+			margin: 0;
+			padding: 4rem 2rem;
+			background: #14110f;
+			color: #efe7dd;
+			font-family: 'EB Garamond', Georgia, serif;
+			display: flex;
+			justify-content: center;
+		}
+		.stage {
+			width: 100%;
+			max-width: 640px;
+		}
+		h1 {
+			font-size: 0.8rem;
+			letter-spacing: 0.15em;
+			text-transform: uppercase;
+			opacity: 0.5;
+			font-family: system-ui, sans-serif;
+			margin: 0 0 2rem;
+		}
+		.copy {
+			font-size: 1.6rem;
+			line-height: 1.35;
+		}
+		/* A faint right edge so the sawtooth against full width is obvious. */
+		.stage { border-right: 1px dashed rgba(255,255,255,0.18); padding-right: 1rem; }
+	</style>
+</head>
+<body>
+	<div class="stage">
+		<h1>ragtooth · webflow embed</h1>
+		<!-- Opt in with data-ragtooth. Options are read from data-rt-* attributes:
+		     saw-period 3 = two full lines then one short; saw-align bottom keeps the
+		     final line full; saw-depth 90px is the pull-in of short lines. -->
+		<div
+			class="copy"
+			data-ragtooth
+			data-rt-saw-depth="90"
+			data-rt-saw-period="3"
+			data-rt-saw-align="bottom"
+			data-rt-max-tracking="0.06em"
+		>
+			The saw rag is a deliberate act of typesetting: rather than let the
+			browser fall the line endings where it may, ragtooth measures each word,
+			predicts the break points, and pulls chosen lines short so the right edge
+			marches in a repeating sawtooth. Resize the window and the pattern
+			re-computes against the new width.
+		</div>
+	</div>
+
+	<!-- The single self-contained bundle. Exposes window.Ragtooth = { init, refit, destroy }. -->
+	<script src="../dist/ragtooth.webflow.min.js"></script>
+
+	<!--
+		WHAT "WORKING" LOOKS LIKE:
+		• On load, the paragraph's right edge is uneven in a deliberate pattern — every
+		  third line is pulled noticeably short (saw-period 3), while the LAST line stays
+		  full width (saw-align bottom).
+		• Short lines get a touch of extra letter-spacing (up to 0.06em) to fill toward
+		  their target width — never stretched grotesquely.
+		• Resizing the browser re-runs the fit: line breaks and the sawtooth recompute
+		  against the new container width (throttled to one pass per frame).
+		• In the console, `Ragtooth.destroy(document.querySelector('[data-ragtooth]'))`
+		  restores the plain, un-ragged paragraph; `Ragtooth.init()` re-applies it.
+	-->
+</body>
+</html>
