@@ -1,6 +1,6 @@
 {
 	"name": "@liiift-studio/ragtooth",
-	"version": "1.2.28",
+	"version": "1.2.29",
 	"description": "Deliberate sawtooth rag for the web — works with React, vanilla JS, or any framework",
 	"type": "module",
 	"main": "./dist/index.cjs",
