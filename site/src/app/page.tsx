@@ -5,6 +5,7 @@ import ToolDirectory from "@/components/ToolDirectory"
 import { version } from "../../../package.json"
 import { version as siteVersion } from "../../package.json"
 import SiteFooter from "../components/SiteFooter"
+import PortsSection from "../components/PortsSection"
 import { MagnetChar } from "@liiift-studio/magnettype"
 
 export default function Home() {
@@ -173,6 +174,14 @@ removeRag(el, original)`} />
 						</p>
 				</div>
 			</section>
+
+			<PortsSection
+				npm="@liiift-studio/ragtooth"
+				bundle="ragtooth"
+				attr="data-ragtooth"
+				framerComponent="Ragtooth"
+				repo="Liiift-Studio/Ragtooth"
+			/>
 
 			<SiteFooter current="ragtooth" npmVersion={version} siteVersion={siteVersion} />
 
