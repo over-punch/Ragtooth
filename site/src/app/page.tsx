@@ -178,7 +178,7 @@ removeRag(el, original)`} />
 			<PortsSection
 				npm="@liiift-studio/ragtooth"
 				bundle="ragtooth"
-				attr="data-ragtooth"
+				attr="data-ragtooth" figma="partial"
 				framerComponent="Ragtooth"
 				repo="Liiift-Studio/Ragtooth"
 			/>
