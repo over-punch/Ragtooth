@@ -1,55 +1,30 @@
 import Demo from "@/components/Demo"
-import CopyInstall from "@/components/CopyInstall"
+import Hero from "@/components/Hero"
 import CodeBlock from "@/components/CodeBlock"
 import { version } from "../../../package.json"
 import { version as siteVersion } from "../../package.json"
 import SiteFooter from "../components/SiteFooter"
 import PortsSection from "../components/PortsSection"
-import { MagnetChar } from "@liiift-studio/magnettype"
 
 export default function Home() {
 	return (
 		<main className="flex flex-col items-center px-6 py-20 gap-24">
 
 			{/* Hero */}
-			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
-				<div className="flex flex-col gap-2">
-					<p className="text-xs uppercase tracking-[0.18em] font-medium text-muted">sawtooth rag shaping</p>
-					<h1 className="text-4xl lg:text-8xl xl:text-9xl" style={{ fontFamily: "var(--font-merriweather), serif", fontVariationSettings: '"wght" 300, "opsz" 144', lineHeight: "1.05em" }}>
-						<MagnetChar as="span" minWeight={300} maxWeight={800} spreadRadius={220} fixedAxes={{ opsz: 144 }}>A Sawtooth Rag,</MagnetChar><br />
-						<MagnetChar as="span" minWeight={300} maxWeight={800} spreadRadius={220} fixedAxes={{ opsz: 144 }} style={{ color: "var(--foreground-subtle)", fontStyle: "italic" }}>on the web.</MagnetChar>
-					</h1>
-				</div>
-				<div className="flex flex-wrap items-center gap-4">
-					<CopyInstall />
-					<a
-						href="https://github.com/Liiift-Studio/Ragtooth"
-						target="_blank"
-						rel="noopener noreferrer"
-						aria-label="Ragtooth on GitHub (opens in new tab)"
-						className="text-sm text-muted hover:text-foreground transition-colors"
-					>
-						GitHub ↗
-					</a>
-				</div>
-				<div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted tracking-wide">
-					<span>TypeScript</span>
-					<span aria-hidden="true">·</span>
-					<span>Zero dependencies</span>
-					<span aria-hidden="true">·</span>
-					<span>React + Vanilla JS</span>
-					<span aria-hidden="true">·</span>
-					<span>CJK · Arabic · Thai</span>
-					<span aria-hidden="true">·</span>
-					<span>~2.7kb gzipped</span>
-				</div>
+			<Hero
+				eyebrow="sawtooth rag shaping"
+				title={[{ text: "A Sawtooth Rag," }, { text: "on the web.", italic: true, subtle: true }]}
+				install="@liiift-studio/ragtooth"
+				github="https://github.com/Liiift-Studio/Ragtooth"
+				tech={["TypeScript", "Zero dependencies", "React + Vanilla JS", "CJK · Arabic · Thai", "~2.7kb gzipped"]}
+			>
 				<p className="text-base leading-relaxed max-w-lg">
 					Most tools fight your rag. Ragtooth works with it — shaping text into a
 					sawtooth pattern of alternating long and short lines. The kind of rhythm that
 					reads as design, not accident. A technique from editorial typesetting, now
 					in one fully-typed npm package.
 				</p>
-			</section>
+			</Hero>
 
 			{/* Interactive demo */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-4">
