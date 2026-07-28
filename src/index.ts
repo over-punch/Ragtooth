@@ -9,5 +9,5 @@ export type { RagTextProps } from './react/RagText'
 export { applyRag, removeRag, getCleanHTML } from './core/adjust'
 
 // Types
-export type { RagOptions } from './core/types'
+export type { RagOptions, RagValue } from './core/types'
 export { RAG_CLASSES } from './core/types'
