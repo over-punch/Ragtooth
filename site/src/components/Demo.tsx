@@ -168,10 +168,11 @@ export default function Demo() {
 
 	// Keep sawPhase in range when sawPeriod changes — clamp both the effective value
 	// passed to RagText AND the slider state so the displayed label stays in sync.
+	// Adjusted during render rather than in an effect: React re-runs the component
+	// immediately without committing the intermediate paint, so there is no cascading
+	// render. Doing this in an effect would flash the stale value for one frame.
 	const effectiveSawPhase = Math.min(sawPhase, sawPeriod)
-	useEffect(() => {
-		if (sawPhase > sawPeriod) setSawPhase(sawPeriod)
-	}, [sawPeriod, sawPhase])
+	if (sawPhase > sawPeriod) setSawPhase(sawPeriod)
 
 	// Effective values: gyro-driven when gyroMode is active, slider-driven otherwise
 	const effectiveDepth = gyroMode ? gyroDepth : sawDepth
