@@ -2,6 +2,7 @@
 
 // Interactive sawtooth rag demo with live controls and rich typographic sample text
 import { useState, useEffect, useDeferredValue, useCallback, useId } from "react"
+import { useMediaQuery, useClientValue } from "@/lib/clientValue"
 import type { ReactNode } from "react"
 import { RagText } from "@liiift-studio/ragtooth"
 
@@ -160,15 +161,10 @@ export default function Demo() {
 	const [gyroTracking, setGyroTracking] = useState(0.7)
 
 	// Detected capabilities — resolved client-side after mount
-	const [showCursor, setShowCursor] = useState(false)
-	const [showGyro, setShowGyro] = useState(false)
-
-	useEffect(() => {
-		const isHover = window.matchMedia('(hover: hover)').matches
-		const isTouch = window.matchMedia('(hover: none)').matches
-		setShowCursor(isHover)
-		setShowGyro(isTouch && 'DeviceOrientationEvent' in window)
-	}, [])
+	const showCursor = useMediaQuery('(hover: hover)')
+	const isTouch = useMediaQuery('(hover: none)')
+	const hasOrientation = useClientValue(() => 'DeviceOrientationEvent' in window, false)
+	const showGyro = isTouch && hasOrientation
 
 	// Keep sawPhase in range when sawPeriod changes — clamp both the effective value
 	// passed to RagText AND the slider state so the displayed label stays in sync.
