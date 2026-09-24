@@ -4,7 +4,7 @@
 import { useState, useEffect, useDeferredValue, useCallback, useId } from "react"
 import { useMediaQuery, useClientValue } from "@/lib/clientValue"
 import type { ReactNode } from "react"
-import { RagText } from "@liiift-studio/ragtooth"
+import { RagText } from "@overpunch/ragtooth"
 
 // Rich sample text — italic for terms, bold small-caps opener, numbers, mixed rhythms.
 // Keyed objects avoid React's unkeyed-fragment dev warning when mapping.

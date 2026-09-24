@@ -1,4 +1,4 @@
-// Public API for @liiift-studio/ragtooth
+// Public API for @overpunch/ragtooth
 
 // React bindings
 export { useRag } from './react/useRag'

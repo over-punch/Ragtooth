@@ -14,7 +14,7 @@ export default function Home() {
 			<Hero
 				eyebrow="sawtooth rag shaping"
 				title={[{ text: "A Sawtooth Rag," }, { text: "on the web.", italic: true, subtle: true }]}
-				install="@liiift-studio/ragtooth"
+				install="@overpunch/ragtooth"
 				github="https://github.com/Liiift-Studio/Ragtooth"
 				tech={["TypeScript", "Zero dependencies", "React + Vanilla JS", "CJK · Arabic · Thai", "~2.7kb gzipped"]}
 			>
@@ -68,7 +68,7 @@ export default function Home() {
 				<div className="flex flex-col gap-8 text-sm">
 					<div className="flex flex-col gap-3">
 						<p className="text-muted">Drop-in component</p>
-						<CodeBlock code={`import { RagText } from '@liiift-studio/ragtooth'
+						<CodeBlock code={`import { RagText } from '@overpunch/ragtooth'
 
 <RagText sawDepth={120} sawPeriod={2}>
   Your paragraph text here...
@@ -76,14 +76,14 @@ export default function Home() {
 					</div>
 					<div className="flex flex-col gap-3">
 						<p className="text-muted">Hook — attach to any element</p>
-						<CodeBlock code={`import { useRag } from '@liiift-studio/ragtooth'
+						<CodeBlock code={`import { useRag } from '@overpunch/ragtooth'
 
 const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 <p ref={ref}>{children}</p>`} />
 					</div>
 				<div className="flex flex-col gap-3">
 					<p className="text-muted">Vanilla JS</p>
-					<CodeBlock code={`import { applyRag, removeRag, getCleanHTML } from '@liiift-studio/ragtooth'
+					<CodeBlock code={`import { applyRag, removeRag, getCleanHTML } from '@overpunch/ragtooth'
 
 const el = document.querySelector('p')
 // getCleanHTML strips any previously-injected spans before storing original HTML
@@ -150,7 +150,7 @@ removeRag(el, original)`} />
 			</section>
 
 			<PortsSection
-				npm="@liiift-studio/ragtooth"
+				npm="@overpunch/ragtooth"
 				bundle="ragtooth"
 				attr="data-ragtooth" figma="partial"
 				framerComponent="Ragtooth"
