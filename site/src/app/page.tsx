@@ -15,7 +15,7 @@ export default function Home() {
 				eyebrow="sawtooth rag shaping"
 				title={[{ text: "A Sawtooth Rag," }, { text: "on the web.", italic: true, subtle: true }]}
 				install="@overpunch/ragtooth"
-				github="https://github.com/Liiift-Studio/Ragtooth"
+				github="https://github.com/over-punch/Ragtooth"
 				tech={["TypeScript", "Zero dependencies", "React + Vanilla JS", "CJK · Arabic · Thai", "~2.7kb gzipped"]}
 			>
 				<p className="text-base leading-relaxed max-w-lg">
@@ -154,7 +154,7 @@ removeRag(el, original)`} />
 				bundle="ragtooth"
 				attr="data-ragtooth" figma="partial"
 				framerComponent="Ragtooth"
-				repo="Liiift-Studio/Ragtooth"
+				repo="over-punch/Ragtooth"
 			/>
 
 			<SiteFooter current="ragtooth" npmVersion={version} siteVersion={siteVersion} />
