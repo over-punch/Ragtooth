@@ -1,6 +1,6 @@
 # Ragtooth
 
-[![npm](https://img.shields.io/npm/v/%40liiift-studio%2Fragtooth.svg)](https://www.npmjs.com/package/@liiift-studio/ragtooth) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![part of liiift type-tools](https://img.shields.io/badge/liiift-type--tools-blueviolet)](https://github.com/Liiift-Studio/type-tools)
+[![npm](https://img.shields.io/npm/v/%40liiift-studio%2Fragtooth.svg)](https://www.npmjs.com/package/@overpunch/ragtooth) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![part of liiift type-tools](https://img.shields.io/badge/liiift-type--tools-blueviolet)](https://github.com/Liiift-Studio/type-tools)
 
 A sawtooth rag, on the web. Shapes text into alternating long/short lines — the kind of typographic rhythm that reads as design, not accident.
 
@@ -8,7 +8,7 @@ The *rag* is the uneven right edge of unjustified text. Left to the browser it f
 
 ![Before and after: the same paragraph with a natural ragged right edge on the left, and ragtooth's deliberate alternating long/short sawtooth on the right.](https://raw.githubusercontent.com/Liiift-Studio/Ragtooth/main/assets/hero.png?v=1)
 
-**[ragtooth.com](https://ragtooth.com)** · [npm](https://www.npmjs.com/package/@liiift-studio/ragtooth) · [GitHub](https://github.com/Liiift-Studio/Ragtooth)
+**[ragtooth.com](https://ragtooth.com)** · [npm](https://www.npmjs.com/package/@overpunch/ragtooth) · [GitHub](https://github.com/Liiift-Studio/Ragtooth)
 
 TypeScript · Zero dependencies · ~3.3 kB min+gzip · React + Vanilla JS
 
@@ -17,7 +17,7 @@ TypeScript · Zero dependencies · ~3.3 kB min+gzip · React + Vanilla JS
 ## Install
 
 ```bash
-npm install @liiift-studio/ragtooth
+npm install @overpunch/ragtooth
 ```
 
 ## React
@@ -25,7 +25,7 @@ npm install @liiift-studio/ragtooth
 ### Component
 
 ```tsx
-import { RagText } from '@liiift-studio/ragtooth'
+import { RagText } from '@overpunch/ragtooth'
 
 <RagText sawDepth={120} sawPeriod={2}>
   Your paragraph text here...
@@ -50,7 +50,7 @@ import { RagText } from '@liiift-studio/ragtooth'
 ### Hook
 
 ```tsx
-import { useRag } from '@liiift-studio/ragtooth'
+import { useRag } from '@overpunch/ragtooth'
 
 const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 
@@ -62,7 +62,7 @@ const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 ## Vanilla JS
 
 ```ts
-import { applyRag, removeRag } from '@liiift-studio/ragtooth'
+import { applyRag, removeRag } from '@overpunch/ragtooth'
 
 const el = document.querySelector('p')
 const originalHTML = el.innerHTML
@@ -171,8 +171,8 @@ applyRag(el, el.innerHTML, { sawPeriod: 3, sawPhase: 2 })
 ## TypeScript
 
 ```ts
-import { applyRag, removeRag, getCleanHTML } from '@liiift-studio/ragtooth'
-import type { RagOptions, RagValue } from '@liiift-studio/ragtooth'
+import { applyRag, removeRag, getCleanHTML } from '@overpunch/ragtooth'
+import type { RagOptions, RagValue } from '@overpunch/ragtooth'
 
 const options: RagOptions = {
   sawDepth: '15%',
@@ -205,7 +205,7 @@ const options: RagOptions = {
 
 ```tsx
 "use client"
-import { RagText } from '@liiift-studio/ragtooth'
+import { RagText } from '@overpunch/ragtooth'
 ```
 
 ---
