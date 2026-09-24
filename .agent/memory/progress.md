@@ -38,7 +38,7 @@
 - **2026-04-04**: Project initialized from CodePen prototype
 - **2026-04-05**: Renamed from rag-rub to Ragtooth; first npm publish at v0.1.0
 - **2026-04-05**: React/react-dom marked optional peer deps
-- **2026-04-05**: Deploy pipeline wired: Liiift-Studio/Ragtooth → Vercel
+- **2026-04-05**: Deploy pipeline wired: over-punch/Ragtooth → Vercel
 - **2026-04-06**: Added sawDepth ch unit, sawAlign (top/bottom), sawPhase options
 - **2026-04-06**: Inline element preservation (Pass 4 contextual HTML wrapping)
 - **2026-04-06**: Orphan space + leading-space-collapse fixes

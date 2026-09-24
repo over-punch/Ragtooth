@@ -1,14 +1,14 @@
 # Ragtooth
 
-[![npm](https://img.shields.io/npm/v/%40liiift-studio%2Fragtooth.svg)](https://www.npmjs.com/package/@overpunch/ragtooth) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![part of liiift type-tools](https://img.shields.io/badge/liiift-type--tools-blueviolet)](https://github.com/Liiift-Studio/type-tools)
+[![npm](https://img.shields.io/npm/v/%40overpunch%2Fragtooth.svg)](https://www.npmjs.com/package/@overpunch/ragtooth) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![part of liiift type-tools](https://img.shields.io/badge/liiift-type--tools-blueviolet)](https://github.com/over-punch/type-tools)
 
 A sawtooth rag, on the web. Shapes text into alternating long/short lines — the kind of typographic rhythm that reads as design, not accident.
 
 The *rag* is the uneven right edge of unjustified text. Left to the browser it falls where it falls. Ragtooth measures each natural line and reshapes that edge into a deliberate, repeating zig-zag — short line, full line, short line — so the paragraph looks composed instead of accidental.
 
-![Before and after: the same paragraph with a natural ragged right edge on the left, and ragtooth's deliberate alternating long/short sawtooth on the right.](https://raw.githubusercontent.com/Liiift-Studio/Ragtooth/main/assets/hero.png?v=1)
+![Before and after: the same paragraph with a natural ragged right edge on the left, and ragtooth's deliberate alternating long/short sawtooth on the right.](https://raw.githubusercontent.com/over-punch/Ragtooth/main/assets/hero.png?v=1)
 
-**[ragtooth.com](https://ragtooth.com)** · [npm](https://www.npmjs.com/package/@overpunch/ragtooth) · [GitHub](https://github.com/Liiift-Studio/Ragtooth)
+**[ragtooth.com](https://ragtooth.com)** · [npm](https://www.npmjs.com/package/@overpunch/ragtooth) · [GitHub](https://github.com/over-punch/Ragtooth)
 
 TypeScript · Zero dependencies · ~3.3 kB min+gzip · React + Vanilla JS
 
@@ -213,7 +213,7 @@ import { RagText } from '@overpunch/ragtooth'
 ## Development
 
 ```bash
-git clone https://github.com/Liiift-Studio/Ragtooth.git
+git clone https://github.com/over-punch/Ragtooth.git
 cd Ragtooth
 npm install
 
@@ -223,13 +223,13 @@ npm run typecheck  # tsc --noEmit
 npm run capture    # regenerate the README hero image (assets/hero.png)
 ```
 
-The source is organised the same way as the rest of the [type-tools](https://github.com/Liiift-Studio/type-tools) suite:
+The source is organised the same way as the rest of the [type-tools](https://github.com/over-punch/type-tools) suite:
 
 - `src/core/` — the framework-agnostic algorithm (`adjust.ts`), options resolver (`resolve.ts`), and shared types. No React imports.
 - `src/react/` — the `useRag` hook and `RagText` component.
 - `src/__tests__/` — Vitest unit tests for the core, resolver, types, and React layers.
 
-Issues and PRs are welcome at [github.com/Liiift-Studio/Ragtooth](https://github.com/Liiift-Studio/Ragtooth/issues).
+Issues and PRs are welcome at [github.com/over-punch/Ragtooth](https://github.com/over-punch/Ragtooth/issues).
 
 ---
 

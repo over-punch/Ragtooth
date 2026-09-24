@@ -31,7 +31,7 @@
 ## Deploy pipeline
 - Two git remotes:
   - `origin` → `git@github.com:quitequinn/Ragtooth.git` (code)
-  - `deploy` → `git@github-liiift:Liiift-Studio/Ragtooth.git` (triggers Vercel)
+  - `deploy` → `git@github-liiift:over-punch/Ragtooth.git` (triggers Vercel)
 - Version bump commit made as Liiift identity, pushed to `deploy` to trigger Vercel
 - npm publish: `npm publish --access public` (requires login; may need OTP)
 

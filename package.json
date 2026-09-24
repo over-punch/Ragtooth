@@ -57,10 +57,10 @@
 	"homepage": "https://ragtooth.com",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Liiift-Studio/Ragtooth.git"
+		"url": "git+https://github.com/over-punch/Ragtooth.git"
 	},
 	"bugs": {
-		"url": "https://github.com/Liiift-Studio/Ragtooth/issues"
+		"url": "https://github.com/over-punch/Ragtooth/issues"
 	},
 	"sideEffects": false,
 	"publishConfig": {
