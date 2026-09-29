@@ -16,7 +16,7 @@
 - Vanilla JS API (`applyRag`, `removeRag`, `getCleanHTML`)
 - Deprecated `ragDifference` prop still accepted as fallback for `sawDepth`
 
-### Landing Site (`ragtooth.liiift.studio`)
+### Landing Site (`ragtooth.overpunch.ca`)
 - Next.js 16 app, deployed via Liiift Vercel account
 - Interactive demo: 5 rag sliders + 3 Merriweather variable font axis sliders + cursor mode
 - Cursor mode: mouse X→sawDepth, Y→maxTracking, Esc to exit

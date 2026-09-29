@@ -6,7 +6,7 @@
 ## Package identity
 - npm: `ragtooth`
 - GitHub: `quitequinn/Ragtooth` (code) + `over-punch/Ragtooth` (Vercel deploy trigger)
-- Site: `ragtooth.liiift.studio`
+- Site: `ragtooth.overpunch.ca`
 - Author: Quinn Keaveney / Liiift Studio
 
 ## Core Goal
