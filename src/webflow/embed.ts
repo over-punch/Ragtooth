@@ -83,6 +83,25 @@ function readOptions(el: HTMLElement): RagOptions {
  *
  * @param el - Element to rag
  */
+/** Re-fits an element whose own width changed: a container resize, or an element shown after being hidden. */
+const widths = new WeakMap<Element, number>()
+const resizeObserver = typeof ResizeObserver !== 'undefined'
+	? new ResizeObserver((entries) => {
+		for (const entry of entries) {
+			const el = entry.target as HTMLElement
+			const w = Math.round(entry.contentRect.width)
+			if (widths.get(el) === w) continue
+			const first = !widths.has(el)
+			widths.set(el, w)
+			const inst = INSTANCES.get(el)
+			if (!inst || !el.isConnected || w === 0) continue
+			// First report: only an element that wasn't laid out at init (hidden) needs a run.
+			if (first && el.querySelector('.rag-line')) continue
+			if (inst.resize || first) applyRag(el, inst.originalHTML, readOptions(el))
+		}
+	})
+	: null
+
 function initElement(el: HTMLElement): void {
 	// Reuse an existing snapshot if this element was already initialised, so a
 	// re-init reads from clean markup rather than already-ragged spans.
@@ -93,6 +112,7 @@ function initElement(el: HTMLElement): void {
 	applyRag(el, originalHTML, readOptions(el))
 	INSTANCES.set(el, { originalHTML, resize })
 	tracked.add(el)
+	resizeObserver?.observe(el)
 }
 
 /**
@@ -101,6 +121,8 @@ function initElement(el: HTMLElement): void {
  */
 function refit(): void {
 	tracked.forEach((el) => {
+		// Removed from the page: stop tracking it.
+		if (!el.isConnected) { tracked.delete(el); return }
 		const inst = INSTANCES.get(el)
 		if (!inst || !inst.resize) return
 		applyRag(el, inst.originalHTML, readOptions(el))
@@ -118,6 +140,8 @@ function destroy(el: HTMLElement): void {
 	removeRag(el, inst.originalHTML)
 	INSTANCES.delete(el)
 	tracked.delete(el)
+	resizeObserver?.unobserve(el)
+	widths.delete(el)
 }
 
 /**
@@ -150,6 +174,21 @@ function autoInit(): void {
 			init()
 		}
 		window.addEventListener('resize', onResize)
+		// Fonts that load later change word widths.
+		document.fonts?.addEventListener?.('loadingdone', onResize)
+		// Elements added later (CMS lists, interactions) are ragged when they appear.
+		if (typeof MutationObserver !== 'undefined' && document.body) {
+			new MutationObserver((records) => {
+				for (const rec of records) {
+					rec.addedNodes.forEach((n) => {
+						if (!(n instanceof HTMLElement) || !n.isConnected) return
+						const found = n.matches(`[${OPT_IN_ATTR}]`) ? [n] : []
+						n.querySelectorAll<HTMLElement>(`[${OPT_IN_ATTR}]`).forEach((el) => found.push(el))
+						for (const el of found) if (!INSTANCES.has(el)) initElement(el)
+					})
+				}
+			}).observe(document.body, { childList: true, subtree: true })
+		}
 	}
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', run, { once: true })
