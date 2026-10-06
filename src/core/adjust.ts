@@ -423,7 +423,10 @@ export function applyRag(
 			// Spread the line's slack as letter-spacing (not on the last line), capped at maxTracking.
 			// The hidden rag-line-info sentinel records the numbers, as before.
 			if (i < lines.length - 1) {
-				const charCount = [...line.map((u) => u.text).join('')].length || 1
+				// letter-spacing is added after every rendered character, the spaces between words included
+				// (each run collapses to one space; a space at the line start collapses away). Counting only
+				// the word characters made tracked lines overshoot their width by up to a few px.
+				const charCount = line.reduce((n, u, k) => n + [...u.text].length + (k > 0 && /\s/.test(u.lead) ? 1 : 0), 0) || 1
 				const tracking = Math.max(0, Math.min((ideal - 1 - lineWidth) / charCount, maxTracking))
 				lineSpan.style.letterSpacing = `${tracking}px`
 				const info = document.createElement('span')

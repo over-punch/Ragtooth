@@ -1015,3 +1015,63 @@ describe('text, markup and listeners survive', () => {
 		restore()
 	})
 })
+
+// ---------------------------------------------------------------------------
+// Regression: letter-spacing applies to spaces too, so tracking must not push a line past its width
+// ---------------------------------------------------------------------------
+
+describe('applyRag — tracking includes the spaces in a line', () => {
+	/** Space width (px) reported by the space probe. */
+	const SPACE = 5
+	/** Width (px) of every character in a word. */
+	const CHAR = 10
+	/** Container width (px). */
+	const WIDTH = 300
+	let restore: () => void
+
+	beforeEach(() => {
+		const proto = HTMLElement.prototype
+		const prior = Object.getOwnPropertyDescriptor(proto, 'offsetWidth')
+		const widthOf = (el: HTMLElement) => {
+			if (el.classList?.contains(RAG_CLASSES.spaceProbe)) return SPACE
+			if (el.classList?.contains(RAG_CLASSES.word)) return (el.textContent ?? '').length * CHAR
+			return WIDTH
+		}
+		Object.defineProperty(proto, 'offsetWidth', {
+			get: function(this: HTMLElement) { return widthOf(this) },
+			set: () => {},
+			configurable: true,
+		})
+		const origBCR = Element.prototype.getBoundingClientRect
+		Element.prototype.getBoundingClientRect = function(this: Element) {
+			const w = widthOf(this as HTMLElement)
+			return { width: w, height: 0, top: 0, left: 0, right: w, bottom: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect
+		}
+		restore = () => {
+			if (prior) Object.defineProperty(proto, 'offsetWidth', prior)
+			Element.prototype.getBoundingClientRect = origBCR
+		}
+	})
+
+	afterEach(() => {
+		restore()
+		document.body.innerHTML = ''
+	})
+
+	it('keeps every tracked line within its ideal width once spaces are tracked', () => {
+		// Words of varied length so each line has slack to fill, with several spaces per line.
+		const el = makeContainer('<p>' + 'aa bbbb c dddddd ee fff gggg h ii jjjjj kk llll m nnn oooooo pp q rrrr ss ttt uuuuu v ww xxxx yy zzz'.repeat(2) + '</p>')
+		applyRag(el, el.innerHTML, { sawDepth: 60, sawPeriod: 2, maxTracking: 5 })
+		const lines = Array.from(el.querySelectorAll<HTMLElement>(`.${RAG_CLASSES.line}`))
+		const tracked = lines.filter((line) => parseFloat(line.style.letterSpacing) > 0)
+		expect(tracked.length).toBeGreaterThan(0)
+		for (const line of tracked) {
+			const info = line.querySelector<HTMLElement>(`.${RAG_CLASSES.lineInfo}`)!
+			const planned = parseFloat(info.getAttribute('data-line-width')!)
+			const ideal = parseFloat(info.getAttribute('data-ideal-width')!)
+			// Characters letter-spacing is applied to: whitespace runs collapse to one, a line-start space collapses away.
+			const rendered = [...(line.textContent ?? '').replace(/\s+/g, ' ').trim()].length
+			expect(planned + parseFloat(line.style.letterSpacing) * rendered).toBeLessThanOrEqual(ideal + 0.01)
+		}
+	})
+})
