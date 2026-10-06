@@ -952,3 +952,66 @@ describe('Intl.Segmenter word splitting', () => {
 		restore()
 	})
 })
+
+// ─── Review fixes (2026-10) ──────────────────────────────────────────────────
+
+describe('text, markup and listeners survive', () => {
+	it('keeps the spaces and punctuation between inline elements, and one link stays one link', () => {
+		const html = '<p><em>alpha</em> <strong>beta</strong> — <i>gamma</i> and <a href="#x" id="lnk">the linked text</a> here.</p>'
+		const el = makeContainer(html)
+		const restore = mockOffsetWidthByClass(2000, 40)
+		const text = el.textContent
+		applyRag(el, el.innerHTML)
+		// The widow step turns the last space into a non-breaking space; everything else is identical.
+		expect((el.textContent ?? '').replace(/ /g, ' ')).toBe(text)
+		expect(el.querySelectorAll('a').length).toBe(1)
+		expect(el.querySelectorAll('#lnk').length).toBe(1)
+		expect(getCleanHTML(el)).toBe(html)
+		restore()
+	})
+
+	it('the widow step never touches attributes', () => {
+		const html = '<p>Some words before <span class="hl x" title="see more">two words</span></p>'
+		const el = makeContainer(`<div>${html}</div>`)
+		const restore = mockOffsetWidthByClass(2000, 40)
+		applyRag(el, el.innerHTML)
+		const span = el.querySelector('span.hl.x')!
+		expect(span).not.toBeNull()
+		expect(span.getAttribute('title')).toBe('see more')
+		restore()
+	})
+
+	it('keeps listeners on inline elements across re-runs and removal', () => {
+		const html = '<p>Please read <a href="#">our terms</a> carefully before you go on.</p>'
+		const el = makeContainer(html)
+		const link = el.querySelector('a')!
+		let clicks = 0
+		link.addEventListener('click', (e) => { e.preventDefault(); clicks++ })
+		const restore = mockOffsetWidthByClass(2000, 40)
+		applyRag(el, html)
+		applyRag(el, html)
+		el.querySelector('a')!.click()
+		expect(clicks).toBe(1)
+		removeRag(el, html)
+		expect(el.querySelector('a')).toBe(link)
+		restore()
+	})
+
+	it('a nested <p> is processed itself, not its <li>', () => {
+		const html = '<ul><li><p>One two three four five six</p></li></ul>'
+		const el = makeContainer(html)
+		const restore = mockOffsetWidthByClass(2000, 40)
+		applyRag(el, el.innerHTML)
+		expect(el.querySelectorAll('p').length).toBe(1)
+		restore()
+	})
+
+	it('re-applying with the processed innerHTML does not nest lines', () => {
+		const el = makeContainer('<p>One two three four five six seven eight nine ten</p>')
+		const restore = mockOffsetWidthByClass(200, 40)
+		applyRag(el, el.innerHTML)
+		applyRag(el, el.innerHTML)
+		expect(el.querySelectorAll(`.${RAG_CLASSES.line} .${RAG_CLASSES.line}`).length).toBe(0)
+		restore()
+	})
+})

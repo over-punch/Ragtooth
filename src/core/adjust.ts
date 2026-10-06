@@ -16,16 +16,76 @@ const DEFAULTS = {
 const BLOCK_SELECTOR = 'p, li, h1, h2, h3, h4, h5, h6, blockquote'
 
 
+/** Inline elements kept whole (no text of their own to split). */
+const ATOMIC_TAGS = new Set(['IMG', 'SVG', 'INPUT', 'SELECT', 'TEXTAREA', 'BUTTON', 'VIDEO', 'AUDIO', 'CANVAS', 'IFRAME', 'OBJECT', 'MATH'])
+
+/** Scripts written without spaces between words: segmented into words with Intl.Segmenter. */
+const UNSPACED_SCRIPT = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}]/u
+
+/** Intl.Segmenter shape we use. */
+type SegmenterInstance = { segment: (text: string) => Iterable<{ segment: string; isWordLike?: boolean }> }
+
+/** Warnings already printed. */
+const warned = new Set<string>()
+
+/** Prints a console warning the first time it is seen. */
+function warnOnce(message: string): void {
+	if (warned.has(message)) return
+	warned.add(message)
+	console.warn(message)
+}
+
+/** The snapshot each processed container was built from, returned by getCleanHTML. */
+const originals = new WeakMap<HTMLElement, string>()
+
 /**
- * Returns the innerHTML of a container with all ragtooth-injected spans removed,
- * unwrapping their children in place. Uses DOM traversal — safe for complex markup.
+ * The container's original nodes: every element's child list, so a re-run or removal can put the
+ * very same nodes back (keeping their event listeners, React's included) instead of re-parsing HTML.
+ */
+interface NodeSnapshot { html: string; children: Map<Node, Node[]> }
+const snapshots = new WeakMap<HTMLElement, NodeSnapshot>()
+
+/** Records every element's child list under root. */
+function takeSnapshot(root: HTMLElement, html: string): NodeSnapshot {
+	const children = new Map<Node, Node[]>()
+	const visit = (node: Node) => {
+		children.set(node, Array.from(node.childNodes))
+		node.childNodes.forEach((child) => { if (child.nodeType === Node.ELEMENT_NODE) visit(child) })
+	}
+	visit(root)
+	return { html, children }
+}
+
+/** Puts the original nodes back where they were. */
+function restoreSnapshot(snapshot: NodeSnapshot): void {
+	snapshot.children.forEach((kids, parent) => (parent as Element).replaceChildren(...kids))
+}
+
+/** Brings the container back to its original content, reusing the original nodes when known. */
+function resetContainer(container: HTMLElement, originalHTML: string): void {
+	const snap = snapshots.get(container)
+	if (snap && snap.html === originalHTML) {
+		restoreSnapshot(snap)
+		return
+	}
+	if (snap) restoreSnapshot(snap)
+	const processed = !!container.querySelector(`.${RAG_CLASSES.line}`)
+	if (processed || container.innerHTML !== originalHTML) container.innerHTML = originalHTML
+	snapshots.set(container, takeSnapshot(container, originalHTML))
+}
+
+/**
+ * Returns the container's original innerHTML: for a container this library processed, the exact
+ * snapshot it was built from; otherwise the innerHTML with any ragtooth markup removed. Idempotent.
  *
  * @param container - Element that may contain rag markup
  */
 export function getCleanHTML(container: HTMLElement): string {
+	const original = originals.get(container)
+	if (original !== undefined && container.querySelector(`.${RAG_CLASSES.line}`)) return original
 	const clone = container.cloneNode(true) as HTMLElement
 	const ragSpans = clone.querySelectorAll(
-		`.${RAG_CLASSES.word}, .${RAG_CLASSES.line}, .${RAG_CLASSES.lineInfo}, .${RAG_CLASSES.break}`,
+		`.${RAG_CLASSES.word}, .${RAG_CLASSES.line}, .${RAG_CLASSES.lineInfo}`,
 	)
 	ragSpans.forEach((el) => {
 		const parent = el.parentNode
@@ -33,37 +93,86 @@ export function getCleanHTML(container: HTMLElement): string {
 		while (el.firstChild) parent.insertBefore(el.firstChild, el)
 		parent.removeChild(el)
 	})
+	clone.querySelectorAll(`br.${RAG_CLASSES.break}`).forEach((br) => br.remove())
+	clone.normalize()
 	return clone.innerHTML
+}
+
+/** One measured unit of a block: a word (or a whole element such as an image). */
+interface Unit {
+	/** The word span (or atomic element) in the live DOM. */
+	node: HTMLElement
+	/** Text of the word (empty for an atomic element). */
+	text: string
+	/** Whitespace before it, kept in the rebuilt text (it collapses at a line start). */
+	lead: string
+	/** An author <br> right before it: it starts a line. */
+	breakBefore: HTMLBRElement | null
+	atomic: boolean
+	/** Width of the word itself, layout px. */
+	width: number
+}
+
+/** The transform scale of an element (1 when untransformed): visual width over layout width. */
+function layoutScale(el: HTMLElement): number {
+	const visual = el.getBoundingClientRect().width
+	const layout = el.offsetWidth
+	if (!(layout > 0) || !(visual > 0) || Math.abs(visual - layout) <= 1) return 1
+	return visual / layout
+}
+
+/** A positive finite number, else undefined (with a warning naming the option). */
+function finiteOption(value: number, name: string, fallback: number): number {
+	if (Number.isFinite(value)) return value
+	warnOnce(`[ragtooth] ${name} must resolve to a finite number; using ${fallback}`)
+	return fallback
 }
 
 /**
  * Applies saw-rag adjustment to a container element.
  *
- * The algorithm runs five passes:
- *  1. Reset — restore the container to the original HTML snapshot
- *  2. Widow removal — replace the last space in each block with &nbsp;
- *  3. Word wrap — wrap every word in a measurement span
- *  4. Line grouping — walk word spans, accumulate widths, break into line spans;
- *     every sawPeriod-th line is shortened by sawDepth pixels
- *  5. Tracking — distribute per-line slack as letter-spacing, capped at maxTracking
+ * The algorithm runs these passes:
+ *  1. Reset — bring the container back to its original content (the original nodes, when known)
+ *  2. Word wrap — wrap each word in a measurement span; the spaces between words and elements
+ *     stay as text, author <br> and images are kept
+ *  3. Measure — read every word's width (layout px)
+ *  4. Line grouping — accumulate widths into lines; every sawPeriod-th line is shortened by
+ *     sawDepth px. The last two words of each block are kept together (no widow).
+ *  5. Write — rebuild each line inside its inline ancestors (one link stays one link within a line),
+ *     reusing the original elements so their listeners keep working, and spread the line's slack
+ *     as letter-spacing, capped at maxTracking
  *
  * @param container    - The live DOM element to adjust (must be rendered and visible)
- * @param originalHTML - The HTML snapshot taken before the first adjustment run
+ * @param originalHTML - The HTML snapshot taken before the first adjustment run (getCleanHTML)
  * @param options      - Rag options (merged with defaults)
  */
 export function applyRag(
 	container: HTMLElement,
 	originalHTML: string,
-	options: RagOptions = {},
+	options: RagOptions | null = {},
 ): void {
 	if (typeof window === 'undefined') return
+	const opts = options ?? {}
 	if (container.offsetWidth === 0) return
 
-	const containerWidth = container.offsetWidth
+	// A snapshot taken from an already-processed container (applyRag(el, el.innerHTML) on a second
+	// run) would nest new lines inside the old ones: use the original this container was built from.
+	if (originalHTML.includes(RAG_CLASSES.line) && originals.has(container)) {
+		originalHTML = originals.get(container)!
+	} else if (originalHTML.includes(RAG_CLASSES.line)) {
+		const tmp = document.createElement('div')
+		tmp.innerHTML = originalHTML
+		originalHTML = getCleanHTML(tmp)
+	}
+
+	// --- Pass 1: Reset ---
+	resetContainer(container, originalHTML)
+	originals.set(container, originalHTML)
+
+	const containerWidth = container.clientWidth || container.offsetWidth
 	const fontSize = parseFloat(getComputedStyle(container).fontSize) || 16
 
 	// Measure the 'ch' unit — width of the '0' glyph in the container's current font.
-	// The probe inherits font styles by being a child of the container.
 	const chProbe = document.createElement('span')
 	chProbe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;'
 	chProbe.textContent = '0'
@@ -72,319 +181,288 @@ export function applyRag(
 	container.removeChild(chProbe)
 
 	// Resolve options — support deprecated ragDifference as fallback for sawDepth.
-	// Emit a one-time warning so consumers know to migrate to sawDepth.
-	if (options.ragDifference !== undefined && options.sawDepth === undefined) {
-		console.warn('[ragtooth] ragDifference is deprecated — use sawDepth instead.')
+	if (opts.ragDifference !== undefined && opts.sawDepth === undefined) {
+		warnOnce('[ragtooth] ragDifference is deprecated — use sawDepth instead.')
 	}
-	const sawDepth = Math.max(0, resolveValue(options.sawDepth ?? options.ragDifference ?? DEFAULTS.sawDepth, containerWidth, fontSize, chWidth))
-	const sawPeriod = Math.max(2, Math.round(options.sawPeriod ?? DEFAULTS.sawPeriod))
-	const maxTracking = Math.max(0, resolveValue(options.maxTracking ?? DEFAULTS.maxTracking, containerWidth, fontSize, chWidth))
-	const sawAlign = options.sawAlign ?? 'top'
-	// sawPhase: 1-indexed position within the cycle that is shortened.
-	// Default = sawPeriod (last line), matching the pre-sawPhase behaviour.
-	const sawPhase = Math.min(sawPeriod, Math.max(1, Math.round(options.sawPhase ?? sawPeriod)))
+	const sawDepth = Math.max(0, finiteOption(resolveValue(opts.sawDepth ?? opts.ragDifference ?? DEFAULTS.sawDepth, containerWidth, fontSize, chWidth), 'sawDepth', DEFAULTS.sawDepth))
+	const rawPeriod = Math.round(Number(opts.sawPeriod ?? DEFAULTS.sawPeriod))
+	if (!Number.isFinite(rawPeriod) || rawPeriod < 2 || rawPeriod > 1000) {
+		if (opts.sawPeriod !== undefined) warnOnce(`[ragtooth] sawPeriod must be a whole number from 2 to 1000; got ${String(opts.sawPeriod)}, using ${Number.isFinite(rawPeriod) && rawPeriod >= 1 && rawPeriod < 2 ? 2 : DEFAULTS.sawPeriod}`)
+	}
+	const sawPeriod = Number.isFinite(rawPeriod) && rawPeriod >= 2 && rawPeriod <= 1000 ? rawPeriod : rawPeriod === 1 ? 2 : DEFAULTS.sawPeriod
+	const maxTracking = Math.min(fontSize, Math.max(0, finiteOption(resolveValue(opts.maxTracking ?? DEFAULTS.maxTracking, containerWidth, fontSize, chWidth), 'maxTracking', DEFAULTS.maxTracking)))
+	const sawAlign = opts.sawAlign ?? 'top'
+	// sawPhase: 1-indexed position within the cycle that is shortened (default: the last line).
+	const sawPhase = Math.min(sawPeriod, Math.max(1, Math.round(opts.sawPhase ?? sawPeriod)))
 
-	// --- Pass 1: Reset ---
-	container.innerHTML = originalHTML
-
-	// --- Pass 2: Widow removal ---
-	container.querySelectorAll<HTMLElement>(BLOCK_SELECTOR).forEach((block) => {
-		block.innerHTML = block.innerHTML.replace(/\s(?=[^\s]*$)/g, '\u00a0')
-	})
-
-	// --- Pass 3: Word wrap ---
-	// Uses DOM traversal rather than regex so inline elements (<em>, <strong>, etc.)
-	// are preserved correctly — each word span is inserted into the correct parent
-	// element, keeping italic and bold contexts intact.
-	// Word spans are collected here (per block element) and passed to Pass 4 directly,
-	// avoiding a querySelectorAll that some test environments fail to resolve inside
-	// inline elements like <em> and <strong>.
+	// Blocks to process: the innermost matching blocks (a <p> inside an <li> or <blockquote> is
+	// processed itself; its container is not, or the whole <p> would be treated as one word).
 	const blocks = Array.from(container.querySelectorAll<HTMLElement>(BLOCK_SELECTOR))
+		.filter((block) => !block.querySelector(BLOCK_SELECTOR))
 	const targets: HTMLElement[] = blocks.length > 0 ? blocks : [container]
 
-	// Build one Intl.Segmenter instance per applyRag call (if available) and reuse it
-	// across all text nodes.  Construction involves locale negotiation and ICU
-	// initialisation, so creating it inside the inner loop is expensive.
-	type SegmenterInstance = { segment: (text: string) => Iterable<{ segment: string; isWordLike: boolean }> }
-	const segmenter: SegmenterInstance | null =
-		typeof Intl !== 'undefined' && typeof (Intl as Record<string, unknown>).Segmenter === 'function'
-			? new (Intl as { Segmenter: new (locale: undefined, opts: { granularity: string }) => SegmenterInstance }).Segmenter(undefined, { granularity: 'word' })
-			: null
+	const SegmenterCtor = typeof Intl !== 'undefined'
+		? (Intl as unknown as { Segmenter?: new (locale: undefined, opts: { granularity: string }) => SegmenterInstance }).Segmenter
+		: undefined
+	const segmenter: SegmenterInstance | null = SegmenterCtor ? new SegmenterCtor(undefined, { granularity: 'word' }) : null
 
-	const wordsByTarget = new Map<HTMLElement, HTMLElement[]>()
+	/** Splits a space-free token into units: words for CJK/Thai (punctuation stays with its word). */
+	const splitToken = (token: string): string[] => {
+		// A line may break after a hyphen or dash inside a word ("words-|everywhere"); ragtooth sets the
+		// breaks itself, so each part is its own unit. Otherwise a long hyphenated run is one unit wider
+		// than the line, locked on one line.
+		const parts = token.split(/(?<=[\-\u2010\u2013\u2014](?=[^\-\u2010\u2013\u2014]))/u)
+		if (parts.length > 1) return parts.flatMap(splitToken)
+		if (!segmenter || !UNSPACED_SCRIPT.test(token)) return [token]
+		const out: string[] = []
+		for (const seg of segmenter.segment(token)) {
+			if (seg.isWordLike || out.length === 0) out.push(seg.segment)
+			else out[out.length - 1] += seg.segment
+		}
+		return out
+	}
 
-	targets.forEach((el) => {
-		const elementWords: HTMLElement[] = []
-
-		// Collect all text nodes first to avoid live-NodeList issues during mutation.
-		// Uses recursive childNodes traversal instead of TreeWalker for reliable descent
-		// into inline elements (<em>, <strong>, etc.) across all DOM implementations.
-		const textNodes: Text[] = []
-		;(function collectTextNodes(node: Node) {
+	// --- Pass 2: Word wrap (per block) ---
+	const unitsByTarget = new Map<HTMLElement, Unit[]>()
+	targets.forEach((block) => {
+		const units: Unit[] = []
+		let pendingSpace = ''
+		let pendingBreak: HTMLBRElement | null = null
+		const walk = (node: Node): void => {
 			if (node.nodeType === Node.TEXT_NODE) {
-				textNodes.push(node as Text)
-			} else {
-				node.childNodes.forEach(collectTextNodes)
-			}
-		})(el)
-
-		for (const textNode of textNodes) {
-			const text = textNode.textContent ?? ''
-			if (!text) continue
-
-			const fragment = document.createDocumentFragment()
-
-			// Use Intl.Segmenter when available for language-aware word detection.
-			// This handles CJK, Arabic, Thai, and other scripts that do not use spaces
-			// as word boundaries — gracefully falling back to a regex split for
-			// environments that do not support Intl.Segmenter.
-			if (segmenter !== null) {
-				const segments = Array.from(segmenter.segment(text))
-
-				// Accumulate each word-like segment together with any surrounding
-				// non-word segments (whitespace, punctuation) into a single span,
-				// mirroring the one-span-per-word structure produced by the regex path.
-				// Leading non-word content is attached as a prefix to the next word;
-				// trailing non-word content after the last word is attached to the last span.
-				let pending = '' // non-word text waiting to be prepended to the next word
-				let lastSpan: HTMLSpanElement | null = null
-
-				for (const seg of segments) {
-					if (seg.isWordLike) {
+				const textNode = node as Text
+				const text = textNode.textContent ?? ''
+				if (!text.trim()) { pendingSpace += text; return }
+				const fragment = document.createDocumentFragment()
+				let lead = ''
+				for (const token of text.split(/(\s+)/)) {
+					if (!token) continue
+					if (/^\s+$/.test(token)) {
+						fragment.appendChild(document.createTextNode(token))
+						lead += token
+						continue
+					}
+					for (const piece of splitToken(token)) {
 						const span = document.createElement('span')
 						span.className = RAG_CLASSES.word
-						span.appendChild(document.createTextNode(pending + seg.segment))
-						pending = ''
+						span.style.whiteSpace = 'nowrap'
+						span.textContent = piece
 						fragment.appendChild(span)
-						elementWords.push(span)
-						lastSpan = span
-					} else {
-						// Non-word segment (space, punctuation, etc.)
-						// Attach trailing non-word content to the previous span so it is
-						// included in BCR measurements and not left as an orphan text node
-						// at inline-element boundaries.
-						if (lastSpan) {
-							lastSpan.appendChild(document.createTextNode(seg.segment))
-						} else {
-							pending += seg.segment
-						}
+						units.push({ node: span, text: piece, lead: pendingSpace + lead, breakBefore: pendingBreak, atomic: false, width: 0 })
+						pendingSpace = ''
+						pendingBreak = null
+						lead = ''
 					}
 				}
-
-				// Any leading non-word text with no preceding word becomes a bare text node.
-				if (pending) {
-					fragment.appendChild(document.createTextNode(pending))
-				}
-			} else {
-				// Fallback: split into alternating [whitespace, word, whitespace, word, …] tokens.
-				// Odd-indexed entries are words; even-indexed are the gaps before them.
-				const tokens = text.split(/(\S+)/)
-
-				for (let i = 0; i < tokens.length; i += 2) {
-					const space = tokens[i]       // whitespace gap before this word
-					const word  = tokens[i + 1]   // word (undefined at end of string)
-					if (!word) continue // trailing whitespace — absorbed into the preceding span below
-
-					// If this is the last word in the text node, include any trailing whitespace
-					// in the span rather than creating an orphan text node. Orphan text nodes at
-					// inline-element boundaries (e.g. "of " before <strong>1455</strong>) are
-					// silently dropped in Pass 4, which removes the space between words.
-					const isLastWord = tokens[i + 3] === undefined
-					const trailingSpace = isLastWord ? (tokens[i + 2] ?? '') : ''
-
-					const span = document.createElement('span')
-					span.className = RAG_CLASSES.word
-					span.appendChild(document.createTextNode(space + word + trailingSpace))
-					fragment.appendChild(span)
-					elementWords.push(span)
-				}
+				pendingSpace += lead
+				textNode.parentNode!.replaceChild(fragment, textNode)
+				return
 			}
-
-			textNode.parentNode!.replaceChild(fragment, textNode)
+			if (node.nodeType !== Node.ELEMENT_NODE) return
+			const el = node as HTMLElement
+			if (el.tagName === 'BR') { pendingBreak = el as unknown as HTMLBRElement; return }
+			if (!el.hasChildNodes() || ATOMIC_TAGS.has(el.tagName)) {
+				units.push({ node: el, text: '', lead: pendingSpace, breakBefore: pendingBreak, atomic: true, width: 0 })
+				pendingSpace = ''
+				pendingBreak = null
+				return
+			}
+			Array.from(el.childNodes).forEach(walk)
 		}
-
-		wordsByTarget.set(el, elementWords)
+		Array.from(block.childNodes).forEach(walk)
+		unitsByTarget.set(block, units)
 	})
 
-	// --- Pass 4: Line grouping ---
-	// Each line becomes an inline-block span with white-space:nowrap so the browser
-	// treats it as one unit. A <br> between spans forces the visual line break that
-	// the algorithm predicts — without this, the browser reflows text freely across
-	// span boundaries and the sawtooth never appears.
-	const LINE_STYLE = 'display:inline-block;white-space:nowrap;vertical-align:top;'
-
-	// Batch all layout reads before any writes to avoid layout thrashing.
-	targets.forEach((element) => {
-		const elementWidth = element.offsetWidth
-		const words = wordsByTarget.get(element) ?? []
-
-		// Prevent hyphen-breaks during measurement: inline spans containing words like
-		// "letter-spacing" can wrap at the hyphen, causing getBoundingClientRect().width
-		// to return the container width instead of the word width. nowrap keeps each
-		// span on a single line so its measured width is accurate.
-		words.forEach(w => { w.style.whiteSpace = 'nowrap' })
-
-		// Measure a single space width in this element's font for line-start correction.
-		// Appended before other reads so all measurements share one reflow.
+	// --- Pass 3: Measure (all reads, before any writes) ---
+	const layout = targets.map((block) => {
+		const cs = getComputedStyle(block)
+		const px = (v: string) => parseFloat(v) || 0
+		// Content width in layout px: offsetWidth included padding and border, and a transformed
+		// ancestor scales getBoundingClientRect, so word widths are divided by the same scale.
+		const scale = layoutScale(block)
+		// clientWidth excludes borders; where it isn't available (some test DOMs report 0), use
+		// offsetWidth minus borders.
+		const boxWidth = block.clientWidth > 0 ? block.clientWidth : block.offsetWidth - px(cs.borderLeftWidth) - px(cs.borderRightWidth)
+		const width = boxWidth - px(cs.paddingLeft) - px(cs.paddingRight)
+		const indent = px(cs.textIndent)
 		const spaceProbe = document.createElement('span')
 		spaceProbe.className = RAG_CLASSES.spaceProbe
-		spaceProbe.style.whiteSpace = 'nowrap'
+		spaceProbe.style.whiteSpace = 'pre'
 		spaceProbe.textContent = ' '
-		element.appendChild(spaceProbe)
+		block.appendChild(spaceProbe)
+		const spaceWidth = spaceProbe.getBoundingClientRect().width / scale
+		const units = unitsByTarget.get(block) ?? []
+		for (const u of units) u.width = u.node.getBoundingClientRect().width / scale
+		block.removeChild(spaceProbe)
+		const wrapLong = cs.overflowWrap !== 'normal' || cs.wordBreak === 'break-all' || cs.wordBreak === 'break-word'
+		return { block, width, indent, spaceWidth, units, wrapLong }
+	})
 
-		// Read phase — collect all widths in one pass.
-		// getBoundingClientRect().width gives subpixel precision, preventing rounding
-		// errors from accumulating across many words on a line.
-		// Also build contextual HTML for each word: the word span wrapped in its
-		// ancestor inline elements (em, strong, a, etc.) up to the block element.
-		// This preserves italic, bold, and other inline styling when the HTML is
-		// reassembled in the write phase. Each word is self-contained so a line
-		// break between two words inside the same <em> simply produces two adjacent
-		// <em> elements — semantically split but visually identical.
-		const spaceWidth = spaceProbe.getBoundingClientRect().width
-		const wordData = words.map((word) => {
-			let html = word.outerHTML
-			let ancestor: Element | null = word.parentElement
-			while (ancestor && ancestor !== element) {
-				// Use a shallow clone to get a properly-serialised open/close tag pair
-				// (handles attribute values with special characters correctly).
-				const shallow = ancestor.cloneNode(false) as Element
-				const shallowHTML = shallow.outerHTML
-				const split = shallowHTML.lastIndexOf('</')
-				html = shallowHTML.slice(0, split) + html + shallowHTML.slice(split)
-				ancestor = ancestor.parentElement
-			}
-			// hasLeadingSpace: the leading whitespace is stripped from the first word
-			// of each line (trimLineStart), so we deduct it from lineWidth at line starts.
-			const hasLeadingSpace = /^[^\S\u00a0]/.test(word.textContent ?? '')
-			return { html, width: word.getBoundingClientRect().width, hasLeadingSpace }
-		})
+	// --- Pass 4 + 5: Group into lines and write ---
+	for (const { block, width: elementWidth, indent, spaceWidth, units, wrapLong } of layout) {
+		if (units.length === 0) continue
 
-		element.removeChild(spaceProbe)
+		// Widow control: the last two words of the block travel together.
+		const glued = new Set<Unit>()
+		const lastWords = units.filter((u) => !u.atomic)
+		if (lastWords.length >= 2) glued.add(lastWords[lastWords.length - 1])
 
-		// For bottom-aligned mode, pre-count lines so we know how far each line sits from
-		// the end of the block. Seed with a top-aligned estimate, then iterate the
-		// bottom-aligned re-count until it converges (estimated === actual). Convergence
-		// is typically reached in 1–2 iterations; 8 is a safe upper bound.
-		let totalLines = 1
-		if (sawAlign === 'bottom') {
-			// Seed: top-aligned estimate (never break on an empty line).
-			// effectiveWidth deducts the leading space width at each line start because
-			// trimLineStart strips it visually — without this, lineWidth is overcounted.
-			let preWidth = 0
-			let preCount = 1
-			wordData.forEach(({ width, hasLeadingSpace }) => {
-				const preOffset = preCount % sawPeriod === sawPhase % sawPeriod ? sawDepth : 0
-				const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
-				if (width + preWidth >= preIdeal && preWidth > 0) {
-					preCount++
-					preWidth = 0
+		/** Width a unit adds to a line: its lead space counts, except at a line start. */
+		const addWidth = (u: Unit, lineWidth: number) => u.width + (lineWidth > 0 && /\s/.test(u.lead) ? spaceWidth : 0)
+
+		/** Splits units into lines for a given shortened-line rule. */
+		const layOut = (isShort: (lineNo: number) => boolean): Unit[][] => {
+			const lines: Unit[][] = [[]]
+			let lineWidth = 0
+			units.forEach((u, idx) => {
+				const lineNo = lines.length
+				const ideal = Math.max(1, elementWidth - 1 - (isShort(lineNo) ? sawDepth : 0) - (lineNo === 1 ? indent : 0))
+				const w = addWidth(u, lineWidth)
+				// A glued last word also carries the word before it to the next line if they don't fit.
+				const nextGlued = glued.has(units[idx + 1])
+				const gluedExtra = nextGlued ? addWidth(units[idx + 1], 1) : 0
+				const startNew = lines[lines.length - 1].length > 0 && (u.breakBefore !== null || (!glued.has(u) && lineWidth + w + gluedExtra > ideal))
+				if (startNew) {
+					lines.push([])
+					lineWidth = 0
 				}
-				const effectiveWidth = preWidth === 0 && hasLeadingSpace ? Math.max(0, width - spaceWidth) : width
-				preWidth += effectiveWidth
+				lines[lines.length - 1].push(u)
+				lineWidth += addWidth(u, lineWidth)
 			})
-			// Iterate bottom-aligned re-count until convergent.
-			// The loop can oscillate between two values (N and N+1) when changing which
-			// lines are short changes the total line count. Detect this and pick the
-			// smaller value: the write phase then produces the larger count, and the
-			// Math.max(1,…) clamp keeps the last line full.
-			let estimated = preCount
-			let prevEstimated = -1
-			for (let iter = 0; iter < 8; iter++) {
-				preWidth = 0
-				preCount = 1
-				wordData.forEach(({ width, hasLeadingSpace }) => {
-					const cyclePos = Math.max(1, estimated - preCount + 1)
-					const preOffset = cyclePos % sawPeriod === sawPhase % sawPeriod ? sawDepth : 0
-					const preIdeal = Math.max(1, elementWidth - 1 - preOffset)
-					if (width + preWidth >= preIdeal && preWidth > 0) {
-						preCount++
-						preWidth = 0
-					}
-					const effectiveWidth = preWidth === 0 && hasLeadingSpace ? Math.max(0, width - spaceWidth) : width
-					preWidth += effectiveWidth
-				})
-				if (preCount === estimated) break
-				if (preCount === prevEstimated) {
-					// Oscillating — pick the smaller to avoid over-estimating totalLines
-					estimated = Math.min(preCount, estimated)
-					break
-				}
-				prevEstimated = estimated
-				estimated = preCount
-			}
-			// Use estimated (not preCount): the write phase is seeded identically, so
-			// it will consistently produce lines based on this anchor value.
-			totalLines = estimated
+			return lines
 		}
 
-		// Strip leading whitespace from the rag-word span content — needed for the
-		// first word of each line because display:inline-block collapses leading spaces.
-		const trimLineStart = (whtml: string) =>
-			whtml.replace(/(class="rag-word">)[^\S\u00a0]+/, '$1')
+		const shortFromTop = (lineNo: number) => lineNo % sawPeriod === sawPhase % sawPeriod
+		let lines = layOut(shortFromTop)
+		if (sawAlign === 'bottom') {
+			// Count from the last line: iterate until the line count is stable (or oscillates).
+			let total = lines.length
+			let previous = -1
+			for (let iter = 0; iter < 8; iter++) {
+				const t = total
+				lines = layOut((lineNo) => Math.max(1, t - lineNo + 1) % sawPeriod === sawPhase % sawPeriod)
+				if (lines.length === total) break
+				if (lines.length === previous) { total = Math.min(lines.length, total); lines = layOut((lineNo) => Math.max(1, total - lineNo + 1) % sawPeriod === sawPhase % sawPeriod); break }
+				previous = total
+				total = lines.length
+			}
+		}
+		const isShortLine = sawAlign === 'bottom'
+			? (lineNo: number) => Math.max(1, lines.length - lineNo + 1) % sawPeriod === sawPhase % sawPeriod
+			: shortFromTop
 
-		// Write phase — build new HTML string
-		let html = `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
-		let lineWidth = 0
-		let lineCount = 1
-		let lineStart = true // true for the first word of each new line
+		// Ancestor chains for every unit, read before anything moves.
+		const chains = new Map<Unit, Element[]>()
+		for (const u of units) {
+			const ancestors: Element[] = []
+			let node: Element | null = u.node.parentElement
+			while (node && node !== block) { ancestors.unshift(node); node = node.parentElement }
+			chains.set(u, ancestors)
+		}
 
-		wordData.forEach(({ html: wordHTML, width, hasLeadingSpace }) => {
-			// Determine whether this line is shortened.
-			// sawPhase (1-indexed) controls which position within the period is short.
-			// top: count from the first line. bottom: count from the last line upward.
-			// Clamp posFromBottom to ≥ 1 to keep the last line full if pre-count underestimates.
-			const cyclePos = sawAlign === 'bottom'
-				? Math.max(1, totalLines - lineCount + 1)
-				: lineCount
-			const isShortLine = cyclePos % sawPeriod === sawPhase % sawPeriod
-			const offset = isShortLine ? sawDepth : 0
-			const idealWidth = Math.max(1, elementWidth - 1 - offset)
+		const copied = new Set<Element>()
+		const fragment = document.createDocumentFragment()
+		lines.forEach((line, i) => {
+			const lineNo = i + 1
+			const ideal = Math.max(1, elementWidth - 1 - (isShortLine(lineNo) ? sawDepth : 0) - (lineNo === 1 ? indent : 0))
+			const lineSpan = document.createElement('span')
+			lineSpan.className = RAG_CLASSES.line
+			lineSpan.style.display = 'inline-block'
+			lineSpan.style.whiteSpace = 'nowrap'
+			lineSpan.style.verticalAlign = 'top'
+			// text-indent is inherited: without this every line would be indented, not just the first.
+			lineSpan.style.textIndent = '0'
 
-			if (width + lineWidth < idealWidth || lineWidth === 0) {
-				html += lineStart ? trimLineStart(wordHTML) : wordHTML
-				lineStart = false
-				// Deduct the stripped leading space at line start so lineWidth matches
-				// what the browser will actually render.
-				const effectiveWidth = lineWidth === 0 && hasLeadingSpace ? Math.max(0, width - spaceWidth) : width
-				lineWidth += effectiveWidth
-			} else {
-				// Close line, insert forced break, open next line
-				html += `<span class="${RAG_CLASSES.lineInfo}" style="display:none" aria-hidden="true" data-ideal-width="${idealWidth}" data-line-width="${lineWidth}"></span></span>`
-				html += `<br class="${RAG_CLASSES.break}" aria-hidden="true">`
-				html += `<span class="${RAG_CLASSES.line}" style="${LINE_STYLE}">`
-				html += trimLineStart(wordHTML)
-				// Seed the new line with effectiveWidth (leading space stripped)
-				lineWidth = hasLeadingSpace ? Math.max(0, width - spaceWidth) : width
-				lineCount++
-				lineStart = false
+			let lineWidth = 0
+			let openChain: { source: Element; clone: Element }[] = []
+			line.forEach((u, k) => {
+				lineWidth += addWidth(u, lineWidth)
+				const ancestors = chains.get(u) ?? []
+				let shared = 0
+				while (shared < openChain.length && shared < ancestors.length && openChain[shared].source === ancestors[shared]) shared++
+				openChain = openChain.slice(0, shared)
+				let parent: Node = shared ? openChain[shared - 1].clone : lineSpan
+				let lead = k === 0 ? u.lead.replace(/[\r\n]+/g, '') : u.lead
+				// Widow control, as before: the space before the block's last word is non-breaking.
+				if (glued.has(u) && /\s/.test(lead)) lead = lead.replace(/\s+$/, '\u00a0')
+				if (lead) parent.appendChild(document.createTextNode(lead))
+				for (let a = shared; a < ancestors.length; a++) {
+					// The first appearance reuses the original element (emptied), so listeners on it
+					// keep working; a later line gets a copy without its id.
+					let copy: Element
+					if (copied.has(ancestors[a])) {
+						copy = ancestors[a].cloneNode(false) as Element
+						copy.removeAttribute('id')
+					} else {
+						copy = ancestors[a]
+						copy.replaceChildren()
+					}
+					copied.add(ancestors[a])
+					parent.appendChild(copy)
+					openChain.push({ source: ancestors[a], clone: copy })
+					parent = copy
+				}
+				if (u.atomic) {
+					parent.appendChild(u.node)
+				} else {
+					// Each word keeps its rag-word span in the output, as before, for anyone styling it.
+					const word = document.createElement('span')
+					word.className = RAG_CLASSES.word
+					word.textContent = u.text
+					parent.appendChild(word)
+				}
+			})
+
+			// A single word wider than the line can't fit a locked line: let it wrap where the author
+			// allows breaking inside words, instead of overflowing the block.
+			if (line.length === 1 && lineWidth > elementWidth && wrapLong) {
+				lineSpan.style.whiteSpace = 'normal'
+				lineSpan.style.maxWidth = `${elementWidth}px`
+			}
+
+			// Spread the line's slack as letter-spacing (not on the last line), capped at maxTracking.
+			// The hidden rag-line-info sentinel records the numbers, as before.
+			if (i < lines.length - 1) {
+				const charCount = [...line.map((u) => u.text).join('')].length || 1
+				const tracking = Math.max(0, Math.min((ideal - 1 - lineWidth) / charCount, maxTracking))
+				lineSpan.style.letterSpacing = `${tracking}px`
+				const info = document.createElement('span')
+				info.className = RAG_CLASSES.lineInfo
+				info.style.display = 'none'
+				info.setAttribute('aria-hidden', 'true')
+				info.setAttribute('data-ideal-width', String(ideal))
+				info.setAttribute('data-line-width', String(lineWidth))
+				lineSpan.appendChild(info)
+			}
+
+			fragment.appendChild(lineSpan)
+			if (i < lines.length - 1) {
+				const authorBreak = lines[i + 1][0].breakBefore
+				if (authorBreak) {
+					fragment.appendChild(authorBreak.cloneNode(false))
+				} else {
+					const br = document.createElement('br')
+					br.className = RAG_CLASSES.break
+					br.setAttribute('aria-hidden', 'true')
+					fragment.appendChild(br)
+				}
 			}
 		})
-
-		html += '</span>'
-		element.innerHTML = html
-	})
-
-	// --- Pass 5: Tracking ---
-	container.querySelectorAll<HTMLElement>(`.${RAG_CLASSES.lineInfo}`).forEach((info) => {
-		const idealWidth = parseFloat(info.getAttribute('data-ideal-width') ?? '0') - 1
-		const lineWidth = parseFloat(info.getAttribute('data-line-width') ?? '0')
-		const line = info.parentElement
-		if (!line) return
-
-		const charCount = line.textContent?.length || 1
-		const difference = idealWidth - lineWidth
-		const tracking = Math.max(0, Math.min(difference / charCount, maxTracking))
-		line.style.letterSpacing = `${tracking}px`
-	})
+		block.replaceChildren(fragment)
+	}
 }
 
 /**
- * Strips all ragtooth injected markup, restoring the container to its original HTML.
+ * Strips all ragtooth injected markup, restoring the container to its original HTML (and its
+ * original nodes, when they are known).
  *
  * @param container    - The element that was previously adjusted
  * @param originalHTML - The snapshot passed to the original applyRag call
  */
 export function removeRag(container: HTMLElement, originalHTML: string): void {
-	container.innerHTML = originalHTML
+	const snap = snapshots.get(container)
+	if (snap && snap.html === originalHTML) restoreSnapshot(snap)
+	else container.innerHTML = originalHTML
+	snapshots.delete(container)
+	originals.delete(container)
 }
