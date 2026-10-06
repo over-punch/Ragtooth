@@ -1074,4 +1074,21 @@ describe('applyRag — tracking includes the spaces in a line', () => {
 			expect(planned + parseFloat(line.style.letterSpacing) * rendered).toBeLessThanOrEqual(ideal + 0.01)
 		}
 	})
+
+	it("sawAlign 'bottom' tracks each line against the pattern it was laid out with", () => {
+		// 23 words at 300px with sawDepth 60 makes the bottom-anchored line count oscillate; the final
+		// layout used one total while the tracking ideals used another, so long lines were recorded as
+		// short (and short ones stretched as if long).
+		const words = 'aa bbbb c dddddd ee fff gggg h ii jjjjj kk llll m nnn oooooo pp q rrrr ss ttt uuuuu v ww'.split(' ')
+		const el = makeContainer('<p>' + words.join(' ') + '</p>')
+		applyRag(el, el.innerHTML, { sawDepth: 60, sawPeriod: 3, sawAlign: 'bottom' })
+		const infos = Array.from(el.querySelectorAll<HTMLElement>(`.${RAG_CLASSES.lineInfo}`))
+		expect(infos.length).toBeGreaterThan(2)
+		for (const info of infos) {
+			expect(parseFloat(info.getAttribute('data-line-width')!)).toBeLessThanOrEqual(parseFloat(info.getAttribute('data-ideal-width')!))
+		}
+		// And the penultimate line is never the shortened one.
+		const ideals = infos.map((i) => parseFloat(i.getAttribute('data-ideal-width')!))
+		expect(ideals[ideals.length - 1]).toBe(Math.max(...ideals))
+	})
 })

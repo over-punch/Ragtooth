@@ -333,23 +333,26 @@ export function applyRag(
 		}
 
 		const shortFromTop = (lineNo: number) => lineNo % sawPeriod === sawPhase % sawPeriod
+		/** Bottom-anchored rule: short lines counted up from line `total`. */
+		const shortFromBottom = (total: number) => (lineNo: number) => Math.max(1, total - lineNo + 1) % sawPeriod === sawPhase % sawPeriod
 		let lines = layOut(shortFromTop)
+		// The line total the final bottom-anchored layout was counted from. When the count oscillates it
+		// can differ from lines.length, and the tracking below must use the same pattern as the layout.
+		let layoutTotal = lines.length
 		if (sawAlign === 'bottom') {
 			// Count from the last line: iterate until the line count is stable (or oscillates).
 			let total = lines.length
 			let previous = -1
 			for (let iter = 0; iter < 8; iter++) {
-				const t = total
-				lines = layOut((lineNo) => Math.max(1, t - lineNo + 1) % sawPeriod === sawPhase % sawPeriod)
+				layoutTotal = total
+				lines = layOut(shortFromBottom(total))
 				if (lines.length === total) break
-				if (lines.length === previous) { total = Math.min(lines.length, total); lines = layOut((lineNo) => Math.max(1, total - lineNo + 1) % sawPeriod === sawPhase % sawPeriod); break }
+				if (lines.length === previous) { total = Math.min(lines.length, total); layoutTotal = total; lines = layOut(shortFromBottom(total)); break }
 				previous = total
 				total = lines.length
 			}
 		}
-		const isShortLine = sawAlign === 'bottom'
-			? (lineNo: number) => Math.max(1, lines.length - lineNo + 1) % sawPeriod === sawPhase % sawPeriod
-			: shortFromTop
+		const isShortLine = sawAlign === 'bottom' ? shortFromBottom(layoutTotal) : shortFromTop
 
 		// Ancestor chains for every unit, read before anything moves.
 		const chains = new Map<Unit, Element[]>()
