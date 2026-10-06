@@ -40,8 +40,11 @@ export function useRag(
 	optionsRef.current = options
 
 	// Track last observed container width to skip ResizeObserver callbacks
-	// that are triggered by height-only changes.
+	// that are triggered by height-only changes (unless the font size changed).
 	const lastWidthRef = useRef<number>(-1)
+
+	/** Computed font-size at the last run, so a size change at the same width re-runs too. */
+	const lastFontSizeRef = useRef<string>('')
 
 	// Holds the inner scroll-restore rAF spawned by the most recent run() call
 	// triggered from the ResizeObserver path.  Kept separate so it can be
@@ -134,8 +137,12 @@ export function useRag(
 		const observer = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const width = Math.round(entry.contentRect.width)
-				if (width === lastWidthRef.current) continue
+				// Text that grows at the same width (text-only zoom, a font-size change) also needs new
+				// breaks, or the locked lines overflow; its height change fires the observer.
+				const fontSize = getComputedStyle(entry.target).fontSize
+				if (width === lastWidthRef.current && fontSize === lastFontSizeRef.current) continue
 				lastWidthRef.current = width
+				lastFontSizeRef.current = fontSize
 				cancelAnimationFrame(rafId)
 				// Cancel any pending inner scroll-restore rAF from the previous run()
 				if (innerRafRef.current !== undefined) {

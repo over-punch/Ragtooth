@@ -226,3 +226,48 @@ describe('RagText', () => {
 		restore()
 	})
 })
+
+// ---------------------------------------------------------------------------
+// Regression: text that grows at the same width (text-only zoom) is re-ragged
+// ---------------------------------------------------------------------------
+
+describe('useRag — font-size change at the same width', () => {
+	it('re-runs when the font size changes but the width does not', async () => {
+		const restore = mockOffsetWidth(300)
+		const OriginalRO = globalThis.ResizeObserver
+		/** Callbacks of every observer the hook creates, so the test can fire them. */
+		const callbacks: ResizeObserverCallback[] = []
+		globalThis.ResizeObserver = class {
+			constructor(cb: ResizeObserverCallback) { callbacks.push(cb) }
+			observe() {}
+			unobserve() {}
+			disconnect() {}
+		} as unknown as typeof ResizeObserver
+		/** Fires every observer with a 300px-wide entry for el and waits for the rAF re-run. */
+		const fire = async (el: Element) => {
+			const entry = { target: el, contentRect: { width: 300 } } as unknown as ResizeObserverEntry
+			await act(async () => {
+				callbacks.forEach((cb) => cb([entry], {} as ResizeObserver))
+				await new Promise((r) => setTimeout(r, 50))
+			})
+		}
+		try {
+			const { container, unmount } = render(<RagText>alpha beta gamma delta epsilon zeta eta theta iota kappa</RagText>)
+			const p = container.querySelector('p')!
+			await fire(p)
+			const before = p.querySelector(`.${RAG_CLASSES.line}`)
+			expect(before).not.toBeNull()
+			// Same width, no change: no re-run, so the line spans are the same nodes.
+			await fire(p)
+			expect(p.querySelector(`.${RAG_CLASSES.line}`)).toBe(before)
+			// Same width, bigger text: the lines are rebuilt.
+			p.style.fontSize = '32px'
+			await fire(p)
+			expect(p.querySelector(`.${RAG_CLASSES.line}`)).not.toBe(before)
+			unmount()
+		} finally {
+			globalThis.ResizeObserver = OriginalRO
+			restore()
+		}
+	})
+})

@@ -83,16 +83,21 @@ function readOptions(el: HTMLElement): RagOptions {
  *
  * @param el - Element to rag
  */
-/** Re-fits an element whose own width changed: a container resize, or an element shown after being hidden. */
+/** Re-fits an element whose own width or font size changed: a container resize, text zoom, or an element shown after being hidden. */
 const widths = new WeakMap<Element, number>()
+/** Computed font-size at each element's last run. */
+const fontSizes = new WeakMap<Element, string>()
 const resizeObserver = typeof ResizeObserver !== 'undefined'
 	? new ResizeObserver((entries) => {
 		for (const entry of entries) {
 			const el = entry.target as HTMLElement
 			const w = Math.round(entry.contentRect.width)
-			if (widths.get(el) === w) continue
+			// Text that grows at the same width (text-only zoom, a font-size change) needs new breaks too.
+			const fontSize = getComputedStyle(el).fontSize
+			if (widths.get(el) === w && fontSizes.get(el) === fontSize) continue
 			const first = !widths.has(el)
 			widths.set(el, w)
+			fontSizes.set(el, fontSize)
 			const inst = INSTANCES.get(el)
 			if (!inst || !el.isConnected || w === 0) continue
 			// First report: only an element that wasn't laid out at init (hidden) needs a run.
@@ -142,6 +147,7 @@ function destroy(el: HTMLElement): void {
 	tracked.delete(el)
 	resizeObserver?.unobserve(el)
 	widths.delete(el)
+	fontSizes.delete(el)
 }
 
 /**
