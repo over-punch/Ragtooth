@@ -63,7 +63,7 @@ export default async function Image() {
 						<span style={{ opacity: 0.4 }}>·</span>
 						<span>React + Vanilla JS</span>
 						<span style={{ opacity: 0.4 }}>·</span>
-						<span>~2.7kb gzipped</span>
+						<span>~3.4 kB gzipped</span>
 					</div>
 					<div style={{ fontSize: 13, color: '#9f949f', letterSpacing: '0.04em' }}>
 						ragtooth.com

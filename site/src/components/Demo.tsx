@@ -292,10 +292,10 @@ export default function Demo() {
 
 			{/* Rag controls */}
 			<div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6">
-				<Slider label="Depth"    unit="px" title="How far lines deviate from the maximum line width — higher values create a more pronounced sawtooth shape"    value={sawDepth}          min={0}   max={400}      step={1}    onChange={setSawDepth} />
+				<Slider label="Depth"    unit="px" title="How far short lines are pulled in from full width — higher values create a more pronounced sawtooth shape"    value={sawDepth}          min={0}   max={400}      step={1}    onChange={setSawDepth} />
 				<Slider label="Period"         title="How many lines complete one full rag cycle — 2 gives a classic alternating long/short sawtooth"         value={sawPeriod}         min={2}   max={6}        step={1}    onChange={setSawPeriod} />
-				<Slider label="Phase"          title="Which step in the cycle the first line lands on — shift this to avoid awkward breaks at the paragraph opening"    value={effectiveSawPhase} min={1}   max={sawPeriod} step={1}   onChange={setSawPhase} />
-				<Slider label="Tracking" unit="px" title="How much letter-spacing ragtooth may add to nudge a line shorter — keep this low to avoid noticeable spacing changes" value={maxTracking}       min={0}   max={2}        step={0.01} onChange={setMaxTracking} />
+				<Slider label="Phase"          title="Which line in each cycle is shortened — 1 is the first line of the cycle, the default is the last"    value={effectiveSawPhase} min={1}   max={sawPeriod} step={1}   onChange={setSawPhase} />
+				<Slider label="Tracking" unit="px" title="The most letter-spacing ragtooth may add to fill a line out to its target width — keep this low to avoid noticeable spacing changes" value={maxTracking}       min={0}   max={2}        step={0.01} onChange={setMaxTracking} />
 			</div>
 
 			{/* Align toggle + resize toggle + cursor/gyro mode toggle */}
@@ -421,7 +421,7 @@ export default function Demo() {
 				)}
 				{!activeMode && (
 					<p className="text-xs opacity-50 italic" style={{ lineHeight: "1.8" }}>
-						Yes, we used small-caps, bold, italic, and a number in the same paragraph. We wanted to make sure the tool doesn&rsquo;t break. On e-readers and e-ink displays, a deliberate sawtooth rag also prevents the harsh reflow artefacts that appear when text redraws line by line on a slow-refresh screen. <span className="opacity-70">(Demo depth is 160px — the library default is 80px.)</span>
+						Yes, we used small-caps, bold, italic, and a number in the same paragraph. We wanted to make sure the tool doesn&rsquo;t break: every element keeps its formatting across the new line breaks. <span className="opacity-70">(Demo depth is 160px — the library default is 80px.)</span>
 					</p>
 				)}
 			</div>

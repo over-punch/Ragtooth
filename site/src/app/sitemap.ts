@@ -7,7 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 	return [
 		{
 			url: 'https://ragtooth.com',
-			lastModified: '2026-05-31',
+			lastModified: '2026-10-06',
 			changeFrequency: 'monthly',
 			priority: 1,
 		},

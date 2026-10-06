@@ -16,7 +16,7 @@ export default function Home() {
 				title={[{ text: "A Sawtooth Rag," }, { text: "on the web.", italic: true, subtle: true }]}
 				install="@overpunch/ragtooth"
 				github="https://github.com/over-punch/Ragtooth"
-				tech={["TypeScript", "Zero dependencies", "React + Vanilla JS", "CJK · Arabic · Thai", "~2.7kb gzipped"]}
+				tech={["TypeScript", "Zero dependencies", "React + Vanilla JS", "CJK · Thai", "~3.4 kB gzipped"]}
 			>
 				<p className="text-base leading-relaxed max-w-lg">
 					Most tools fight your rag. Ragtooth works with it — shaping text into a
@@ -29,7 +29,7 @@ export default function Home() {
 			{/* Interactive demo */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-4">
 				<h2 className="text-xs uppercase tracking-[0.18em] font-medium text-muted">Live demo — drag the sliders</h2>
-				<div className="rounded-xl -mx-8 px-8 py-8" style={{ background: "var(--panel)", overflow: 'hidden' }}>
+				<div className="rounded-xl -mx-4 px-4 sm:-mx-8 sm:px-8 py-8" style={{ background: "var(--panel)", overflow: 'hidden' }}>
 					<Demo />
 				</div>
 			</section>
@@ -88,6 +88,7 @@ const { ref } = useRag({ sawDepth: 120, sawPeriod: 2 })
 const el = document.querySelector('p')
 // getCleanHTML strips any previously-injected spans before storing original HTML
 const original = getCleanHTML(el)
+await document.fonts.ready
 applyRag(el, original, { sawDepth: 120, sawPeriod: 2 })
 
 // To remove the effect and restore original markup:
@@ -128,12 +129,12 @@ removeRag(el, original)`} />
 								<tr className="hover:bg-foreground/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">maxTracking</td>
 									<td className="py-2 pr-6">0.7</td>
-									<td className="py-2">Max letter-spacing in px (also accepts em, rem). Keeps lines from being stretched into oblivion.</td>
+									<td className="py-2">Max letter-spacing in px (also accepts em, rem). Every line but the last is filled out with letter-spacing up to this cap.</td>
 								</tr>
 								<tr className="hover:bg-foreground/5 transition-colors">
 									<td className="py-2 pr-6 font-mono">resize</td>
 									<td className="py-2 pr-6">true</td>
-									<td className="py-2">Re-runs the algorithm on container resize via ResizeObserver. Set false for static layouts.</td>
+									<td className="py-2">Re-runs the algorithm when the container&rsquo;s width or font size changes (ResizeObserver). Set false for static layouts.</td>
 								</tr>
 								<tr className="hover:bg-foreground/5 transition-colors text-faint">
 									<td className="py-2 pr-6 font-mono">ragDifference</td>
@@ -144,7 +145,7 @@ removeRag(el, original)`} />
 						</table>
 					</div>
 						<p className="text-xs text-muted leading-relaxed">
-							Word boundaries are detected using <span className="font-mono">Intl.Segmenter</span> when available — correctly splitting CJK (Chinese, Japanese, Korean), Arabic, Thai, and other scripts that don&rsquo;t use spaces as word delimiters. Falls back to a whitespace regex in environments without Segmenter support.
+							Words are split at spaces and after hyphens. Scripts written without spaces (Chinese, Japanese, Korean, Thai, Lao, Khmer, Myanmar) are split into words with <span className="font-mono">Intl.Segmenter</span> where the browser supports it. A paragraph usually gains a line or two, since ragtooth sets its own breaks.
 						</p>
 				</div>
 			</section>
