@@ -271,3 +271,31 @@ describe('useRag — font-size change at the same width', () => {
 		}
 	})
 })
+
+// ---------------------------------------------------------------------------
+// CMS HTML via dangerouslySetInnerHTML (the README's rich-text example)
+// ---------------------------------------------------------------------------
+
+describe('useRag — HTML from a CMS', () => {
+	/** The README example: the HTML string is passed as contentKey so a new string is re-snapshotted. */
+	function Body({ html }: { html: string }) {
+		const { ref } = useRag({ sawDepth: 120 }, html)
+		return <div ref={ref as React.RefObject<HTMLDivElement>} dangerouslySetInnerHTML={{ __html: html }} />
+	}
+
+	it('rags the injected paragraphs and re-rags when the HTML changes', () => {
+		const restore = mockOffsetWidth(300)
+		try {
+			const first = '<p>One <a href="/a">linked</a> paragraph of <em>words</em> here</p>'
+			const { container, rerender } = render(<Body html={first} />)
+			expect(container.querySelectorAll(`p .${RAG_CLASSES.line}`).length).toBeGreaterThan(0)
+			expect(container.querySelector('a')?.getAttribute('href')).toBe('/a')
+			rerender(<Body html="<p>Completely different text now</p>" />)
+			expect(container.textContent?.replace(/\u00a0/g, ' ')).toContain('Completely different text now')
+			expect(container.textContent).not.toContain('linked')
+			expect(container.querySelectorAll(`p .${RAG_CLASSES.line}`).length).toBeGreaterThan(0)
+		} finally {
+			restore()
+		}
+	})
+})

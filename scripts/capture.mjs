@@ -3,7 +3,8 @@
 //    via esbuild — no React, no CDN, fully reproducible offline. The bundle is a
 //    regenerable build artifact written under node_modules/ (already gitignored).
 // 2. Serves the repo over HTTP and renders scripts/capture.html in headless Chromium.
-// 3. Screenshots each `.scene` element to assets/<id>.png with transparent corners.
+// 3. Screenshots each `.scene` element to assets/<id>.png with transparent corners
+//    (hero, markup, period).
 //
 // Run: node scripts/capture.mjs   (from the repo root)
 // Setup: playwright is a devDependency; run `npx playwright install chromium` once.
@@ -59,21 +60,24 @@ const server = createServer(async (req, res) => {
 	}
 })
 
-await new Promise((r) => server.listen(0, r))
-const { port } = server.address()
+/** HTTP port; fixed (5965) so parallel captures in the suite don't collide. Override with PORT=…. */
+const port = Number(process.env.PORT ?? 5965)
+await new Promise((r) => server.listen(port, r))
 
 const browser = await chromium.launch()
-const page = await browser.newPage({ deviceScaleFactor: 2 })
-await page.goto(`http://localhost:${port}/scripts/capture.html`, { waitUntil: "networkidle" })
-await page.evaluate(() => window.__ready ?? document.fonts.ready)
-await page.waitForTimeout(600) // let fonts and the rag layout settle
+try {
+	const page = await browser.newPage({ deviceScaleFactor: 2 })
+	await page.goto(`http://localhost:${port}/scripts/capture.html`, { waitUntil: "networkidle" })
+	await page.evaluate(() => window.__ready ?? document.fonts.ready)
+	await page.waitForTimeout(600) // let fonts and the rag layout settle
 
-const ids = await page.$$eval(".scene", (els) => els.map((e) => e.id))
-for (const id of ids) {
-	const el = await page.$(`#${id}`)
-	await el.screenshot({ path: `assets/${id}.png`, omitBackground: true })
-	console.log("captured assets/%s.png", id)
+	const ids = await page.$$eval(".scene", (els) => els.map((e) => e.id))
+	for (const id of ids) {
+		const el = await page.$(`#${id}`)
+		await el.screenshot({ path: `assets/${id}.png`, omitBackground: true })
+		console.log("captured assets/%s.png", id)
+	}
+} finally {
+	await browser.close()
+	server.close()
 }
-
-await browser.close()
-server.close()

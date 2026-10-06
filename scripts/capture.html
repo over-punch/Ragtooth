@@ -1,21 +1,30 @@
 <!doctype html>
-<!-- README visual harness for ragtooth — rendered headless by scripts/capture.mjs. Not shipped in the npm package. -->
+<!-- README visual harness for ragtooth — rendered headless by scripts/capture.mjs (scenes: hero, markup, period). Not shipped in the npm package. -->
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<title>ragtooth capture</title>
 		<style>
-			/* Tool theme — mirrors site/src/app/globals.css */
+			/* Tool theme — mirrors site/src/app/globals.css (hue 328) */
 			@font-face {
 				font-family: "Merriweather";
 				src: url("/site/public/fonts/Merriweather.woff2") format("woff2");
-				font-weight: 400;
+				font-weight: 300 900;
+				font-style: normal;
+				font-display: block;
+			}
+			@font-face {
+				font-family: "Merriweather";
+				src: url("/site/public/fonts/Merriweather-Italic.woff2") format("woff2");
+				font-weight: 300 900;
+				font-style: italic;
 				font-display: block;
 			}
 			:root {
-				--background: oklch(0.12 0.04 158);
-				--foreground: oklch(0.97 0.008 158);
-				--foreground-subtle: oklch(0.66 0.02 158);
+				--background: oklch(0.320 0.1437 328);
+				--foreground: oklch(0.970 0.0080 328);
+				--foreground-subtle: oklch(0.680 0.0200 328);
+				--link: oklch(0.86 0.09 328);
 			}
 			html,
 			body {
@@ -25,6 +34,10 @@
 			body {
 				font-family: "Merriweather", Georgia, serif;
 				-webkit-font-smoothing: antialiased;
+				display: flex;
+				flex-direction: column;
+				gap: 40px;
+				padding: 20px;
 			}
 			.scene {
 				display: flex;
@@ -38,57 +51,117 @@
 			.panel {
 				flex: 1;
 				min-width: 0;
+				/* Faint guide rule at the right edge so the rag shape reads clearly */
+				border-right: 1px dashed color-mix(in oklch, var(--foreground-subtle) 55%, transparent);
+				padding-right: 22px;
 			}
 			.label {
-				font-family: "Merriweather", Georgia, serif;
 				font-size: 13px;
 				letter-spacing: 0.14em;
 				text-transform: uppercase;
 				color: var(--foreground-subtle);
 				margin: 0 0 18px;
 			}
-			.panel p {
+			.label code {
+				font-family: ui-monospace, Menlo, monospace;
+				letter-spacing: 0;
+				text-transform: none;
+			}
+			.panel p.copy {
 				font-size: 21px;
+				font-weight: 300;
 				line-height: 1.5;
 				color: var(--foreground);
 				margin: 0;
 			}
-			/* Faint guide rule at the right edge so the rag shape reads clearly */
-			.panel {
-				border-right: 1px dashed color-mix(in oklch, var(--foreground-subtle) 45%, transparent);
-				padding-right: 22px;
+			#period .panel p.copy {
+				font-size: 17px;
+			}
+			.copy a {
+				color: var(--link);
+				text-decoration: underline;
+				text-underline-offset: 3px;
+			}
+			.copy .sc {
+				font-variant-caps: all-small-caps;
+				font-weight: 700;
+				letter-spacing: 0.04em;
 			}
 		</style>
 	</head>
 	<body>
+		<!-- Hero: the same paragraph, natural rag vs ragtooth -->
 		<div class="scene" id="hero">
 			<div class="panel">
 				<p class="label">Natural rag</p>
-				<p id="before"></p>
+				<p class="copy" data-copy="plain"></p>
 			</div>
 			<div class="panel">
 				<p class="label">ragtooth</p>
-				<p id="after"></p>
+				<p class="copy" data-copy="plain" data-rag='{"sawDepth":120,"sawPeriod":2}'></p>
+			</div>
+		</div>
+
+		<!-- Markup: small caps, italics, bold and a link survive the rebuild -->
+		<div class="scene" id="markup">
+			<div class="panel">
+				<p class="label">Natural rag</p>
+				<p class="copy" data-copy="rich"></p>
+			</div>
+			<div class="panel">
+				<p class="label">ragtooth · same markup</p>
+				<p class="copy" data-copy="rich" data-rag='{"sawDepth":120,"sawPeriod":2}'></p>
+			</div>
+		</div>
+
+		<!-- Period and alignment -->
+		<div class="scene" id="period">
+			<div class="panel">
+				<p class="label"><code>sawPeriod: 2</code></p>
+				<p class="copy" data-copy="long" data-rag='{"sawDepth":90,"sawPeriod":2}'></p>
+			</div>
+			<div class="panel">
+				<p class="label"><code>sawPeriod: 3</code></p>
+				<p class="copy" data-copy="long" data-rag='{"sawDepth":90,"sawPeriod":3}'></p>
+			</div>
+			<div class="panel">
+				<p class="label"><code>3 · sawAlign: 'bottom'</code></p>
+				<p class="copy" data-copy="long" data-rag='{"sawDepth":90,"sawPeriod":3,"sawAlign":"bottom"}'></p>
 			</div>
 		</div>
 
 		<script type="module">
 			import { applyRag } from "/_core.mjs"
 
-			const COPY =
-				"Typography is the craft of endowing human language with a durable visual form. " +
-				"A ragged right edge should feel composed, not careless. ragtooth shapes the rag " +
-				"into a deliberate sawtooth so the paragraph reads as design rather than accident."
+			/** Sample copy per scene: plain text, a longer plain text for the period scene, and rich markup with small caps, italics, bold and a link. */
+			const COPY = {
+				plain:
+					"Typography is the craft of endowing human language with a durable visual form. " +
+					"A ragged right edge should feel composed, not careless. ragtooth shapes the rag " +
+					"into a deliberate sawtooth so the paragraph reads as design rather than accident.",
+				long:
+					"Typography is the craft of endowing human language with a durable visual form. " +
+					"A ragged right edge should feel composed, not careless. ragtooth shapes the rag " +
+					"into a deliberate sawtooth so the paragraph reads as design rather than accident. " +
+					"Set it once and every paragraph follows.",
+				rich:
+					'<span class="sc">Typography traces its formal origins</span> to the press of 1455, where ' +
+					"<em>justified setting</em> and careful spacing were discipline before they were decoration. " +
+					"A ragged-right setting has a bad reputation, most of it <em>unearned</em>: the trouble is " +
+					'<strong>never the rag itself</strong> but the shape it falls into. <a href="#">Read more about the rag</a>.',
+			}
 
-			const before = document.getElementById("before")
-			const after = document.getElementById("after")
-			before.textContent = COPY
-			after.textContent = COPY
+			document.querySelectorAll("[data-copy]").forEach((p) => {
+				p.innerHTML = COPY[p.dataset.copy]
+			})
 
 			window.__ready = (async () => {
+				await document.fonts.load('300 21px "Merriweather"')
+				await document.fonts.load('italic 300 21px "Merriweather"')
 				await document.fonts.ready
-				// Apply a pronounced sawtooth so the shape is unmistakable in a still image.
-				applyRag(after, after.innerHTML, { sawDepth: 120, sawPeriod: 2, maxTracking: 0.7 })
+				document.querySelectorAll("[data-rag]").forEach((p) => {
+					applyRag(p, p.innerHTML, JSON.parse(p.dataset.rag))
+				})
 				return true
 			})()
 		</script>
