@@ -10,6 +10,8 @@ export default defineConfig({
 		react(),
 		dts({
 			include: ['src'],
+			// Tests and the Framer component aren't part of the package (they shipped as empty .d.ts files).
+			exclude: ['src/__tests__/**', 'src/framer/**', 'src/webflow/**'],
 			rollupTypes: true,
 		}),
 	],
@@ -18,10 +20,12 @@ export default defineConfig({
 	},
 	build: {
 		lib: {
-			entry: resolve(__dirname, 'src/index.ts'),
+			// index: everything, including the React hook and component (imports react).
+			// core: the vanilla API only, for apps without React and for SSR.
+			entry: { index: resolve(__dirname, 'src/index.ts'), core: resolve(__dirname, 'src/core.ts') },
 			name: 'Ragtooth',
 			formats: ['es', 'cjs'],
-			fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`,
+			fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
 		},
 		rollupOptions: {
 			external: ['react', 'react/jsx-runtime', 'react-dom'],

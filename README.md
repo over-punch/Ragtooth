@@ -88,14 +88,23 @@ Capture `originalHTML` before any mutation so the `fonts.ready` call receives cl
 
 ## How it works
 
-Ragtooth measures each line's natural width by wrapping every word in a span, reading their `offsetWidth`, and grouping them into lines. It then applies `max-width` and `letter-spacing` to each line element to produce the sawtooth rhythm:
+Ragtooth measures every word's width (wrapping each word in a span), then sets its own line breaks by adding up those widths:
 
-- **Long lines** — stay at full container width
-- **Short lines** — constrained to `containerWidth − sawDepth`, with `letter-spacing` added to fill that reduced width
+- **Long lines** — fill up to the container's content width
+- **Short lines** — every `sawPeriod`-th line breaks earlier, at `content width − sawDepth`
+- **Tracking** — each line except a paragraph's last is filled out with `letter-spacing`, up to `maxTracking`
+- **No widows** — the last two words of each block stay together
 
-The algorithm never changes how text flows. It reads the browser's natural line breaks, then constrains them. `ResizeObserver` re-runs on any container width change.
+Each line is then locked (`white-space: nowrap`, a `<br>` after it). Because Ragtooth chooses the breaks, they differ from the browser's: a paragraph usually gains a line or more (10–27% taller in our tests at body sizes). Words still break after hyphens; a single word wider than the column wraps only if your CSS allows breaking inside words (`overflow-wrap`).
 
-Calling `applyRag` again is safe — it resets to the supplied `originalHTML` before re-measuring, so repeated calls (e.g. on resize) never compound.
+**Markup:** inline elements (`<em>`, `<a>`, `<strong>`…), your own `<br>` and images, and the spaces between elements are kept, and the original elements are reused, so event listeners on them (React's included) keep working. An element that runs across a line break is split into one copy per line (a link over two lines becomes two links; only the first keeps its `id`). `getCleanHTML()` returns the original markup. Nested blocks are handled: in `<li><p>…</p></li>` the `<p>` is ragged.
+
+**Limits:**
+- Ragtooth makes ragged text, so `text-align: justify` is overridden, and `white-space: pre` is not supported.
+- At large sizes (few words per line) the pattern can invert: a long line can't always be longer than a short one.
+- Lines are measured with the fonts loaded at the time. The React hook re-runs after `document.fonts.ready`; with the vanilla API, call `applyRag` again once fonts load.
+
+`ResizeObserver` (React hook, Webflow embed) re-runs on any container width change. Calling `applyRag` again is safe — it resets to the original content before re-measuring, so repeated calls (e.g. on resize) never compound, even if you pass the element's current, already-ragged `innerHTML`.
 
 ---
 
@@ -103,7 +112,8 @@ Calling `applyRag` again is safe — it resets to the supplied `originalHTML` be
 
 Ragtooth shapes the *visual* edge of a paragraph; the reading order, words, and text content are unchanged. A few things worth knowing because the effect works by mutating the DOM:
 
-- **Word wrapping.** Each word is wrapped in an inline `<span>` to measure it. Inline spans don't introduce new word boundaries, so screen readers still announce the paragraph as continuous text.
+- **Word wrapping.** Each word is wrapped in an inline `<span>`; the spaces between words are kept, so the text reads as before. Injected line breaks are `aria-hidden`, but copied text includes a line break at each line end.
+- **Links.** A link that wraps across lines becomes one link per line, which a screen reader announces separately. Keep links short, or leave such text unragged.
 - **Letter-spacing.** Short lines are filled with `letter-spacing` up to `maxTracking`. Keep `maxTracking` modest (the `0.7` default is conservative) so spacing stays within comfortable reading limits — this respects [WCAG 1.4.12 Text Spacing](https://www.w3.org/WAI/WCAG21/Understand/text-spacing.html), which expects text to remain readable when users override spacing.
 - **Reset for export.** `getCleanHTML(el)` returns the markup with every injected span removed — use it before serialising, copying, or persisting content so you store clean HTML, not instrumented markup.
 - **Best on body copy.** Like all rag shaping, it reads best on left-aligned, unjustified prose. It is decorative: if `letter-spacing` is set very high it can hurt legibility, so tune `sawDepth`/`maxTracking` to taste.
@@ -114,7 +124,7 @@ Ragtooth shapes the *visual* edge of a paragraph; the reading order, words, and 
 
 - **Browsers** — any evergreen browser. Relies on [`ResizeObserver`](https://caniuse.com/resizeobserver) and [`document.fonts.ready`](https://caniuse.com/mdn-api_fontfaceset_ready), both supported in Chrome/Edge 64+, Firefox 69+, and Safari 11.1+.
 - **SSR** — the core guards on `typeof window` and no-ops on the server; the React entry points need a browser (see [Next.js](#nextjs)).
-- **React** — optional peer dependency, `react`/`react-dom` `>=17`. The vanilla API has no peer deps at all.
+- **React** — optional peer dependency, `react`/`react-dom` `>=17`. The main entry also exports the hook and component, so it imports `react`; without React installed, import the vanilla API from `@overpunch/ragtooth/core`.
 - **Size** — ~3.3 kB min+gzip, zero runtime dependencies.
 
 ---
@@ -128,7 +138,7 @@ Ragtooth shapes the *visual* edge of a paragraph; the reading order, words, and 
 | `sawDepth` | `RagValue` | `80` | How far short lines are pulled in from full width. Higher = more pronounced sawtooth. |
 | `sawPeriod` | `number` | `2` | Lines per saw cycle. `2` = alternating long/short. `3` = two long, one short. `4` = three long, one short. |
 | `sawPhase` | `number` | `sawPeriod` | Which line in each cycle is shortened (1-indexed). Default = last line. |
-| `sawAlign` | `'top' \| 'bottom'` | `'top'` | Whether the cycle is anchored from the top or bottom of the block. `'bottom'` guarantees the last lines are full-width. |
+| `sawAlign` | `'top' \| 'bottom'` | `'top'` | Whether the cycle is anchored from the top or bottom of the block. `'bottom'` counts the cycle from the last line, so the lines just before the end are never the shortened ones. |
 | `maxTracking` | `RagValue` | `0.7` | Maximum `letter-spacing` any line can receive. Prevents grotesque stretching on very short lines. |
 | `resize` | `boolean` | `true` | Whether to re-run when the container resizes. Set to `false` for static contexts. |
 
@@ -148,14 +158,14 @@ All size options (`sawDepth`, `maxTracking`) accept a `RagValue` — a number or
 ### sawAlign examples
 
 ```ts
-// Guarantee the paragraph ends with two full-width lines
+// Count the cycle from the end, so the closing lines aren't the shortened ones
 applyRag(el, el.innerHTML, {
   sawDepth: 100,
   sawPeriod: 3,
   sawAlign: 'bottom',
 })
 // Period of 3 from the bottom: lines count as [short, full, full] per group
-// → the penultimate line is always full
+// → the penultimate line is never shortened (the last line holds whatever words remain)
 ```
 
 ### sawPhase examples
