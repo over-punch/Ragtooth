@@ -90,7 +90,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
 }
 ```
 
-The server HTML renders with the browser's own rag first; the hook re-breaks it before the first paint after hydration.
+The server HTML is painted with the browser's own rag first; the hook re-breaks it when the component hydrates, which is the layout shift quantified under [Measured](#measured).
 
 ## Vanilla JS
 
@@ -309,7 +309,7 @@ const options: RagOptions = {
 | `applyRag(el, originalHTML, options?)` | Applies the sawtooth rag to `el`. |
 | `removeRag(el, originalHTML)` | Restores `el` to its original HTML. |
 | `getCleanHTML(el)` | Returns the element's current HTML with all injected spans removed. |
-| `useRag(options?)` | React hook — returns `{ ref }`. Attach `ref` to any block element. Measures and re-runs on resize. |
+| `useRag(options?, contentKey?)` | React hook — returns `{ ref }`. Attach `ref` to any block element. Measures and re-runs on resize. Pass a string as `contentKey` (e.g. the HTML or text) to re-measure when the content changes. |
 | `RagText` | React component wrapper around `useRag`. |
 | `RagOptions` | TypeScript interface for all options. |
 | `RagValue` | Type for size options (`number \| string`). |
